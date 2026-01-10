@@ -1,4 +1,5 @@
 #!/bin/bash
+# Ralphus - Autonomous Coding Loop for OpenCode
 # Usage: ./loop.sh [plan] [max_iterations]
 # Examples:
 #   ./loop.sh              # Build mode, unlimited iterations
@@ -6,32 +7,39 @@
 #   ./loop.sh plan         # Plan mode, unlimited iterations
 #   ./loop.sh plan 5       # Plan mode, max 5 iterations
 
+set -euo pipefail
+
+# Configuration (override via environment variables)
+AGENT="${RALPH_AGENT:-Sisyphus}"
+OPENCODE="${OPENCODE_BIN:-opencode}"
+
 # Parse arguments
-if [ "$1" = "plan" ]; then
-    # Plan mode
+if [ "${1:-}" = "plan" ]; then
     MODE="plan"
     PROMPT_FILE="PROMPT_plan.md"
     MAX_ITERATIONS=${2:-0}
-elif [[ "$1" =~ ^[0-9]+$ ]]; then
-    # Build mode with max iterations
+elif [[ "${1:-}" =~ ^[0-9]+$ ]]; then
     MODE="build"
     PROMPT_FILE="PROMPT_build.md"
     MAX_ITERATIONS=$1
 else
-    # Build mode, unlimited (no arguments or invalid input)
     MODE="build"
     PROMPT_FILE="PROMPT_build.md"
     MAX_ITERATIONS=0
 fi
 
 ITERATION=0
-CURRENT_BRANCH=$(git branch --show-current)
+CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
 
+# Header
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "  RALPHUS - Autonomous Coding Loop"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "Mode:   $MODE"
+echo "Agent:  $AGENT"
 echo "Prompt: $PROMPT_FILE"
 echo "Branch: $CURRENT_BRANCH"
-[ $MAX_ITERATIONS -gt 0 ] && echo "Max:    $MAX_ITERATIONS iterations"
+[ "$MAX_ITERATIONS" -gt 0 ] && echo "Max:    $MAX_ITERATIONS iterations"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 # Verify prompt file exists
@@ -40,31 +48,80 @@ if [ ! -f "$PROMPT_FILE" ]; then
     exit 1
 fi
 
+# Build mode requires IMPLEMENTATION_PLAN.md
+if [ "$MODE" = "build" ] && [ ! -f "IMPLEMENTATION_PLAN.md" ]; then
+    echo "Error: IMPLEMENTATION_PLAN.md not found."
+    echo "Run planning mode first: ./loop.sh plan"
+    exit 1
+fi
+
+# Archive previous run if branch changed
+LAST_BRANCH_FILE=".last-branch"
+if [ -f "$LAST_BRANCH_FILE" ]; then
+    LAST_BRANCH=$(cat "$LAST_BRANCH_FILE")
+    if [ "$LAST_BRANCH" != "$CURRENT_BRANCH" ]; then
+        ARCHIVE_DIR="archive/$(date +%Y-%m-%d)-$LAST_BRANCH"
+        mkdir -p "$ARCHIVE_DIR"
+        cp IMPLEMENTATION_PLAN.md "$ARCHIVE_DIR/" 2>/dev/null || true
+        cp AGENTS.md "$ARCHIVE_DIR/" 2>/dev/null || true
+        echo "Archived previous run to $ARCHIVE_DIR"
+    fi
+fi
+echo "$CURRENT_BRANCH" > "$LAST_BRANCH_FILE"
+
+# Graceful shutdown handler
+SHUTDOWN=0
+trap 'SHUTDOWN=1; echo -e "\n⚠ Shutdown requested. Finishing current iteration..."' INT TERM
+
+# Main loop
 while true; do
-    if [ $MAX_ITERATIONS -gt 0 ] && [ $ITERATION -ge $MAX_ITERATIONS ]; then
+    # Check for shutdown request
+    if [ "$SHUTDOWN" -eq 1 ]; then
+        echo "Shutting down gracefully."
+        exit 0
+    fi
+
+    # Check iteration limit
+    if [ "$MAX_ITERATIONS" -gt 0 ] && [ "$ITERATION" -ge "$MAX_ITERATIONS" ]; then
         echo "Reached max iterations: $MAX_ITERATIONS"
         break
     fi
 
-    # Run Ralph iteration with selected prompt
-    # -p: Headless mode (non-interactive, reads from stdin)
-    # --dangerously-skip-permissions: Auto-approve all tool calls (YOLO mode)
-    # --output-format=stream-json: Structured output for logging/monitoring
-    # --model opus: Primary agent uses Opus for complex reasoning (task selection, prioritization)
-    #               Can use 'sonnet' in build mode for speed if plan is clear and tasks well-defined
-    # --verbose: Detailed execution logging
-    cat "$PROMPT_FILE" | claude -p \
-        --dangerously-skip-permissions \
-        --output-format=stream-json \
-        --model opus \
-        --verbose
-
-    # Push changes after each iteration
-    git push origin "$CURRENT_BRANCH" || {
-        echo "Failed to push. Creating remote branch..."
-        git push -u origin "$CURRENT_BRANCH"
-    }
-
     ITERATION=$((ITERATION + 1))
-    echo -e "\n\n======================== LOOP $ITERATION ========================\n"
+    echo -e "\n======================== ITERATION $ITERATION ========================\n"
+
+    # Run OpenCode with the prompt file
+    # The prompt file is attached via -f, message tells agent what to do
+    OUTPUT=$("$OPENCODE" run --agent "$AGENT" -f "$PROMPT_FILE" -- "Read the attached prompt file and execute the instructions" 2>&1 | tee /dev/stderr) || true
+
+    # Check for completion signal
+    if echo "$OUTPUT" | grep -q "<promise>COMPLETE</promise>"; then
+        echo -e "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "  ALL TASKS COMPLETE"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        exit 0
+    fi
+
+    # Check for blocked signal
+    if echo "$OUTPUT" | grep -q "<promise>BLOCKED:"; then
+        BLOCKED_MSG=$(echo "$OUTPUT" | grep -o "<promise>BLOCKED:[^<]*</promise>" | head -1 || echo "unknown")
+        echo -e "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "  RALPH IS BLOCKED"
+        echo "  $BLOCKED_MSG"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "Check IMPLEMENTATION_PLAN.md for details."
+        exit 1
+    fi
+
+    # Push changes after each iteration (if in a git repo)
+    if git rev-parse --git-dir > /dev/null 2>&1; then
+        git push origin "$CURRENT_BRANCH" 2>/dev/null || {
+            echo "Note: Failed to push. Creating remote branch..."
+            git push -u origin "$CURRENT_BRANCH" 2>/dev/null || echo "Warning: Could not push to remote"
+        }
+    fi
 done
+
+echo -e "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "  Loop finished after $ITERATION iterations"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

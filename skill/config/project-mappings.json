@@ -1,0 +1,31 @@
+{
+  "mappings": {
+    "prism": {
+      "local": "/Users/davidhelmus/Repos/portfolio-master/MVP",
+      "remote": "~/Repos/portfolio-prism"
+    },
+    "canvas": {
+      "local": "/Users/davidhelmus/Repos/opencode-canvas",
+      "remote": "~/Repos/opencode-canvas"
+    },
+    "ralph": {
+      "local": "/Users/davidhelmus/Repos/ralph-opencode",
+      "remote": "~/Repos/ralph-opencode"
+    },
+    "thoth": {
+      "local": "/Users/davidhelmus/Repos/thoth",
+      "remote": "~/Repos/thoth"
+    }
+  },
+  "defaults": {
+    "iterations": 20,
+    "agent": "Sisyphus",
+    "commit_message": "[ralph] sync before remote run"
+  },
+  "homelab": {
+    "ssh_alias": "homelab",
+    "opencode_path": "~/.opencode/bin/opencode",
+    "projects_root": "~/Repos",
+    "state_file": "~/.ralph-sessions.json"
+  }
+}

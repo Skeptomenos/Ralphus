@@ -18,3 +18,28 @@
 9999999999999. When @IMPLEMENTATION_PLAN.md becomes large periodically clean out the items that are completed from the file using a subagent.
 99999999999999. If you find inconsistencies in the specs/* then use an Opus 4.5 subagent with 'ultrathink' requested to update the specs.
 999999999999999. IMPORTANT: Keep @AGENTS.md operational only — status updates and progress notes belong in `IMPLEMENTATION_PLAN.md`. A bloated AGENTS.md pollutes every future loop's context.
+
+## Error Recovery Protocol
+
+If tests fail after 3 fix attempts on the same issue:
+1. Document the failure in @IMPLEMENTATION_PLAN.md under "## Blocked"
+2. Move to the next highest priority task
+3. Do NOT spin on the same error indefinitely
+
+If you cannot make progress after 15 minutes of attempts:
+1. Document what you tried in @IMPLEMENTATION_PLAN.md
+2. Output the blocked signal (see below)
+
+## Completion Signals
+
+When ALL tasks in @IMPLEMENTATION_PLAN.md are marked complete and verified:
+```
+<promise>COMPLETE</promise>
+```
+
+If stuck after 3 attempts on the same task, or 15 minutes with no progress:
+```
+<promise>BLOCKED:[task description]:[reason]</promise>
+```
+
+Example: `<promise>BLOCKED:Fix auth middleware:Cannot reproduce error locally</promise>`
