@@ -1,22 +1,30 @@
 #!/bin/bash
 # Ralphus - Autonomous Coding Loop for OpenCode
-# Usage: ./loop.sh [plan] [max_iterations]
+# Usage: ./loop.sh [plan|ultrawork|ulw] [max_iterations]
 # Examples:
 #   ./loop.sh              # Build mode, unlimited iterations
 #   ./loop.sh 20           # Build mode, max 20 iterations
 #   ./loop.sh plan         # Plan mode, unlimited iterations
 #   ./loop.sh plan 5       # Plan mode, max 5 iterations
+#   ./loop.sh ultrawork    # Build mode with ultrawork (aggressive parallel agents)
+#   ./loop.sh ulw 10       # Ultrawork mode, max 10 iterations
 
 set -euo pipefail
 
 # Configuration (override via environment variables)
 AGENT="${RALPH_AGENT:-Sisyphus}"
 OPENCODE="${OPENCODE_BIN:-opencode}"
+ULTRAWORK=0
 
 # Parse arguments
 if [ "${1:-}" = "plan" ]; then
     MODE="plan"
     PROMPT_FILE="PROMPT_plan.md"
+    MAX_ITERATIONS=${2:-0}
+elif [ "${1:-}" = "ultrawork" ] || [ "${1:-}" = "ulw" ]; then
+    MODE="build"
+    PROMPT_FILE="PROMPT_build.md"
+    ULTRAWORK=1
     MAX_ITERATIONS=${2:-0}
 elif [[ "${1:-}" =~ ^[0-9]+$ ]]; then
     MODE="build"
@@ -36,6 +44,7 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo "  RALPHUS - Autonomous Coding Loop"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "Mode:   $MODE"
+[ "$ULTRAWORK" -eq 1 ] && echo "Ultra:  enabled"
 echo "Agent:  $AGENT"
 echo "Prompt: $PROMPT_FILE"
 echo "Branch: $CURRENT_BRANCH"
@@ -90,9 +99,14 @@ while true; do
     ITERATION=$((ITERATION + 1))
     echo -e "\n======================== ITERATION $ITERATION ========================\n"
 
+    if [ "$ULTRAWORK" -eq 1 ]; then
+        MESSAGE="Read the attached prompt file and execute the instructions. ulw"
+    else
+        MESSAGE="Read the attached prompt file and execute the instructions"
+    fi
+
     # Run OpenCode with the prompt file
-    # The prompt file is attached via -f, message tells agent what to do
-    OUTPUT=$("$OPENCODE" run --agent "$AGENT" -f "$PROMPT_FILE" -- "Read the attached prompt file and execute the instructions" 2>&1 | tee /dev/stderr) || true
+    OUTPUT=$("$OPENCODE" run --agent "$AGENT" -f "$PROMPT_FILE" -- "$MESSAGE" 2>&1 | tee /dev/stderr) || true
 
     # Check for phase completion signal (single phase done, loop continues)
     if echo "$OUTPUT" | grep -q "<promise>PHASE_COMPLETE</promise>"; then

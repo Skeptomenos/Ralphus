@@ -152,7 +152,11 @@ while :; do cat PROMPT.md | opencode run --agent Sisyphus; done
 ./loop.sh 20           # Build mode, max 20 iterations  
 ./loop.sh plan         # Planning mode
 ./loop.sh plan 5       # Planning mode, max 5 iterations
+./loop.sh ultrawork    # Ultrawork mode (aggressive parallel agents)
+./loop.sh ulw 10       # Ultrawork mode, max 10 iterations
 ```
+
+**Ultrawork mode** appends "ulw" to the agent message, triggering Sisyphus's aggressive parallelism: multiple background explore agents, 5+ simultaneous tool calls, and proactive context cleanup.
 
 ### Completion Detection
 
