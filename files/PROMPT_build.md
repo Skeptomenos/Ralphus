@@ -1,19 +1,30 @@
-## CRITICAL: Single-Phase Iteration Rule
+## CRITICAL: Task-by-Task Execution Rule
 
-**You must complete exactly ONE phase (or one logical unit of work) per iteration, then STOP.**
+**You must work on ONE TASK at a time, verify it, then move to the next. After completing your current PHASE, STOP.**
 
-After completing a phase:
-1. Commit and push your changes
-2. Update @IMPLEMENTATION_PLAN.md to mark the phase complete
-3. Create a git tag if tests pass
-4. Output `<promise>PHASE_COMPLETE</promise>`
-5. **STOP IMMEDIATELY**
+### Workflow for Each Phase:
 
-**DO NOT** continue to the next phase after completing your current phase.
-**DO NOT** start reading or planning the next phase.
-**DO NOT** say "Moving to Phase X" and continue working.
+1. **Create todos** — Break the phase into individual tasks using the TodoWrite tool
+2. **For each task:**
+   - Mark the task as `in_progress`
+   - Implement ONLY that task (one file change or one logical unit)
+   - Run `swift build` or equivalent to verify it compiles
+   - Run tests if applicable
+   - Mark the task as `completed`
+3. **After ALL tasks in the phase are done:**
+   - Commit and push your changes
+   - Update @IMPLEMENTATION_PLAN.md to mark the phase complete
+   - Create a git tag if tests pass
+   - Output `<promise>PHASE_COMPLETE</promise>`
+   - **STOP IMMEDIATELY**
 
-The loop will restart you with fresh context for the next phase. This prevents context exhaustion and ensures clean incremental progress.
+### DO NOT:
+- **DO NOT** edit multiple files before running a build
+- **DO NOT** start the next task before verifying the current one compiles
+- **DO NOT** continue to the next phase after completing your current phase
+- **DO NOT** expand scope mid-phase (stick to the tasks you defined)
+
+The loop will restart you with fresh context for the next phase.
 
 ---
 
@@ -21,10 +32,10 @@ The loop will restart you with fresh context for the next phase. This prevents c
 0b. Study @IMPLEMENTATION_PLAN.md.
 0c. For reference, the application source code is in `src/*`.
 
-1. Your task is to implement functionality per the specifications using parallel agents. Follow @IMPLEMENTATION_PLAN.md and choose the SINGLE most important phase/item to address. Complete ONLY that one phase, then stop. Before making changes, search the codebase (don't assume not implemented) using explore agents via background_task. Fire multiple explore agents in parallel for searches/reads. Use the primary agent for build/test operations. Consult Oracle agent when complex reasoning is needed (debugging, architectural decisions, when stuck after 2+ attempts).
-2. After implementing functionality or resolving problems, run the tests for that unit of code that was improved. If functionality is missing then it's your job to add it as per the application specifications. Ultrathink.
+1. Your task is to implement functionality per the specifications. Follow @IMPLEMENTATION_PLAN.md and choose the SINGLE most important phase to address. Break it into tasks using TodoWrite. Complete ONE task at a time, verifying each before moving on. Before making changes, search the codebase (don't assume not implemented) using explore agents via background_task. Fire multiple explore agents in parallel for searches/reads. Use the primary agent for build/test operations. Consult Oracle agent when complex reasoning is needed (debugging, architectural decisions, when stuck after 2+ attempts).
+2. After implementing each task, run build and tests to verify. If functionality is missing then it's your job to add it as per the application specifications. Ultrathink.
 3. When you discover issues, immediately update @IMPLEMENTATION_PLAN.md with your findings using a background agent. When resolved, update and remove the item.
-4. When the tests pass, update @IMPLEMENTATION_PLAN.md, then `git add -A` then `git commit` with a message describing the changes. After the commit, `git push`.
+4. When all tasks in the phase pass tests, update @IMPLEMENTATION_PLAN.md, then `git add -A` then `git commit` with a message describing the changes. After the commit, `git push`.
 
 99999. Important: When authoring documentation, capture the why — tests and implementation importance.
 999999. Important: Single sources of truth, no migrations/adapters. If tests unrelated to your work fail, resolve them as part of the increment.
