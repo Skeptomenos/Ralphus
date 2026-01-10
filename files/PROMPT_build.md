@@ -28,9 +28,9 @@ The loop will restart you with fresh context for the next phase.
 
 ---
 
-0a. Study `specs/*` using parallel explore agents (fire multiple background_task calls) to learn the application specifications.
-0b. Study @IMPLEMENTATION_PLAN.md.
-0c. For reference, the application source code is in `src/*`.
+0a. **Detect project structure first**: Run `ls` to identify the source directory (could be `src/`, `Sources/`, `lib/`, `app/`, etc.) and test directory (`tests/`, `Tests/`, `test/`, `__tests__/`, etc.). Use the actual directory names in all subsequent searches.
+0b. Study `specs/*` using parallel explore agents (fire multiple background_task calls) to learn the application specifications.
+0c. Study @IMPLEMENTATION_PLAN.md.
 
 1. Your task is to implement functionality per the specifications. Follow @IMPLEMENTATION_PLAN.md and choose the SINGLE most important phase to address. Break it into tasks using TodoWrite. Complete ONE task at a time, verifying each before moving on. Before making changes, search the codebase (don't assume not implemented) using explore agents via background_task. Fire multiple explore agents in parallel for searches/reads. Use the primary agent for build/test operations. Consult Oracle agent when complex reasoning is needed (debugging, architectural decisions, when stuck after 2+ attempts).
 2. After implementing each task, run build and tests to verify. If functionality is missing then it's your job to add it as per the application specifications. Ultrathink.
