@@ -2,9 +2,7 @@
 
 December 2025 boiled [Ralph's](https://ghuntley.com/ralph/) powerful yet dumb little face to the top of most AI-related timelines.
 
-I've been trying to pay attention to the smart things [@GeoffreyHuntley](https://x.com/GeoffreyHuntley) says since bumping into his crazy helpful [LLM stdlib tips](https://ghuntley.com/stdlib/) earlier this year.
-
-But I can't say Ralph really clicked for me when he first shared the idea this summer. The recent hubbub has been hard to ignore.
+I always try to pay attention to the crazy-smart insights [@GeoffreyHuntley](https://x.com/GeoffreyHuntley) shares, but I can't say Ralph really clicked for me this summer. Now, all of the recent hubbub has made it hard to ignore.
 
 [@mattpocockuk](https://x.com/mattpocockuk/status/2008200878633931247) and [@ryancarson](https://x.com/ryancarson/status/2008548371712135632)'s overviews helped a lot - right until Geoff came in and [said 'nah'](https://x.com/GeoffreyHuntley/status/2008731415312236984).
 
@@ -12,13 +10,13 @@ But I can't say Ralph really clicked for me when he first shared the idea this s
 
 _So what is the optimal way to Ralph?_
 
-From the sounds of it, many folks are having a good Ralph with various shapes and forms - but I wanted to read the tea leaves as closely as I could from the person who not only captured the approach but also has had the most time in the seat putting it through its paces.
+Many folks seem to be getting good results with various shapes - but I wanted to read the tea leaves as closely as possible from the person who not only captured this approach but also has had the most ass-time in the seat putting it through its paces.
 
-So I dug in to really _RTFM_ on [recent videos](<(https://www.youtube.com/watch?v=O2bBWDoxO4s)>) and Geoff's [original post](https://ghuntley.com/ralph/) to try and untangle for myself what might work best.
+So I dug in to really _RTFM_ on [recent videos](<(https://www.youtube.com/watch?v=O2bBWDoxO4s)>) and Geoff's [original post](https://ghuntley.com/ralph/) to try and untangle for myself what works best.
 
-And, Geoff, if you happen to bump into this - I'd love to know if you think I've missed or mangled anything too badly.
+Below is the result - a (likely OCD-inspired) Ralph Playbook that organizes the miscellaneous details for putting this all into practice w/o hopefully neutering it in the process.
 
-Here's my take –
+> Digging into all of this has also brought to mind some possibly valuable [extensions](#enhancements) to the core approach that aim to stay aligned with the guidelines that make Ralph work so well.
 
 ---
 
@@ -506,11 +504,13 @@ Referenced in [PROMPT.md](#promptmd) templates for orientation steps.
 
 Still determining the value/viability of these possible enhancements, but the opportunities sound promising.
 
-- [Use Claude's AskUserQuestionTool for Planning](#use-claudes-askuserquestiontool-for-planning)
-- [Acceptance-Driven Backpressure](#acceptance-driven-backpressure)
-- [Non-Deterministic Backpressure](#non-deterministic-backpressure)
-- [Ralph Friendly Work Branches](#ralph-friendly-work-branches)
-- [JTBD → Story Map → SLC Release](#jtbd--story-map--slc-release)
+I'm still determining the value/viability of these, but the opportunities sound promising:
+
+- [Claude's AskUserQuestionTool for Planning](#use-claudes-askuserquestiontool-for-planning) - use Claude's built-in interview tool to systematically clarify JTBD, edge cases, and acceptance criteria for specs.
+- [Acceptance-Driven Backpressure](#acceptance-driven-backpressure) - Derive test requirements during planning from acceptance criteria. Prevents "cheating" - can't claim done without appropriate tests passing.
+- [Non-Deterministic Backpressure](#non-deterministic-backpressure) - Using LLM-as-judge for tests against subjective tasks (tone, aesthetics, UX). Binary pass/fail reviews that iterate until pass.
+- [Ralph Friendly Work Branches](#ralph-friendly-work-branches) - Asking Ralph to "filter to feature X" at runtime is unreliable. Instead, create scoped plan per branch upfront.
+- [JTBD → Story Map → SLC Release](#jtbd--story-map--slc-release) - Push the power of "Letting Ralph Ralph" to connect JTBD's audience and activities to Simple/Lovable/Complete releases.
 
 ---
 
@@ -674,7 +674,7 @@ interface ReviewResult {
 function createReview(config: {
   criteria: string; // What to evaluate (behavioral, observable)
   artifact: string; // Text content OR screenshot path
-  intelligence?: 'fast' | 'smart'; // Optional, defaults to 'fast'
+  intelligence?: "fast" | "smart"; // Optional, defaults to 'fast'
 }): Promise<ReviewResult>;
 ```
 
@@ -695,37 +695,38 @@ The fixture implementation selects appropriate models. (Examples are current opt
 ##### `llm-review.test.ts` - Shows Ralph how to use it (text and vision examples):
 
 ```typescript
-import { createReview } from '@/lib/llm-review';
+import { createReview } from "@/lib/llm-review";
 
 // Example 1: Text evaluation
-test('welcome message tone', async () => {
+test("welcome message tone", async () => {
   const message = generateWelcomeMessage();
   const result = await createReview({
     criteria:
-      'Message uses warm, conversational tone appropriate for design professionals while clearly conveying value proposition',
+      "Message uses warm, conversational tone appropriate for design professionals while clearly conveying value proposition",
     artifact: message, // Text content
   });
   expect(result.pass).toBe(true);
 });
 
 // Example 2: Vision evaluation (screenshot path)
-test('dashboard visual hierarchy', async () => {
-  await page.screenshot({ path: './tmp/dashboard.png' });
+test("dashboard visual hierarchy", async () => {
+  await page.screenshot({ path: "./tmp/dashboard.png" });
   const result = await createReview({
-    criteria: 'Layout demonstrates clear visual hierarchy with obvious primary action',
-    artifact: './tmp/dashboard.png', // Screenshot path
+    criteria:
+      "Layout demonstrates clear visual hierarchy with obvious primary action",
+    artifact: "./tmp/dashboard.png", // Screenshot path
   });
   expect(result.pass).toBe(true);
 });
 
 // Example 3: Smart intelligence for complex judgment
-test('brand visual consistency', async () => {
-  await page.screenshot({ path: './tmp/homepage.png' });
+test("brand visual consistency", async () => {
+  await page.screenshot({ path: "./tmp/homepage.png" });
   const result = await createReview({
     criteria:
-      'Visual design maintains professional brand identity suitable for financial services while avoiding corporate sterility',
-    artifact: './tmp/homepage.png',
-    intelligence: 'smart', // Complex aesthetic judgment
+      "Visual design maintains professional brand identity suitable for financial services while avoiding corporate sterility",
+    artifact: "./tmp/homepage.png",
+    intelligence: "smart", // Complex aesthetic judgment
   });
   expect(result.pass).toBe(true);
 });
