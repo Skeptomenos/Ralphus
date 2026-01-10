@@ -94,7 +94,15 @@ while true; do
     # The prompt file is attached via -f, message tells agent what to do
     OUTPUT=$("$OPENCODE" run --agent "$AGENT" -f "$PROMPT_FILE" -- "Read the attached prompt file and execute the instructions" 2>&1 | tee /dev/stderr) || true
 
-    # Check for completion signal
+    # Check for phase completion signal (single phase done, loop continues)
+    if echo "$OUTPUT" | grep -q "<promise>PHASE_COMPLETE</promise>"; then
+        echo -e "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "  PHASE COMPLETE - Starting next iteration"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        # Continue to next iteration with fresh context
+    fi
+
+    # Check for full completion signal (all tasks done)
     if echo "$OUTPUT" | grep -q "<promise>COMPLETE</promise>"; then
         echo -e "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo "  ALL TASKS COMPLETE"
