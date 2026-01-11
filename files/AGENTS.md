@@ -5,27 +5,11 @@
 ## Build & Run
 
 ```bash
-# Validate (if applicable)
+# Validate (update these for your project)
 [test command]
 [typecheck command]
 [lint command]
 ```
-
-## OpenCode Configuration
-
-| Setting | Value | Override |
-|---------|-------|----------|
-| Agent | Sisyphus | `RALPH_AGENT=build` |
-| Binary | opencode | `OPENCODE_BIN=~/.opencode/bin/opencode` |
-
-## Completion Signals
-
-The loop detects these signals to control execution:
-
-| Signal | Meaning |
-|--------|---------|
-| `<promise>COMPLETE</promise>` | All tasks done, loop exits cleanly |
-| `<promise>BLOCKED:[task]:[reason]</promise>` | Stuck, needs human intervention |
 
 ## Operational Notes
 

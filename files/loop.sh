@@ -1,13 +1,15 @@
 #!/bin/bash
 # Ralphus - Autonomous Coding Loop for OpenCode
-# Usage: ./loop.sh [plan|ultrawork|ulw] [max_iterations]
+# Usage: ./loop.sh [plan] [ultrawork|ulw] [max_iterations]
 # Examples:
-#   ./loop.sh              # Build mode, unlimited iterations
-#   ./loop.sh 20           # Build mode, max 20 iterations
-#   ./loop.sh plan         # Plan mode, unlimited iterations
-#   ./loop.sh plan 5       # Plan mode, max 5 iterations
-#   ./loop.sh ultrawork    # Build mode with ultrawork (aggressive parallel agents)
-#   ./loop.sh ulw 10       # Ultrawork mode, max 10 iterations
+#   ./loop.sh                  # Build mode, unlimited iterations
+#   ./loop.sh 20               # Build mode, max 20 iterations
+#   ./loop.sh plan             # Plan mode, unlimited iterations
+#   ./loop.sh plan 5           # Plan mode, max 5 iterations
+#   ./loop.sh ultrawork        # Build mode with ultrawork
+#   ./loop.sh ulw 10           # Ultrawork build, max 10 iterations
+#   ./loop.sh plan ultrawork   # Plan mode with ultrawork
+#   ./loop.sh plan ulw 5       # Ultrawork plan, max 5 iterations
 
 set -euo pipefail
 
@@ -17,39 +19,28 @@ OPENCODE="${OPENCODE_BIN:-opencode}"
 ULTRAWORK=0
 
 # Parse arguments
-if [ "${1:-}" = "plan" ]; then
-    MODE="plan"
-    PROMPT_FILE="PROMPT_plan.md"
-    MAX_ITERATIONS=${2:-0}
-elif [ "${1:-}" = "ultrawork" ] || [ "${1:-}" = "ulw" ]; then
-    MODE="build"
-    PROMPT_FILE="PROMPT_build.md"
-    ULTRAWORK=1
-    MAX_ITERATIONS=${2:-0}
-elif [[ "${1:-}" =~ ^[0-9]+$ ]]; then
-    MODE="build"
-    PROMPT_FILE="PROMPT_build.md"
-    MAX_ITERATIONS=$1
-else
-    MODE="build"
-    PROMPT_FILE="PROMPT_build.md"
-    MAX_ITERATIONS=0
-fi
+MODE="build"
+PROMPT_FILE="PROMPT_build.md"
+MAX_ITERATIONS=0
+
+for arg in "$@"; do
+    if [ "$arg" = "plan" ]; then
+        MODE="plan"
+        PROMPT_FILE="PROMPT_plan.md"
+    elif [ "$arg" = "ultrawork" ] || [ "$arg" = "ulw" ]; then
+        ULTRAWORK=1
+    elif [[ "$arg" =~ ^[0-9]+$ ]]; then
+        MAX_ITERATIONS=$arg
+    fi
+done
 
 ITERATION=0
 CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
 
 # Header
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "  RALPHUS - Autonomous Coding Loop"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "Mode:   $MODE"
-[ "$ULTRAWORK" -eq 1 ] && echo "Ultra:  enabled"
-echo "Agent:  $AGENT"
-echo "Prompt: $PROMPT_FILE"
-echo "Branch: $CURRENT_BRANCH"
-[ "$MAX_ITERATIONS" -gt 0 ] && echo "Max:    $MAX_ITERATIONS iterations"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "=== RALPHUS: $MODE mode | $AGENT | $CURRENT_BRANCH ==="
+[ "$ULTRAWORK" -eq 1 ] && echo "Ultrawork: enabled"
+[ "$MAX_ITERATIONS" -gt 0 ] && echo "Max iterations: $MAX_ITERATIONS"
 
 # Verify prompt file exists
 if [ ! -f "$PROMPT_FILE" ]; then
@@ -108,31 +99,15 @@ while true; do
     # Run OpenCode with the prompt file
     OUTPUT=$("$OPENCODE" run --agent "$AGENT" -f "$PROMPT_FILE" -- "$MESSAGE" 2>&1 | tee /dev/stderr) || true
 
-    # Check for phase completion signal (single phase done, loop continues)
+    # Check completion signals
     if echo "$OUTPUT" | grep -q "<promise>PHASE_COMPLETE</promise>"; then
-        echo -e "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-        echo "  PHASE COMPLETE - Starting next iteration"
-        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-        # Continue to next iteration with fresh context
+        echo "=== PHASE COMPLETE - next iteration ==="
     fi
-
-    # Check for full completion signal (all tasks done)
     if echo "$OUTPUT" | grep -q "<promise>COMPLETE</promise>"; then
-        echo -e "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-        echo "  ALL TASKS COMPLETE"
-        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-        exit 0
+        echo "=== ALL TASKS COMPLETE ===" && exit 0
     fi
-
-    # Check for blocked signal
     if echo "$OUTPUT" | grep -q "<promise>BLOCKED:"; then
-        BLOCKED_MSG=$(echo "$OUTPUT" | grep -o "<promise>BLOCKED:[^<]*</promise>" | head -1 || echo "unknown")
-        echo -e "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-        echo "  RALPH IS BLOCKED"
-        echo "  $BLOCKED_MSG"
-        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-        echo "Check IMPLEMENTATION_PLAN.md for details."
-        exit 1
+        echo "=== BLOCKED ===" && echo "$OUTPUT" | grep -o "<promise>BLOCKED:[^<]*</promise>" && exit 1
     fi
 
     # Push changes after each iteration (if in a git repo)
@@ -144,6 +119,4 @@ while true; do
     fi
 done
 
-echo -e "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "  Loop finished after $ITERATION iterations"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "=== Loop finished after $ITERATION iterations ==="
