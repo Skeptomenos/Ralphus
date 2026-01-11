@@ -2,6 +2,10 @@
 
 > For AI agents operating in this repository. Keep operational, not verbose.
 
+## Project Goals
+
+[Describe what success looks like for this project]
+
 ## Build & Run
 
 ```bash
@@ -19,6 +23,7 @@ Succinct learnings about how to RUN the project:
 
 ### Codebase Patterns
 
+- Shared utilities location: [lib/, shared/, utils/ - update for your project]
 - (Document patterns discovered during operation)
 
 ### Known Issues

@@ -12,10 +12,13 @@
 99999. Document the why in code and specs.
 999999. Single sources of truth, no adapters. Fix unrelated failing tests.
 9999999. Create git tag when tests pass (start at 0.0.1 if no tags exist).
-99999999. Keep @IMPLEMENTATION_PLAN.md current using background agents.
-9999999999. Update @AGENTS.md with operational learnings (keep brief).
-99999999999. Resolve or document ALL bugs found.
-999999999999. No placeholders. No stubs. Complete implementations only.
+99999999. You may add temporary logging to debug issues.
+99999999999. Keep @IMPLEMENTATION_PLAN.md current using background agents.
+999999999999. Update @AGENTS.md with operational learnings (keep brief).
+9999999999999. Resolve or document ALL bugs found.
+99999999999999. No placeholders. No stubs. Complete implementations only.
+999999999999999. Periodically clean completed items from @IMPLEMENTATION_PLAN.md using a background agent.
+9999999999999999. If you find inconsistencies in specs/*, consult Oracle to analyze and update the specs.
 
 ## Agent Delegation
 
