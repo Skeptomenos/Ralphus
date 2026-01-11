@@ -1,17 +1,17 @@
 ---
-name: homelab-ralph
-description: "Manage Ralph autonomous agent loops on the homelab server. Spawn, monitor, attach, and control long-running Ralph sessions via SSH and tmux. Supports multiple concurrent sessions."
+name: ralphus
+description: "Manage Ralphus autonomous coding loops on the homelab server. Spawn, monitor, attach, and control long-running Ralphus sessions via SSH and tmux. Supports multiple concurrent sessions."
 triggers:
-  - "run ralph on homelab"
-  - "start ralph remotely"
-  - "push and run ralph"
-  - "sync and spawn ralph"
-  - "check ralph status"
-  - "how is ralph doing"
-  - "ralph progress"
-  - "stop ralph"
+  - "run ralphus on homelab"
+  - "start ralphus remotely"
+  - "push and run ralphus"
+  - "sync and spawn ralphus"
+  - "check ralphus status"
+  - "how is ralphus doing"
+  - "ralphus progress"
+  - "stop ralphus"
 created: 2025-01-10
-updated: 2025-01-10
+updated: 2025-01-11
 ---
 
 <!--
@@ -20,14 +20,14 @@ BASELINE FAILURES ADDRESSED:
 - No local/remote path mapping → Added PROJECT_MAPPINGS section
 - No unified push+run flow → Added PUSH_AND_START mode with PHASE L0
 - Missing opencode path knowledge → Documented in ENVIRONMENT
-- No commit message convention → Specified [ralph] sync convention
+- No commit message convention → Specified [ralphus] sync convention
 -->
 
-# Homelab Ralph Management
+# Homelab Ralphus Management
 
-**Core principle:** One command syncs local changes and spawns remote ralph. No manual git operations.
+**Core principle:** One command syncs local changes and spawns remote ralphus. No manual git operations.
 
-Spawn and manage Ralph autonomous agent loops on the homelab server (Fedora Linux).
+Spawn and manage Ralphus autonomous coding loops on the homelab server (Fedora Linux).
 Supports multiple concurrent sessions across different repos or parallel runs in the same repo.
 
 ---
@@ -35,12 +35,12 @@ Supports multiple concurrent sessions across different repos or parallel runs in
 ## When to Use
 
 - Run autonomous coding loops on homelab server
-- Sync local changes to remote before spawning ralph
-- Monitor long-running ralph sessions
-- Manage multiple concurrent ralph loops
+- Sync local changes to remote before spawning ralphus
+- Monitor long-running ralphus sessions
+- Manage multiple concurrent ralphus loops
 
 **Do NOT use when:**
-- Running ralph locally (use `./scripts/ralph/ralph.sh` directly)
+- Running ralphus locally (use `./loop.sh` directly)
 - Project not cloned on homelab yet
 
 ---
@@ -51,13 +51,13 @@ Analyze the user's request to determine operation mode:
 
 | User Request Pattern | Mode | Jump To |
 |---------------------|------|---------|
-| "push and run ralph", "sync and spawn ralph", "push to homelab" | `PUSH_AND_START` | Phase L0, then S1-S4 |
-| "run ralph", "start ralph", "spawn ralph" (no push keyword) | `START` | Phase S1-S4 |
-| "check ralph", "ralph status", "how is ralph" | `STATUS` | Phase T1-T2 |
-| "stop ralph", "kill ralph", "cancel ralph" | `STOP` | Phase K1-K2 |
-| "attach to ralph", "show ralph output" | `ATTACH` | Phase A1 |
-| "ralph progress", "what did ralph do" | `PROGRESS` | Phase P1-P2 |
-| "list aliases", "ralph projects" | `ALIASES` | Phase L1 |
+| "push and run ralphus", "sync and spawn ralphus", "push to homelab" | `PUSH_AND_START` | Phase L0, then S1-S4 |
+| "run ralphus", "start ralphus", "spawn ralphus" (no push keyword) | `START` | Phase S1-S4 |
+| "check ralphus", "ralphus status", "how is ralphus" | `STATUS` | Phase T1-T2 |
+| "stop ralphus", "kill ralphus", "cancel ralphus" | `STOP` | Phase K1-K2 |
+| "attach to ralphus", "show ralphus output" | `ATTACH` | Phase A1 |
+| "ralphus progress", "what did ralphus do" | `PROGRESS` | Phase P1-P2 |
+| "list aliases", "ralphus projects" | `ALIASES` | Phase L1 |
 
 **CRITICAL**: Parse the actual request. Don't default to START mode.
 
@@ -76,10 +76,10 @@ Analyze the user's request to determine operation mode:
 | OpenCode binary | `~/.opencode/bin/opencode` |
 | Session manager | tmux |
 | Projects location | `~/Repos/` |
-| Ralph scripts | `{project}/scripts/ralph/` |
-| State file | `~/.ralph-sessions.json` |
-| Session naming | `ralph-{alias}` or `ralph-{alias}-N` for parallel |
-| Default agent | `Sisyphus` (oh-my-opencode v2.14.0 installed) |
+| Ralphus files | `{project}/loop.sh`, `{project}/PROMPT_*.md`, `{project}/IMPLEMENTATION_PLAN.md` |
+| State file | `~/.ralphus-sessions.json` |
+| Session naming | `ralphus-{alias}` or `ralphus-{alias}-N` for parallel |
+| Default agent | `Sisyphus` (oh-my-opencode installed) |
 
 **CRITICAL**: Every SSH command MUST start with `cd ~` because default entry is `/docker/`:
 ```bash
@@ -106,8 +106,8 @@ The config contains:
 - `homelab.*` - SSH alias, opencode path, state file location
 
 **Usage**: 
-- "Push and run ralph for prism" → pushes from local, pulls on remote, spawns ralph
-- "Start ralph for canvas" → just spawns on remote (no local push)
+- "Push and run ralphus for prism" → pushes from local, pulls on remote, spawns ralphus
+- "Start ralphus for canvas" → just spawns on remote (no local push)
 
 **CRITICAL**: The `prism` alias has DIFFERENT local and remote paths. Always read the config.
 
@@ -115,7 +115,7 @@ The config contains:
 
 ## STATE FILE STRUCTURE
 
-Location: `~/.ralph-sessions.json` on homelab (path from `config/project-mappings.json`)
+Location: `~/.ralphus-sessions.json` on homelab (path from `config/project-mappings.json`)
 
 ```json
 {
@@ -142,7 +142,7 @@ Location: `~/.ralph-sessions.json` on homelab (path from `config/project-mapping
 ### Initialize State File (if not exists)
 ```bash
 # Read config/project-mappings.json first, then create state file with matching structure
-ssh homelab 'cd ~ && cat > ~/.ralph-sessions.json << '\''EOF'\''
+ssh homelab 'cd ~ && cat > ~/.ralphus-sessions.json << '\''EOF'\''
 {
   "aliases": { ... },
   "project_mappings": { ... },
@@ -153,42 +153,42 @@ EOF'
 
 ### Read State File
 ```bash
-ssh homelab "cd ~ && cat ~/.ralph-sessions.json 2>/dev/null || echo '{\"aliases\":{},\"sessions\":{}}'"
+ssh homelab "cd ~ && cat ~/.ralphus-sessions.json 2>/dev/null || echo '{\"aliases\":{},\"sessions\":{}}'"
 ```
 
 ### Read Aliases
 ```bash
-ssh homelab "cd ~ && cat ~/.ralph-sessions.json | jq -r '.aliases'"
+ssh homelab "cd ~ && cat ~/.ralphus-sessions.json | jq -r '.aliases'"
 ```
 
 ### Resolve Alias to Path
 ```bash
-ssh homelab "cd ~ && cat ~/.ralph-sessions.json | jq -r '.aliases.{ALIAS} // empty'"
+ssh homelab "cd ~ && cat ~/.ralphus-sessions.json | jq -r '.aliases.{ALIAS} // empty'"
 ```
 
 ### Add/Update Session in State
 ```bash
-ssh homelab "cd ~ && cat ~/.ralph-sessions.json | jq '.sessions.\"{SESSION_NAME}\" = {\"project\": \"{PROJECT_PATH}\", \"alias\": \"{ALIAS}\", \"started\": \"{ISO_TIMESTAMP}\", \"iterations\": {N}, \"status\": \"running\"}' > ~/.ralph-sessions.json.tmp && mv ~/.ralph-sessions.json.tmp ~/.ralph-sessions.json"
+ssh homelab "cd ~ && cat ~/.ralphus-sessions.json | jq '.sessions.\"{SESSION_NAME}\" = {\"project\": \"{PROJECT_PATH}\", \"alias\": \"{ALIAS}\", \"started\": \"{ISO_TIMESTAMP}\", \"iterations\": {N}, \"mode\": \"{MODE}\", \"ultrawork\": {ULTRAWORK}, \"status\": \"running\"}' > ~/.ralphus-sessions.json.tmp && mv ~/.ralphus-sessions.json.tmp ~/.ralphus-sessions.json"
 ```
 
 ### Update Session Status
 ```bash
-ssh homelab "cd ~ && cat ~/.ralph-sessions.json | jq '.sessions.\"{SESSION_NAME}\".status = \"{STATUS}\"' > ~/.ralph-sessions.json.tmp && mv ~/.ralph-sessions.json.tmp ~/.ralph-sessions.json"
+ssh homelab "cd ~ && cat ~/.ralphus-sessions.json | jq '.sessions.\"{SESSION_NAME}\".status = \"{STATUS}\"' > ~/.ralphus-sessions.json.tmp && mv ~/.ralphus-sessions.json.tmp ~/.ralphus-sessions.json"
 ```
 
 ### Remove Session from State
 ```bash
-ssh homelab "cd ~ && cat ~/.ralph-sessions.json | jq 'del(.sessions.\"{SESSION_NAME}\")' > ~/.ralph-sessions.json.tmp && mv ~/.ralph-sessions.json.tmp ~/.ralph-sessions.json"
+ssh homelab "cd ~ && cat ~/.ralphus-sessions.json | jq 'del(.sessions.\"{SESSION_NAME}\")' > ~/.ralphus-sessions.json.tmp && mv ~/.ralphus-sessions.json.tmp ~/.ralphus-sessions.json"
 ```
 
 ### Get All Running Sessions
 ```bash
-ssh homelab "cd ~ && cat ~/.ralph-sessions.json | jq -r '.sessions | to_entries[] | select(.value.status == \"running\") | .key'"
+ssh homelab "cd ~ && cat ~/.ralphus-sessions.json | jq -r '.sessions | to_entries[] | select(.value.status == \"running\") | .key'"
 ```
 
 ### Get Sessions for Alias
 ```bash
-ssh homelab "cd ~ && cat ~/.ralph-sessions.json | jq -r '.sessions | to_entries[] | select(.value.alias == \"{ALIAS}\") | .key'"
+ssh homelab "cd ~ && cat ~/.ralphus-sessions.json | jq -r '.sessions | to_entries[] | select(.value.alias == \"{ALIAS}\") | .key'"
 ```
 
 ---
@@ -226,7 +226,7 @@ LOCAL CHANGES DETECTED
 {git status output}
 
 Options:
-1. Auto-commit with message "[ralph] sync before remote run"
+1. Auto-commit with message "[ralphus] sync before remote run"
 2. Let me commit manually first (abort)
 3. Push anyway (uncommitted changes stay local)
 
@@ -235,7 +235,7 @@ What would you like to do?
 
 **If user chooses option 1:**
 ```bash
-cd {local_path} && git add -A && git commit -m "[ralph] sync before remote run"
+cd {local_path} && git add -A && git commit -m "[ralphus] sync before remote run"
 ```
 
 ### Step 4: Git Push (LOCAL)
@@ -293,12 +293,12 @@ Proceeding to remote spawn...
 
 ```bash
 # Group 1: Server state + state file (ALWAYS cd ~ first!)
-ssh homelab "cd ~ && cat ~/.ralph-sessions.json 2>/dev/null || echo '{\"aliases\":{},\"sessions\":{}}'"
+ssh homelab "cd ~ && cat ~/.ralphus-sessions.json 2>/dev/null || echo '{\"aliases\":{},\"sessions\":{}}'"
 ssh homelab "cd ~ && tmux ls 2>/dev/null || echo 'NO_SESSIONS'"
 ssh homelab "cd ~ && ~/.opencode/bin/opencode --version || echo 'OPENCODE_NOT_INSTALLED'"
 
-# Group 2: Active ralph sessions (from tmux)
-ssh homelab "cd ~ && tmux ls 2>/dev/null | grep ralph || echo 'NO_RALPH_SESSIONS'"
+# Group 2: Active ralphus sessions (from tmux)
+ssh homelab "cd ~ && tmux ls 2>/dev/null | grep ralphus || echo 'NO_RALPHUS_SESSIONS'"
 
 # Group 3: System resources (optional, for long runs)
 ssh homelab "cd ~ && uptime && free -h | head -2"
@@ -308,7 +308,7 @@ ssh homelab "cd ~ && uptime && free -h | head -2"
 1. State file contents (aliases, sessions)
 2. Whether tmux server is running
 3. Whether opencode is installed
-4. Active ralph sessions (tmux)
+4. Active ralphus sessions (tmux)
 5. System load (for capacity planning)
 
 **After gathering, sync state file with tmux reality:**
@@ -328,19 +328,21 @@ ssh homelab "cd ~ && uptime && free -h | head -2"
 | Parameter | Required | Default | Example |
 |-----------|----------|---------|---------|
 | Project (alias or path) | YES | - | `canvas`, `~/Repos/opencode-canvas` |
+| Mode | NO | build | `plan`, `build` |
 | Iterations | NO | 20 | 30, 50, 100 |
+| Ultrawork | NO | false | `ultrawork`, `ulw` |
 | Agent | NO | Sisyphus | build, Sisyphus |
 | --no-pull | NO | false | Skip git pull |
 
 **Alias Resolution:**
-1. Check if input matches known alias (canvas, ralph, prism, thoth)
+1. Check if input matches known alias (canvas, prism, thoth)
 2. If alias → resolve to full path from state file
 3. If full path → use directly
 4. If unknown → ASK user
 
 **Session Naming:**
-1. Base name: `ralph-{alias}` (e.g., `ralph-canvas`)
-2. If session exists and running → use `ralph-{alias}-2`, `ralph-{alias}-3`, etc.
+1. Base name: `ralphus-{alias}` (e.g., `ralphus-canvas`)
+2. If session exists and running → use `ralphus-{alias}-2`, `ralphus-{alias}-3`, etc.
 3. Check both tmux AND state file for existing sessions
 
 **MANDATORY OUTPUT before proceeding:**
@@ -349,14 +351,16 @@ ssh homelab "cd ~ && uptime && free -h | head -2"
 START PARAMETERS
 ================
 Project: {project_path} (alias: {alias})
+Mode: {plan | build}
 Iterations: {iterations}
+Ultrawork: {yes | no}
 Agent: {agent}
 Session name: {session_name}
 Git pull: {yes | skipped (--no-pull)}
 
 Validation:
   [ ] Alias resolved or path confirmed
-  [ ] Ralph scripts exist at {project_path}/scripts/ralph/
+  [ ] Ralphus files exist at {project_path}/ (loop.sh, PROMPT_*.md)
   [ ] Session name available (no collision)
 ```
 
@@ -418,8 +422,8 @@ What would you like to do?
 
 <preflight>
 ```bash
-# Verify ralph is set up in project (ALWAYS cd ~ first!)
-ssh homelab "cd ~ && ls {project_path}/scripts/ralph/ralph.sh && echo 'RALPH_OK' || echo 'RALPH_MISSING'"
+# Verify ralphus is set up in project (ALWAYS cd ~ first!)
+ssh homelab "cd ~ && ls {project_path}/loop.sh {project_path}/PROMPT_build.md {project_path}/PROMPT_plan.md && echo 'RALPHUS_OK' || echo 'RALPHUS_MISSING'"
 
 # Check for existing session with same name (avoid collision)
 ssh homelab "cd ~ && tmux has-session -t {session_name} 2>/dev/null && echo 'SESSION_EXISTS' || echo 'SESSION_FREE'"
@@ -429,15 +433,15 @@ ssh homelab "cd ~ && ~/.opencode/bin/opencode --version && ~/.opencode/bin/openc
 ```
 
 **BLOCKING conditions:**
-- `RALPH_MISSING` -> STOP. Tell user to set up ralph first:
+- `RALPHUS_MISSING` -> STOP. Tell user to set up ralphus first:
   ```
-  Ralph scripts not found at {project_path}/scripts/ralph/
+  Ralphus files not found at {project_path}/
   
-  To set up ralph, copy from ralph-opencode:
-    ssh homelab "cd ~ && mkdir -p {project_path}/scripts/ralph && cp ~/Repos/ralph-opencode/{ralph.sh,prompt.md,prd.json.example} {project_path}/scripts/ralph/"
+  To set up ralphus, copy from ralphus repo:
+    ssh homelab "cd ~ && cd {project_path} && cp ~/Repos/ralphus/skill/ralphus/scripts/loop.sh . && cp ~/Repos/ralphus/skill/ralphus/instructions/PROMPT_*.md ."
   ```
-- `SESSION_EXISTS` -> Increment session name (ralph-canvas → ralph-canvas-2)
-- `SISYPHUS_MISSING` -> WARN. Ralph will use default agent.
+- `SESSION_EXISTS` -> Increment session name (ralphus-canvas → ralphus-canvas-2)
+- `SISYPHUS_MISSING` -> WARN. Ralphus will use default agent.
 </preflight>
 
 ---
@@ -445,15 +449,24 @@ ssh homelab "cd ~ && ~/.opencode/bin/opencode --version && ~/.opencode/bin/openc
 ## PHASE S4: Start Session & Update State
 
 <start_session>
+**Build the loop.sh command based on parameters:**
+
+| Mode | Ultrawork | Command |
+|------|-----------|---------|
+| build | no | `./loop.sh {iterations}` |
+| build | yes | `./loop.sh ultrawork {iterations}` |
+| plan | no | `./loop.sh plan` |
+| plan | yes | `./loop.sh plan ultrawork` |
+
 ```bash
-# Start ralph in detached tmux session (ALWAYS cd ~ first, use full opencode path)
-ssh homelab "cd ~ && tmux new-session -d -s {session_name} -c {project_path} 'export PATH=~/.opencode/bin:\$PATH && RALPH_AGENT=Sisyphus ./scripts/ralph/ralph.sh {iterations}'"
+# Start ralphus in detached tmux session (ALWAYS cd ~ first, use full opencode path)
+ssh homelab "cd ~ && tmux new-session -d -s {session_name} -c {project_path} 'export PATH=~/.opencode/bin:\$PATH && RALPH_AGENT=Sisyphus ./loop.sh {mode} {ultrawork} {iterations}'"
 
 # Verify session started
 ssh homelab "cd ~ && tmux has-session -t {session_name} 2>/dev/null && echo 'STARTED' || echo 'FAILED'"
 
 # Update state file with new session
-ssh homelab "cd ~ && cat ~/.ralph-sessions.json | jq '.sessions.\"{session_name}\" = {\"project\": \"{project_path}\", \"alias\": \"{alias}\", \"started\": \"{ISO_TIMESTAMP}\", \"iterations\": {iterations}, \"status\": \"running\"}' > ~/.ralph-sessions.json.tmp && mv ~/.ralph-sessions.json.tmp ~/.ralph-sessions.json"
+ssh homelab "cd ~ && cat ~/.ralphus-sessions.json | jq '.sessions.\"{session_name}\" = {\"project\": \"{project_path}\", \"alias\": \"{alias}\", \"started\": \"{ISO_TIMESTAMP}\", \"iterations\": {iterations}, \"mode\": \"{mode}\", \"ultrawork\": {ultrawork_bool}, \"status\": \"running\"}' > ~/.ralphus-sessions.json.tmp && mv ~/.ralphus-sessions.json.tmp ~/.ralphus-sessions.json"
 
 # Capture initial output (first 10 lines)
 sleep 3
@@ -463,11 +476,13 @@ ssh homelab "cd ~ && tmux capture-pane -t {session_name} -p -S 0 -E 10"
 **MANDATORY OUTPUT after start:**
 
 ```
-RALPH SESSION STARTED
-=====================
+RALPHUS SESSION STARTED
+=======================
 Session: {session_name}
 Project: {project_path} (alias: {alias})
+Mode: {plan | build}
 Iterations: {iterations}
+Ultrawork: {yes | no}
 Agent: Sisyphus
 Git: {pulled | skipped | had local changes}
 
@@ -477,10 +492,10 @@ To attach (live view):
   ssh homelab -t "tmux attach -t {session_name}"
 
 To check progress:
-  "How is ralph doing?" or "Ralph progress"
+  "How is ralphus doing?" or "Ralphus progress"
 
 To stop:
-  "Stop ralph on {alias}"
+  "Stop ralphus on {alias}"
 ```
 </start_session>
 
@@ -495,13 +510,13 @@ To stop:
 # Execute in parallel (ALWAYS cd ~ first!)
 
 # Get state file
-ssh homelab "cd ~ && cat ~/.ralph-sessions.json"
+ssh homelab "cd ~ && cat ~/.ralphus-sessions.json"
 
-# Get all ralph tmux sessions
-ssh homelab "cd ~ && tmux ls 2>/dev/null | grep ralph || echo 'NO_RALPH_SESSIONS'"
+# Get all ralphus tmux sessions
+ssh homelab "cd ~ && tmux ls 2>/dev/null | grep ralphus || echo 'NO_RALPHUS_SESSIONS'"
 
-# Capture output from ALL ralph sessions
-ssh homelab "cd ~ && for s in \$(tmux ls 2>/dev/null | grep ralph | cut -d: -f1); do echo \"=== \$s ===\"; tmux capture-pane -t \$s -p -S -20; done"
+# Capture output from ALL ralphus sessions
+ssh homelab "cd ~ && for s in \$(tmux ls 2>/dev/null | grep ralphus | cut -d: -f1); do echo \"=== \$s ===\"; tmux capture-pane -t \$s -p -S -20; done"
 ```
 
 **Sync state with reality:**
@@ -517,12 +532,13 @@ ssh homelab "cd ~ && for s in \$(tmux ls 2>/dev/null | grep ralph | cut -d: -f1)
 **MANDATORY OUTPUT:**
 
 ```
-RALPH STATUS REPORT
-===================
+RALPHUS STATUS REPORT
+=====================
 Active sessions: N
 
-SESSION: ralph-canvas
+SESSION: ralphus-canvas
   Project: ~/Repos/opencode-canvas
+  Mode: build | Ultrawork: yes
   Started: 2025-01-10 11:30:00 (2h 15m ago)
   Iterations: 30
   Status: RUNNING
@@ -531,9 +547,11 @@ SESSION: ralph-canvas
   {captured output}
   
   Current iteration: X of Y (parsed from output)
+  Completion signals: {PHASE_COMPLETE | COMPLETE | BLOCKED | none detected}
 
-SESSION: ralph-thoth
+SESSION: ralphus-thoth
   Project: ~/Repos/thoth
+  Mode: plan | Ultrawork: no
   Started: 2025-01-10 11:45:00 (2h ago)
   Iterations: 50
   Status: RUNNING
@@ -543,19 +561,19 @@ SESSION: ralph-thoth
 
 COMMANDS:
   Attach: ssh homelab -t "tmux attach -t {session}"
-  Stop one: "Stop ralph on {alias}"
-  Stop all: "Stop all ralph sessions"
+  Stop one: "Stop ralphus on {alias}"
+  Stop all: "Stop all ralphus sessions"
 ```
 
 **If no sessions running:**
 ```
-RALPH STATUS: No active sessions
+RALPHUS STATUS: No active sessions
 
 Known projects: (from config/project-mappings.json)
   {list aliases and remote paths from config}
 
 To start a new session:
-  "Run ralph on homelab for {alias}"
+  "Run ralphus on homelab for {alias}"
 ```
 </status_report>
 
@@ -568,15 +586,15 @@ To start a new session:
 <progress_gather>
 **First, read state file to get all sessions:**
 ```bash
-ssh homelab "cd ~ && cat ~/.ralph-sessions.json"
+ssh homelab "cd ~ && cat ~/.ralphus-sessions.json"
 ```
 
 **Then, for EACH session in state file with status "running":**
 ```bash
 # Execute in parallel for each session
-ssh homelab "cd ~ && cat {project_path}/scripts/ralph/prd.json 2>/dev/null | jq '.userStories[] | {id, title, passes}' || echo 'NO_PRD'"
-ssh homelab "cd ~ && tail -50 {project_path}/scripts/ralph/progress.txt 2>/dev/null || echo 'NO_PROGRESS'"
-ssh homelab "cd ~ && tmux capture-pane -t {session_name} -p -S -30 2>/dev/null || echo 'SESSION_NOT_RUNNING'"
+ssh homelab "cd ~ && cat {project_path}/IMPLEMENTATION_PLAN.md 2>/dev/null || echo 'NO_PLAN'"
+ssh homelab "cd ~ && tmux capture-pane -t {session_name} -p -S -50 2>/dev/null || echo 'SESSION_NOT_RUNNING'"
+ssh homelab "cd ~ && cd {project_path} && git log --oneline -10 2>/dev/null || echo 'NO_GIT'"
 ```
 
 **If user specified an alias (e.g., "progress on canvas"):**
@@ -591,32 +609,35 @@ ssh homelab "cd ~ && tmux capture-pane -t {session_name} -p -S -30 2>/dev/null |
 **MANDATORY OUTPUT (for each session):**
 
 ```
-RALPH PROGRESS REPORT
-=====================
+RALPHUS PROGRESS REPORT
+=======================
 
-SESSION: ralph-canvas
+SESSION: ralphus-canvas
 Project: ~/Repos/opencode-canvas
+Mode: build | Ultrawork: yes
 Status: RUNNING (iteration 15 of 30)
 Started: 2025-01-10 11:30:00 (2h 15m ago)
 
-STORIES:
-  [✓] US-001: {title} - PASSED
-  [✓] US-002: {title} - PASSED  
-  [ ] US-003: {title} - pending
-  [ ] US-004: {title} - pending
+IMPLEMENTATION PLAN STATUS:
+  {Parse IMPLEMENTATION_PLAN.md for phases and tasks}
+  - Phase 1: [x] Complete
+  - Phase 2: [ ] In progress (3/5 tasks done)
+  - Phase 3: [ ] Pending
 
-Progress: 2/4 stories complete (50%)
+RECENT COMMITS:
+  {last 5 commits from git log}
 
-RECENT ACTIVITY (from progress.txt):
-  {last 10 lines of progress.txt}
+COMPLETION SIGNALS DETECTED:
+  {PHASE_COMPLETE | COMPLETE | BLOCKED:[reason] | none}
 
 CURRENT OUTPUT:
-  {last 20 lines of tmux capture}
+  {last 30 lines of tmux capture}
 
 ---
 
-SESSION: ralph-thoth
+SESSION: ralphus-thoth
 Project: ~/Repos/thoth
+Mode: plan | Ultrawork: no
 Status: RUNNING (iteration 8 of 50)
 ...
 ```
@@ -630,28 +651,28 @@ Status: RUNNING (iteration 8 of 50)
 
 <stop_identify>
 **Parse user request:**
-- "Stop ralph" (no qualifier) → If 1 session, stop it. If multiple, list and ask.
-- "Stop ralph on canvas" → Stop all ralph-canvas* sessions
-- "Stop all ralph" → Stop ALL ralph sessions
-- "Stop ralph-canvas-2" → Stop specific session
+- "Stop ralphus" (no qualifier) → If 1 session, stop it. If multiple, list and ask.
+- "Stop ralphus on canvas" → Stop all ralphus-canvas* sessions
+- "Stop all ralphus" → Stop ALL ralphus sessions
+- "Stop ralphus-canvas-2" → Stop specific session
 
 ```bash
 # Get current sessions
-ssh homelab "cd ~ && cat ~/.ralph-sessions.json | jq -r '.sessions | to_entries[] | select(.value.status == \"running\") | .key'"
-ssh homelab "cd ~ && tmux ls 2>/dev/null | grep ralph"
+ssh homelab "cd ~ && cat ~/.ralphus-sessions.json | jq -r '.sessions | to_entries[] | select(.value.status == \"running\") | .key'"
+ssh homelab "cd ~ && tmux ls 2>/dev/null | grep ralphus"
 ```
 
 **If multiple sessions and no qualifier:**
 ```
-Multiple ralph sessions running:
-  1. ralph-canvas (~/Repos/opencode-canvas) - 2h 15m
-  2. ralph-thoth (~/Repos/thoth) - 2h
-  3. ralph-canvas-2 (~/Repos/opencode-canvas) - 30m
+Multiple ralphus sessions running:
+  1. ralphus-canvas (~/Repos/opencode-canvas) - 2h 15m
+  2. ralphus-thoth (~/Repos/thoth) - 2h
+  3. ralphus-canvas-2 (~/Repos/opencode-canvas) - 30m
 
 Which to stop?
-  - "Stop ralph on canvas" (stops 1 and 3)
-  - "Stop ralph-thoth" (stops 2)
-  - "Stop all ralph" (stops all)
+  - "Stop ralphus on canvas" (stops 1 and 3)
+  - "Stop ralphus-thoth" (stops 2)
+  - "Stop all ralphus" (stops all)
 ```
 </stop_identify>
 
@@ -673,22 +694,22 @@ ssh homelab "cd ~ && tmux has-session -t {session_name} 2>/dev/null && echo 'STI
 ssh homelab "cd ~ && tmux kill-session -t {session_name} 2>/dev/null"
 
 # Update state file
-ssh homelab "cd ~ && cat ~/.ralph-sessions.json | jq '.sessions.\"{session_name}\".status = \"stopped\"' > ~/.ralph-sessions.json.tmp && mv ~/.ralph-sessions.json.tmp ~/.ralph-sessions.json"
+ssh homelab "cd ~ && cat ~/.ralphus-sessions.json | jq '.sessions.\"{session_name}\".status = \"stopped\"' > ~/.ralphus-sessions.json.tmp && mv ~/.ralphus-sessions.json.tmp ~/.ralphus-sessions.json"
 ```
 
 **MANDATORY OUTPUT:**
 
 ```
-RALPH SESSION(S) STOPPED
-========================
+RALPHUS SESSION(S) STOPPED
+==========================
 Stopped: {session_name_1}, {session_name_2}
 Method: graceful
 
-Final progress saved to:
-  {project_path}/scripts/ralph/progress.txt
+Final state in:
+  {project_path}/IMPLEMENTATION_PLAN.md
 
 To view final state:
-  "Ralph progress on {alias}"
+  "Ralphus progress on {alias}"
 ```
 </stop_session>
 
@@ -701,15 +722,15 @@ To view final state:
 <attach_mode>
 **First, list available sessions:**
 ```bash
-ssh homelab "cd ~ && tmux ls 2>/dev/null | grep ralph || echo 'NO_RALPH_SESSIONS'"
+ssh homelab "cd ~ && tmux ls 2>/dev/null | grep ralphus || echo 'NO_RALPHUS_SESSIONS'"
 ```
 
 **If multiple sessions:**
 ```
-AVAILABLE RALPH SESSIONS
-========================
-1. ralph-canvas - ~/Repos/opencode-canvas
-2. ralph-thoth - ~/Repos/thoth
+AVAILABLE RALPHUS SESSIONS
+==========================
+1. ralphus-canvas - ~/Repos/opencode-canvas
+2. ralphus-thoth - ~/Repos/thoth
 
 Which session to attach to?
 ```
@@ -717,8 +738,8 @@ Which session to attach to?
 **For interactive attach, the user must run this themselves:**
 
 ```
-ATTACH TO RALPH SESSION
-=======================
+ATTACH TO RALPHUS SESSION
+=========================
 Session: {session_name}
 Project: {project_path}
 
@@ -728,7 +749,7 @@ Run this command in your terminal:
 Controls:
   Ctrl+B, D     - Detach (session keeps running)
   Ctrl+B, [     - Scroll mode (q to exit)
-  Ctrl+C        - Stop ralph (careful!)
+  Ctrl+C        - Stop ralphus (careful!)
 
 Alternative - peek without attaching:
   ssh homelab "tmux capture-pane -t {session_name} -p -S -100"
@@ -745,19 +766,19 @@ Alternative - peek without attaching:
 
 <list_aliases>
 ```bash
-ssh homelab "cd ~ && cat ~/.ralph-sessions.json | jq -r '.aliases | to_entries[] | \"\(.key)\t→ \(.value)\"'"
+ssh homelab "cd ~ && cat ~/.ralphus-sessions.json | jq -r '.aliases | to_entries[] | \"\(.key)\t→ \(.value)\"'"
 ```
 
 **MANDATORY OUTPUT:**
 
 ```
-RALPH PROJECT ALIASES
-=====================
+RALPHUS PROJECT ALIASES
+=======================
 {list from config/project-mappings.json - show alias → remote path}
 
 To add a new alias:
   1. Edit config/project-mappings.json (local skill config)
-  2. Update ~/.ralph-sessions.json on homelab to match
+  2. Update ~/.ralphus-sessions.json on homelab to match
 ```
 </list_aliases>
 
@@ -767,25 +788,26 @@ To add a new alias:
 
 | Problem | Diagnosis | Solution |
 |---------|-----------|----------|
-| "session not found" | Session ended | Check `progress.txt` for final state |
+| "session not found" | Session ended | Check `IMPLEMENTATION_PLAN.md` for final state |
 | "no server running" | tmux not started | Start any tmux session first |
 | "connection refused" | SSH issue | Verify `ssh homelab` works |
 | "opencode not found" | Not installed | Install opencode on homelab |
 | "Sisyphus not found" | oh-my-opencode missing | Install plugin or use `RALPH_AGENT=build` |
-| Ralph stuck | Context exhaustion | Check iteration count, may need restart |
+| Ralphus stuck | Context exhaustion | Check iteration count, may need restart |
 | State file missing | First run | Initialize with PHASE 0 command |
 | State/tmux mismatch | Crash or manual kill | Sync state in PHASE 0 |
+| BLOCKED signal | Ralphus hit a blocker | Check output for `<promise>BLOCKED:` reason |
 
 **Recovery commands:**
 ```bash
 # Check what happened
-ssh homelab "cd ~ && cat {project}/scripts/ralph/progress.txt | tail -50"
+ssh homelab "cd ~ && cat {project}/IMPLEMENTATION_PLAN.md"
 
 # Check git state
 ssh homelab "cd ~ && cd {project} && git status && git log --oneline -5"
 
 # Re-initialize state file (use values from config/project-mappings.json)
-ssh homelab 'cd ~ && cat > ~/.ralph-sessions.json << '\''EOF'\''
+ssh homelab 'cd ~ && cat > ~/.ralphus-sessions.json << '\''EOF'\''
 {
   "aliases": { ... },
   "project_mappings": { ... },
@@ -794,7 +816,7 @@ ssh homelab 'cd ~ && cat > ~/.ralph-sessions.json << '\''EOF'\''
 EOF'
 
 # Restart from where it left off
-ssh homelab "cd ~ && tmux new-session -d -s ralph-{project} -c {project} 'export PATH=~/.opencode/bin:\$PATH && ./scripts/ralph/ralph.sh 20'"
+ssh homelab "cd ~ && tmux new-session -d -s ralphus-{alias} -c {project} 'export PATH=~/.opencode/bin:\$PATH && ./loop.sh 20'"
 ```
 
 ---
@@ -805,10 +827,11 @@ ssh homelab "cd ~ && tmux new-session -d -s ralph-{project} -c {project} 'export
 |---------|------------|
 | Guessing local/remote paths | Always use PROJECT MAPPINGS table |
 | Running git commands without checking status | Always `git status --porcelain` first |
-| Using generic commit messages | Use `[ralph] sync before remote run` convention |
+| Using generic commit messages | Use `[ralphus] sync before remote run` convention |
 | Forgetting prism has different paths | Check config - local ≠ remote for prism |
 | Pushing without verifying | Check exit code and `git log origin/HEAD` |
 | Skipping PHASE L0 when "push" keyword present | Always detect push/sync keywords |
+| Not specifying mode | Default is build; ask if user wants plan mode |
 
 ---
 
@@ -836,6 +859,7 @@ ssh homelab "cd ~ && tmux new-session -d -s ralph-{project} -c {project} 'export
 8. **NEVER assume single session** - Always check for multiple
 9. **NEVER skip PHASE L0 when push keyword detected** - Local sync is mandatory
 10. **NEVER hardcode paths** - Always use PROJECT MAPPINGS
+11. **NEVER ignore completion signals** - Check for COMPLETE, BLOCKED, PHASE_COMPLETE in output
 
 ---
 
@@ -846,7 +870,7 @@ ssh homelab "cd ~ && tmux new-session -d -s ralph-{project} -c {project} 'export
 | Goal | Command |
 |------|---------|
 | Check local status | `cd {local_path} && git status --porcelain` |
-| Auto-commit | `cd {local_path} && git add -A && git commit -m "[ralph] sync before remote run"` |
+| Auto-commit | `cd {local_path} && git add -A && git commit -m "[ralphus] sync before remote run"` |
 | Push to origin | `cd {local_path} && git push origin HEAD` |
 | Verify push | `cd {local_path} && git log origin/HEAD -1 --oneline` |
 
@@ -856,20 +880,20 @@ ssh homelab "cd ~ && tmux new-session -d -s ralph-{project} -c {project} 'export
 
 | Goal | Command |
 |------|---------|
-| Init state file | `ssh homelab 'cd ~ && cat > ~/.ralph-sessions.json << ...` (see STATE FILE COMMANDS) |
-| Read state | `ssh homelab "cd ~ && cat ~/.ralph-sessions.json"` |
-| Resolve alias | `ssh homelab "cd ~ && cat ~/.ralph-sessions.json \| jq -r '.aliases.canvas'"` |
+| Init state file | `ssh homelab 'cd ~ && cat > ~/.ralphus-sessions.json << ...` (see STATE FILE COMMANDS) |
+| Read state | `ssh homelab "cd ~ && cat ~/.ralphus-sessions.json"` |
+| Resolve alias | `ssh homelab "cd ~ && cat ~/.ralphus-sessions.json \| jq -r '.aliases.canvas'"` |
 | Check remote changes | `ssh homelab "cd ~ && cd {path} && git status --porcelain"` |
 | Git pull | `ssh homelab "cd ~ && cd {path} && git pull --ff-only"` |
-| Start ralph | `ssh homelab "cd ~ && tmux new-session -d -s {sess} -c {path} 'export PATH=~/.opencode/bin:\$PATH && RALPH_AGENT=Sisyphus ./scripts/ralph/ralph.sh {n}'"` |
-| Check running | `ssh homelab "cd ~ && tmux ls \| grep ralph"` |
+| Start ralphus | `ssh homelab "cd ~ && tmux new-session -d -s {sess} -c {path} 'export PATH=~/.opencode/bin:\$PATH && RALPH_AGENT=Sisyphus ./loop.sh {mode} {ultrawork} {n}'"` |
+| Check running | `ssh homelab "cd ~ && tmux ls \| grep ralphus"` |
 | Peek output | `ssh homelab "cd ~ && tmux capture-pane -t {sess} -p -S -50"` |
 | Attach (user runs) | `ssh homelab -t "tmux attach -t {sess}"` |
 | Stop graceful | `ssh homelab "cd ~ && tmux send-keys -t {sess} C-c"` |
 | Stop force | `ssh homelab "cd ~ && tmux kill-session -t {sess}"` |
-| Update state | `ssh homelab "cd ~ && cat ~/.ralph-sessions.json \| jq '...' > ~/.ralph-sessions.json.tmp && mv ~/.ralph-sessions.json.tmp ~/.ralph-sessions.json"` |
-| Check progress | `ssh homelab "cd ~ && cat {path}/scripts/ralph/prd.json \| jq '.userStories[]'"` |
-| View log | `ssh homelab "cd ~ && tail -50 {path}/scripts/ralph/progress.txt"` |
+| Update state | `ssh homelab "cd ~ && cat ~/.ralphus-sessions.json \| jq '...' > ~/.ralphus-sessions.json.tmp && mv ~/.ralphus-sessions.json.tmp ~/.ralphus-sessions.json"` |
+| Check progress | `ssh homelab "cd ~ && cat {path}/IMPLEMENTATION_PLAN.md"` |
+| View git log | `ssh homelab "cd ~ && cd {path} && git log --oneline -10"` |
 
 ---
 
@@ -883,7 +907,8 @@ Before reporting task complete:
 - [ ] Uncommitted changes handled (committed or user chose to skip)
 - [ ] Git push succeeded (if push mode)
 - [ ] Remote git pull succeeded
-- [ ] Ralph scripts exist at remote path
+- [ ] Ralphus files exist at remote path (loop.sh, PROMPT_*.md)
 - [ ] Session started and verified
 - [ ] State file updated
 - [ ] Session ID reported to user
+- [ ] Mode (plan/build) and ultrawork status reported

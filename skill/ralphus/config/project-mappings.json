@@ -8,24 +8,24 @@
       "local": "/Users/davidhelmus/Repos/opencode-canvas",
       "remote": "~/Repos/opencode-canvas"
     },
-    "ralph": {
-      "local": "/Users/davidhelmus/Repos/ralph-opencode",
-      "remote": "~/Repos/ralph-opencode"
-    },
     "thoth": {
       "local": "/Users/davidhelmus/Repos/thoth",
       "remote": "~/Repos/thoth"
+    },
+    "murmeln": {
+      "local": "/Users/davidhelmus/Repos/Murmeln",
+      "remote": "~/Repos/Murmeln"
     }
   },
   "defaults": {
     "iterations": 20,
     "agent": "Sisyphus",
-    "commit_message": "[ralph] sync before remote run"
+    "commit_message": "[ralphus] sync before remote run"
   },
   "homelab": {
     "ssh_alias": "homelab",
     "opencode_path": "~/.opencode/bin/opencode",
     "projects_root": "~/Repos",
-    "state_file": "~/.ralph-sessions.json"
+    "state_file": "~/.ralphus-sessions.json"
   }
 }
