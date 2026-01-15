@@ -86,25 +86,30 @@ The non-obvious things that only experience reveals.
 ## Phase 6: Follow-ups (Discovered During Exploration)
 
 <!-- Questions added during discovery iterations -->
+<!-- These are processed FIRST (depth-first exploration) -->
+<!-- Each discovery should add 1-2 follow-ups here -->
 
 ---
 
 ## Discoveries Log
 
 <!-- Each discovery iteration adds an entry here -->
+<!-- Track follow-up count to detect exhaustion (3 consecutive 0s = exhausted) -->
 
-| # | Question | Discovery File | Status |
-|---|----------|----------------|--------|
-| 1 | | | |
+| # | Question | Discovery File | Follow-ups | Status |
+|---|----------|----------------|------------|--------|
+| 1 | | | | |
 
 ---
 
 ## Exhaustion Criteria
 
 The discovery loop completes when:
-1. All seed questions answered
-2. No new follow-up questions generated for 3 consecutive iterations
-3. OR manual `<promise>COMPLETE</promise>` signal
+1. **Primary**: 3 consecutive discoveries generate 0 follow-up questions (codebase exhausted)
+2. **Secondary**: All questions answered AND no pending follow-ups
+3. **Manual**: `<promise>COMPLETE</promise>` signal
+
+**How to detect**: Check the "Follow-ups" column in Discoveries Log. If the last 3 entries are all "0", the codebase is exhausted.
 
 ## Output Artifacts
 

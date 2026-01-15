@@ -29,10 +29,14 @@
 
 ## Follow-up Questions
 
-<!-- 0-2 new questions discovered while answering this one -->
+<!-- CRITICAL: Generate 1-2 follow-ups per discovery -->
+<!-- Only 0 if you genuinely found nothing new to explore -->
+<!-- These get added to DISCOVERY_PLAN.md Phase 6: Follow-ups -->
 
-- [ ] [New question discovered]
-- [ ] [Another question if applicable]
+Ask yourself: "What new questions emerged while investigating this?"
+
+- [ ] [New question that digs deeper into something surprising]
+- [ ] [Question exploring connections to other parts of codebase]
 
 ## Related Discoveries
 
