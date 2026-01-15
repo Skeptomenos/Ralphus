@@ -75,22 +75,52 @@ variants/ralphus-{name}/
 
 ---
 
+## Prerequisites
+
+- [OpenCode](https://github.com/opencode-ai/opencode) installed
+- Sisyphus agent configured (or set `RALPH_AGENT` to your preferred agent)
+- Git repository initialized in your project
+
 ## Quick Start
 
-### Using a Variant
+### 1. Copy a Variant to Your Project
 
 ```bash
-# Copy variant to your project
-cp -r path/to/ralphus/variants/ralphus-code ./ralphus/ralphus-code
+# Clone ralphus (or add as submodule)
+git clone https://github.com/Skeptomenos/Ralphus.git ~/ralphus
 
-# Create specs directory
+# Copy the variant you need
+mkdir -p ./ralphus
+cp -r ~/ralphus/variants/ralphus-code ./ralphus/ralphus-code
+```
+
+### 2. Create Required Directories
+
+Each variant expects a specific directory:
+
+| Variant | Required Directory | Contents |
+|---------|-------------------|----------|
+| `ralphus-code` | `specs/` | Feature specifications (`*.md`) |
+| `ralphus-test` | `test-specs/` | Test specifications (`*.md`) |
+| `ralphus-research` | `questions/` | Research questions (`*.md`) |
+
+```bash
+# For ralphus-code
 mkdir -p specs
-echo "# Feature Spec" > specs/my-feature.md
+echo "# My Feature Spec" > specs/my-feature.md
 
-# Run planning phase
+# For ralphus-test
+mkdir -p test-specs
+echo "# Test Spec" > test-specs/tests.md
+```
+
+### 3. Run the Loop
+
+```bash
+# Planning phase (generates tracking file)
 ./ralphus/ralphus-code/scripts/loop.sh plan
 
-# Run build phase
+# Build phase (executes tasks)
 ./ralphus/ralphus-code/scripts/loop.sh
 ```
 
