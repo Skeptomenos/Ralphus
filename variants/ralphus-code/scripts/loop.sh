@@ -48,6 +48,13 @@ if [ ! -f "$PROMPT_FILE" ]; then
     exit 1
 fi
 
+# Verify specs/ directory exists
+if [ ! -d "specs" ]; then
+    echo "Error: specs/ directory not found."
+    echo "Create specs/*.md files with your specifications first."
+    exit 1
+fi
+
 # Build mode requires IMPLEMENTATION_PLAN.md
 if [ "$MODE" = "build" ] && [ ! -f "IMPLEMENTATION_PLAN.md" ]; then
     echo "Error: IMPLEMENTATION_PLAN.md not found."
@@ -100,6 +107,9 @@ while true; do
     OUTPUT=$("$OPENCODE" run --agent "$AGENT" -f "$PROMPT_FILE" -- "$MESSAGE" 2>&1 | tee /dev/stderr) || true
 
     # Check completion signals
+    if echo "$OUTPUT" | grep -q "<promise>PLAN_COMPLETE</promise>"; then
+        echo "=== PLANNING COMPLETE ===" && exit 0
+    fi
     if echo "$OUTPUT" | grep -q "<promise>PHASE_COMPLETE</promise>"; then
         echo "=== PHASE COMPLETE - next iteration ==="
     fi

@@ -22,14 +22,101 @@ Then came **Sisyphus** — the OpenCode agent cursed to roll context windows uph
 
 *One must imagine Sisyphus shipping features.*
 
-**Ralphus** is their offspring. A playbook for autonomous development that combines:
-- Ralph's "just keep looping" philosophy
-- Sisyphus's "I will not stop until the tests pass" determination
-- The shared delusion that eventually, the code will be complete
+**Ralphus** is their offspring. A meta-framework for autonomous development loops.
 
 ---
 
-## How It Works
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        VARIANTS                             │
+│         (What to do - prompts, templates, loop)             │
+├─────────────────┬─────────────────┬─────────────────────────┤
+│  ralphus-code   │  ralphus-test   │  ralphus-research       │
+│  (features)     │  (tests)        │  (research)             │
+└────────┬────────┴────────┬────────┴────────┬────────────────┘
+         │                 │                 │
+         └────────────┬────┴────────┬────────┘
+                      │             │
+         ┌────────────▼─────────────▼────────────┐
+         │              SKILLS                   │
+         │      (Where to run - execution)       │
+         ├───────────────────┬───────────────────┤
+         │   ralphus-local   │  ralphus-remote   │
+         │   (tmux here)     │  (SSH to homelab) │
+         └───────────────────┴───────────────────┘
+```
+
+**Variants** define *what* to do — the prompts, templates, and loop logic.
+**Skills** define *where* to run — local tmux or remote homelab via SSH.
+
+---
+
+## Variants
+
+| Variant | Purpose | Spec Directory | Tracking |
+|---------|---------|----------------|----------|
+| `ralphus-code` | Implement features from specs | `specs/` | `IMPLEMENTATION_PLAN.md` |
+| `ralphus-test` | Create tests from test specs | `test-specs/` | Test spec checkboxes |
+| `ralphus-research` | Deep research on topics | `questions/` | `RESEARCH_PLAN.md` |
+
+Each variant contains:
+```
+variants/ralphus-{name}/
+├── README.md           # Variant-specific docs
+├── scripts/
+│   └── loop.sh         # The eternal loop
+├── instructions/
+│   ├── PROMPT_plan.md  # Planning phase
+│   └── PROMPT_build.md # Execution phase
+└── templates/          # Format references
+```
+
+---
+
+## Quick Start
+
+### Using a Variant
+
+```bash
+# Copy variant to your project
+cp -r path/to/ralphus/variants/ralphus-code ./ralphus/ralphus-code
+
+# Create specs directory
+mkdir -p specs
+echo "# Feature Spec" > specs/my-feature.md
+
+# Run planning phase
+./ralphus/ralphus-code/scripts/loop.sh plan
+
+# Run build phase
+./ralphus/ralphus-code/scripts/loop.sh
+```
+
+### Variant-Specific Usage
+
+**ralphus-code** (feature implementation):
+```bash
+./ralphus/ralphus-code/scripts/loop.sh plan    # Generate IMPLEMENTATION_PLAN.md
+./ralphus/ralphus-code/scripts/loop.sh         # Build features
+```
+
+**ralphus-test** (test creation):
+```bash
+./ralphus/ralphus-test/scripts/loop.sh plan    # Prepare test spec with checkboxes
+./ralphus/ralphus-test/scripts/loop.sh         # Create tests one by one
+```
+
+**ralphus-research** (deep research):
+```bash
+./ralphus/ralphus-research/scripts/loop.sh plan   # Create research plan
+./ralphus/ralphus-research/scripts/loop.sh        # Execute research
+```
+
+---
+
+## The Ralphus Cycle
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -55,13 +142,61 @@ Then came **Sisyphus** — the OpenCode agent cursed to roll context windows uph
 
 Each iteration:
 1. **Sisyphus wakes up** with no memory of previous iterations
-2. **Reads the plan** (IMPLEMENTATION_PLAN.md) to figure out what's happening
-3. **Picks the most important task** (like Ralph picking his nose, but productive)
-4. **Implements it** using parallel subagents (Sisyphus delegates, he's learned)
-5. **Runs tests** (backpressure — the boulder fights back)
-6. **Commits** (the boulder reaches the top!)
-7. **Context clears** (the boulder rolls back down)
-8. **Repeat** (one must imagine Sisyphus happy)
+2. **Reads the plan** to figure out what's happening
+3. **Picks the next task** from the tracking file
+4. **Implements it** using parallel subagents
+5. **Runs tests** (backpressure)
+6. **Commits** and marks complete
+7. **Context clears** — loop repeats
+
+---
+
+## Skills (Execution Modes)
+
+Skills define *where* Ralphus runs. They invoke variants.
+
+### ralphus-local
+
+Run any variant locally in tmux:
+```bash
+"Run ralphus-test locally for account-management"
+```
+
+### ralphus-remote
+
+Run any variant on homelab via SSH:
+```bash
+"Run ralphus-code on homelab for canvas"
+"How is ralphus doing?"
+"Stop ralphus"
+```
+
+---
+
+## Repository Structure
+
+```
+ralphus/
+├── README.md
+├── AGENTS.md                    # Template for target projects
+├── CHANGELOG.md
+│
+├── docs/                        # Documentation
+│   ├── ULTRAWORK.md             # Ultrawork philosophy
+│   ├── LOOP_VARIANTS.md         # Variant concept paper
+│   └── references/              # Research materials
+│
+├── variants/                    # Loop variants (WHAT to do)
+│   ├── ralphus-code/            # Feature implementation
+│   ├── ralphus-test/            # Test creation
+│   └── ralphus-research/        # Deep research
+│
+└── skills/                      # Execution modes (WHERE to run)
+    ├── ralphus-local/           # Local tmux execution
+    └── ralphus-remote/          # Homelab SSH execution
+        └── config/
+            └── project-mappings.json
+```
 
 ---
 
@@ -69,108 +204,32 @@ Each iteration:
 
 ### "Let Ralphus Ralphus"
 
-Don't micromanage. The loop is self-correcting. If Ralphus goes in circles, that's just him warming up. Eventually, through sheer persistence and the heat death of your API budget, features will emerge.
+Don't micromanage. The loop is self-correcting. If Ralphus goes in circles, that's just him warming up.
 
 ### "The Plan is Disposable"
 
-Wrong plan? Delete it. Regenerate. The cost of one planning loop is nothing compared to Ralphus implementing the wrong thing 47 times.
-
-> *"My cat's breath smells like cat food."* — Ralph, on technical debt
+Wrong plan? Delete it. Regenerate. The cost of one planning loop is nothing compared to implementing the wrong thing 47 times.
 
 ### "Context is Precious"
 
-200K tokens sounds like a lot until Ralphus loads your entire codebase and forgets why he's there. Keep tasks small. Keep specs focused. Keep Sisyphus in the "smart zone" (40-60% context utilization).
+200K tokens sounds like a lot until Ralphus loads your entire codebase and forgets why he's there. Keep tasks small. Keep specs focused.
 
 ### "Backpressure is Love"
 
-Tests that fail are not obstacles. They are Sisyphus's boulder. They give his existence meaning. Without failing tests, what would he push against?
+Tests that fail are not obstacles. They are Sisyphus's boulder. They give his existence meaning.
 
 ---
 
-## Quick Start
+## Completion Signals
 
-### Prerequisites
-
-- [OpenCode](https://opencode.ai) with Sisyphus agent installed
-- A project with specs in `specs/*.md`
-- The will to let go and trust the loop
-
-### Installation
-
-```bash
-# Clone Ralphus
-git clone https://github.com/Skeptomenos/Ralphus.git
-cd your-project
-
-# Copy the essentials from the skill folder
-cp ~/Repos/ralphus/skill/ralphus/scripts/loop.sh .
-cp ~/Repos/ralphus/skill/ralphus/instructions/PROMPT_plan.md .
-cp ~/Repos/ralphus/skill/ralphus/instructions/PROMPT_build.md .
-
-# Make it executable
-chmod +x loop.sh
-```
-
-### Install the Skill (for remote homelab execution)
-
-```bash
-# Copy skill to OpenCode config
-cp -r ~/Repos/ralphus/skill/ralphus ~/.config/opencode/skill/ralphus
-```
-
-### Running Ralphus
-
-```bash
-# Phase 1: Let Ralphus understand what needs to be built
-./loop.sh plan
-
-# Phase 2: Let Ralphus build it
-./loop.sh
-
-# Phase 3: Go touch grass. Ralphus has this.
-```
-
-### Stopping Ralphus
-
-```bash
-# Gentle (Ctrl+C)
-# Ralphus will finish current task and stop
-
-# Nuclear
-pkill -f opencode
-git reset --hard  # Undo whatever chaos occurred
-```
-
----
-
-## The Loop
-
-### Minimal Form (The OG Ralph)
-
-```bash
-while :; do cat PROMPT.md | opencode run --agent Sisyphus; done
-```
-
-### Enhanced Form (Ralphus)
-
-```bash
-./loop.sh              # Build mode, unlimited iterations
-./loop.sh 20           # Build mode, max 20 iterations  
-./loop.sh plan         # Planning mode
-./loop.sh plan 5       # Planning mode, max 5 iterations
-./loop.sh ultrawork    # Ultrawork mode (aggressive parallel agents)
-./loop.sh ulw 10       # Ultrawork mode, max 10 iterations
-```
-
-**Ultrawork mode** appends "ulw" to the agent message, triggering Sisyphus's aggressive parallelism: multiple background explore agents, 5+ simultaneous tool calls, and proactive context cleanup.
-
-### Completion Detection
-
-Ralphus knows when to stop (unlike his namesakes):
+Ralphus knows when to stop:
 
 ```markdown
-When ALL tasks are complete, output:
+When ALL tasks are complete:
 <promise>COMPLETE</promise>
+
+When one phase/task is done (loop continues):
+<promise>PHASE_COMPLETE</promise>
 
 When stuck and need human help:
 <promise>BLOCKED:[task]:[reason]</promise>
@@ -178,123 +237,12 @@ When stuck and need human help:
 
 ---
 
-## File Structure
-
-### Your Project (after setup)
-```
-your-project/
-├── loop.sh                    # The eternal loop
-├── PROMPT_plan.md             # "Figure out what to build"
-├── PROMPT_build.md            # "Build the thing"
-├── AGENTS.md                  # Project-specific (yours, not copied)
-├── IMPLEMENTATION_PLAN.md     # The boulder (generated by Ralphus)
-├── specs/                     # What success looks like
-│   ├── auth.md
-│   └── dashboard.md
-└── src/                       # Where the code goes
-```
-
-### Ralphus Repository
-```
-ralphus/
-└── skill/
-    └── ralphus/
-        ├── SKILL.md               # Homelab remote execution skill
-        ├── config/
-        │   ├── oh-my-opencode.json
-        │   └── project-mappings.json
-        ├── instructions/
-        │   ├── PROMPT_build.md
-        │   └── PROMPT_plan.md
-        ├── scripts/
-        │   └── loop.sh
-        └── templates/
-            └── IMPLEMENTATION_PLAN.md
-```
-
----
-
-## Remote Execution (Homelab)
-
-Ralphus can run on a remote server while you sleep. Because Sisyphus never sleeps.
-
-```bash
-# Push local changes and spawn Ralphus on homelab
-"Push and run ralphus for canvas"
-
-# Check on him
-"How is ralphus doing?"
-
-# He's been at it for 6 hours, give him a break
-"Stop ralphus"
-```
-
-Use the `/ralphus` skill for full remote orchestration (triggers: "run ralphus on homelab", "ralphus progress", "stop ralphus").
-
----
-
-## Troubleshooting
-
-| Symptom | Diagnosis | Treatment |
-|---------|-----------|-----------|
-| Ralphus implementing same thing twice | "Don't assume not implemented" guardrail missing | Add to prompt |
-| Ralphus in infinite loop | Tests always failing | Fix the tests, not Ralphus |
-| Ralphus went silent | Context exhaustion | Reduce task size |
-| Ralphus committed crimes against architecture | Plan was wrong | Delete plan, re-run planning |
-| Ralphus ate paste | That's just Ralph | Let him cook |
-
----
-
-## The Guardrails
-
-Ralphus uses numbered guardrails to ensure critical rules are never forgotten:
-
-```markdown
-99999. Capture the why in documentation
-999999. Single sources of truth, no adapters
-9999999. Tag releases when tests pass
-99999999. Keep IMPLEMENTATION_PLAN.md current
-999999999. Update AGENTS.md with operational learnings
-9999999999. Resolve or document bugs, even unrelated ones
-99999999999. No placeholders. No stubs. Complete implementations only.
-```
-
-The higher the number, the more important. It's like Ralph counting — he might not get far, but he remembers the big ones.
-
----
-
 ## Credits & Lineage
 
-This project stands on the shoulders of giants (and one paste-eating child):
-
-- **Geoffrey Huntley** ([@GeoffreyHuntley](https://x.com/GeoffreyHuntley)) — The mad genius who realized a dumb loop could replace a dev team. Created the original [Ralph methodology](https://ghuntley.com/ralph/).
-- **Clayton Farr** ([@ClaytonFarr](https://github.com/ClaytonFarr)) — Who systematized Ralph into the excellent [ralph-playbook](https://github.com/ClaytonFarr/ralph-playbook) that this project is forked from.
-- **Sisyphus** — The OpenCode agent who rolls the boulder so you don't have to.
-- **Ralph Wiggum** — For teaching us that persistence beats intelligence.
-
-### What's Different Here?
-
-Ralphus adapts the ralph-playbook for **OpenCode** (instead of Claude Code) and adds:
-
-- **Sisyphus integration** — OpenCode's agent system with oh-my-opencode
-- **Completion signals** — `<promise>COMPLETE</promise>` for clean loop termination
-- **Homelab remote execution** — Run Ralphus on a server via SSH/tmux
-- **Archive mechanism** — Preserve state when switching branches
-- **Error recovery** — Blocked task detection and documentation
-
-See [PLAN.md](PLAN.md) for the full adaptation roadmap.
-
----
-
-## Philosophy Corner
-
-> *"The struggle itself toward the heights is enough to fill a man's heart."*
-> — Albert Camus, The Myth of Sisyphus
-
-> *"Me fail English? That's unpossible!"*
-> — Ralph Wiggum, on debugging
-
-Both are valid approaches to software development.
+- **Geoffrey Huntley** ([@GeoffreyHuntley](https://x.com/GeoffreyHuntley)) — Created the original [Ralph methodology](https://ghuntley.com/ralph/)
+- **Clayton Farr** ([@ClaytonFarr](https://github.com/ClaytonFarr)) — Systematized Ralph into [ralph-playbook](https://github.com/ClaytonFarr/ralph-playbook)
+- **Sisyphus** — The OpenCode agent who rolls the boulder so you don't have to
+- **Ralph Wiggum** — For teaching us that persistence beats intelligence
 
 ---
 
