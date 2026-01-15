@@ -29,16 +29,16 @@ Then came **Sisyphus** — the OpenCode agent cursed to roll context windows uph
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                        VARIANTS                             │
-│         (What to do - prompts, templates, loop)             │
-├─────────────────┬─────────────────┬─────────────────────────┤
-│  ralphus-code   │  ralphus-test   │  ralphus-research       │
-│  (features)     │  (tests)        │  (research)             │
-└────────┬────────┴────────┬────────┴────────┬────────────────┘
-         │                 │                 │
-         └────────────┬────┴────────┬────────┘
-                      │             │
+┌─────────────────────────────────────────────────────────────────────────┐
+│                              VARIANTS                                   │
+│             (What to do - prompts, templates, loop)                     │
+├──────────────────┬──────────────────┬──────────────────┬────────────────┤
+│  ralphus-code    │  ralphus-test    │ ralphus-research │ ralphus-discover│
+│  (features)      │  (tests)         │ (learning)       │ (onboarding)   │
+└────────┬─────────┴────────┬─────────┴────────┬─────────┴────────┬───────┘
+         │                 │                 │                 │
+         └────────────┬────┴────────┬────────┴────────┬────────┘
+                      │             │                 │
          ┌────────────▼─────────────▼────────────┐
          │              SKILLS                   │
          │      (Where to run - execution)       │
@@ -60,6 +60,7 @@ Then came **Sisyphus** — the OpenCode agent cursed to roll context windows uph
 | `ralphus-code` | Implement features from specs | `specs/` | `IMPLEMENTATION_PLAN.md` |
 | `ralphus-test` | Create tests from test specs | `test-specs/` | Test spec checkboxes |
 | `ralphus-research` | Deep research on topics | `questions/` | `RESEARCH_PLAN.md` |
+| `ralphus-discover` | Understand a codebase | (none) | `DISCOVERY_PLAN.md` |
 
 Each variant contains:
 ```
@@ -103,6 +104,7 @@ Each variant expects a specific directory:
 | `ralphus-code` | `specs/` | Feature specifications (`*.md`) |
 | `ralphus-test` | `test-specs/` | Test specifications (`*.md`) |
 | `ralphus-research` | `questions/` | Research questions (`*.md`) |
+| `ralphus-discover` | (none) | Just run it on any codebase |
 
 ```bash
 # For ralphus-code
@@ -142,6 +144,12 @@ echo "# Test Spec" > test-specs/tests.md
 ```bash
 ./ralphus/ralphus-research/scripts/loop.sh plan   # Create research plan
 ./ralphus/ralphus-research/scripts/loop.sh        # Execute research
+```
+
+**ralphus-discover** (codebase understanding):
+```bash
+./ralphus/ralphus-discover/scripts/loop.sh plan   # Generate discovery plan
+./ralphus/ralphus-discover/scripts/loop.sh        # Discover codebase patterns
 ```
 
 ---
@@ -219,7 +227,8 @@ ralphus/
 ├── variants/                    # Loop variants (WHAT to do)
 │   ├── ralphus-code/            # Feature implementation
 │   ├── ralphus-test/            # Test creation
-│   └── ralphus-research/        # Deep research
+│   ├── ralphus-research/        # Deep research
+│   └── ralphus-discover/        # Codebase understanding
 │
 └── skills/                      # Execution modes (WHERE to run)
     ├── ralphus-local/           # Local tmux execution
