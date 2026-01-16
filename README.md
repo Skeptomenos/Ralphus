@@ -89,12 +89,20 @@ The recommended way to use Ralphus is with **central execution** — one install
 ### 1. Install Ralphus
 
 ```bash
-# Clone to your home directory
+# Clone the repo (default location)
 git clone https://github.com/Skeptomenos/Ralphus.git ~/ralphus
 
 # Install the wrapper command
-cp ~/ralphus/scripts/ralphus ~/.local/bin/
+cp ~/ralphus/bin/ralphus ~/.local/bin/
 chmod +x ~/.local/bin/ralphus
+
+# Verify installation
+ralphus help
+```
+
+**Custom location?** If you clone elsewhere (e.g., `~/Repos/ralphus`), add to your `~/.zshrc`:
+```bash
+export RALPHUS_HOME="$HOME/Repos/ralphus"
 ```
 
 ### 2. Use From Any Project
