@@ -58,7 +58,7 @@ Then came **Sisyphus** — the OpenCode agent cursed to roll context windows uph
 | Variant | Purpose | Spec Directory | Tracking |
 |---------|---------|----------------|----------|
 | `ralphus-code` | Implement features from specs | `specs/` | `IMPLEMENTATION_PLAN.md` |
-| `ralphus-test` | Create tests from test specs | `test-specs/` | Test spec checkboxes |
+| `ralphus-test` | Create tests from test specs | `test-specs/` | `TEST_PLAN.md` |
 | `ralphus-research` | Deep research on topics | `questions/` | `RESEARCH_PLAN.md` |
 | `ralphus-discover` | Understand a codebase | (none) | `DISCOVERY_PLAN.md` |
 

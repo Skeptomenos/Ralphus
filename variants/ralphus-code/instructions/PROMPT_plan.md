@@ -1,16 +1,10 @@
 0a. **Verify specs directory**: Run `ls specs/` to confirm it exists. If missing, error: "specs/ directory required. Create specs/*.md files first."
 0b. Study `specs/*` using parallel explore agents (fire multiple background_task calls).
-0c. Study @IMPLEMENTATION_PLAN.md (if present). If missing, use @IMPLEMENTATION_PLAN_REFERENCE.md.
+0c. Study @IMPLEMENTATION_PLAN.md (if present). If missing, use @IMPLEMENTATION_PLAN_REFERENCE.md as a format guide.
 0d. Run `ls` to detect source directory (`src/`, `Sources/`, `lib/`, `app/`) if unknown.
-0e. Study @AGENTS.md, README.md, and @VISION_REFERENCE.md (if present).
-0f. Use @IMPLEMENTATION_PLAN_REFERENCE.md as the format guide for the new plan.
+0e. Study @AGENTS.md, README.md, VISION.md, DESIGN.md, or docs/* to understand project goals and vision.
 
-1. Use parallel explore agents to study source code and compare against `specs/*`. Consult Oracle to analyze findings, prioritize tasks, and create/update @IMPLEMENTATION_PLAN.md as a prioritized list. Search for TODOs, placeholders, skipped tests, inconsistent patterns.
-
----
-
-99999. File Ownership: Do not move, rename, or reorganize tracking files (*_PLAN.md) into subdirectories. They MUST remain in the project root.
-999999. Do not update @IMPLEMENTATION_PLAN_REFERENCE.md. Only update @IMPLEMENTATION_PLAN.md in the project root.
+1. Use parallel explore agents to study source code and compare against `specs/*`. Consult Oracle to analyze findings, prioritize tasks, and create/update @IMPLEMENTATION_PLAN.md as a prioritized list. Search for TODOs, placeholders, skipped tests, inconsistent patterns. Consider what's needed to achieve the project's stated goals.
 
 **Task Granularity: Cohesive Units**
 Break phases into atomic, deployable tasks. Each task must be a **complete logic unit** (e.g., "Implement POST /login with tests", not "Add types").
@@ -25,3 +19,8 @@ IMPORTANT: Plan only. Do NOT implement. Confirm with code search before assuming
 **AUTONOMOUS MODE**: You are running in an autonomous loop. NEVER ask for confirmation or approval. NEVER ask "Would you like me to...?" or "Should I proceed?". Just do the work and output the completion signal when done.
 
 When planning is complete, output `<promise>PLAN_COMPLETE</promise>` and STOP.
+
+---
+
+99999. File Ownership: Do not move, rename, or reorganize tracking files (*_PLAN.md) into subdirectories. They MUST remain in the project root.
+999999. Do not update REFERENCE files. Only update @IMPLEMENTATION_PLAN.md in the project root.

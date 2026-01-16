@@ -50,8 +50,8 @@ pkill -f opencode      # Nuclear option
 
 Run these after implementing to get immediate feedback:
 
-- Syntax: `bash -n files/loop.sh`
-- Lint: `shellcheck files/loop.sh` (if installed)
+- Syntax: `bash -n variants/*/scripts/loop.sh`
+- Lint: `shellcheck variants/*/scripts/loop.sh` (if installed)
 
 ## Operational Notes
 
@@ -67,8 +67,8 @@ Succinct learnings about how to RUN the project:
 
 ```bash
 # Lint shell scripts
-shellcheck files/loop.sh
-bash -n files/loop.sh    # Validate syntax
+shellcheck variants/*/scripts/loop.sh
+bash -n variants/*/scripts/loop.sh    # Validate syntax
 ```
 
 ---
@@ -135,7 +135,7 @@ Study @IMPLEMENTATION_PLAN.md
 ## The Ralphus Cycle
 
 ```
-1. Read IMPLEMENTATION_PLAN.md
+1. Read the tracking plan (*_PLAN.md)
 2. Pick highest priority incomplete task
 3. Search codebase first (don't assume not implemented)
 4. Implement using parallel subagents
@@ -160,10 +160,10 @@ Study @IMPLEMENTATION_PLAN.md
 ## Guardrails (Numbered by Importance)
 
 ```
-99999.       Document the why in code and specs
-999999.      Single sources of truth, no adapters
-9999999.     Tag releases when tests pass (semver)
-99999999.    Keep IMPLEMENTATION_PLAN.md current
+99999.       File Ownership: Do not move, rename, or reorganize tracking files (*_PLAN.md) into subdirectories. They MUST remain in the project root.
+999999.      Document the why in code and specs
+9999999.     Single sources of truth, no adapters
+99999999.    Tag releases when tests pass (semver)
 999999999.   Update AGENTS.md with operational learnings
 9999999999.  Resolve or document ALL bugs found
 99999999999. No placeholders. No stubs. Complete implementations only.
@@ -183,7 +183,7 @@ Study @IMPLEMENTATION_PLAN.md
 ## Error Recovery Protocol
 
 1. **Test fails**: Fix the code, not the test
-2. **3 consecutive failures**: Document in IMPLEMENTATION_PLAN.md, move to next task
+2. **3 consecutive failures**: Document in the tracking plan, move to next task
 3. **15 min no progress**: Output `<promise>BLOCKED:[task]:[reason]</promise>`
 
 **Never**: Delete failing tests, spin on same error, leave code broken
@@ -211,7 +211,7 @@ OPENCODE_BIN="opencode"          # Binary path
 | Assume code doesn't exist | Search first with subagents |
 | Implement placeholders/stubs | Complete implementations only |
 | Spin on failing tests | Document and move on after 3 attempts |
-| Bloat AGENTS.md with status | Status goes in IMPLEMENTATION_PLAN.md |
+| Bloat AGENTS.md with status | Status goes in the tracking plan |
 | Delete failing tests | Fix the code |
 
 ---
@@ -230,6 +230,6 @@ Succinct learnings about how to RUN the project:
 
 ```bash
 # Lint shell scripts
-shellcheck files/loop.sh
-bash -n files/loop.sh    # Validate syntax
+shellcheck variants/*/scripts/loop.sh
+bash -n variants/*/scripts/loop.sh    # Validate syntax
 ```
