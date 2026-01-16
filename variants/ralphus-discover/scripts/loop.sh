@@ -96,9 +96,9 @@ while true; do
 
     OUTPUT=$("$OPENCODE" run --agent "$AGENT" \
         -f "$PROMPT_FILE" \
-        -f "$TEMPLATES_DIR/DISCOVERY_PLAN.md" \
-        -f "$TEMPLATES_DIR/DISCOVERY.md" \
-        -f "$TEMPLATES_DIR/CODEBASE_UNDERSTANDING.md" \
+        -f "$TEMPLATES_DIR/DISCOVERY_PLAN_REFERENCE.md" \
+        -f "$TEMPLATES_DIR/DISCOVERY_REFERENCE.md" \
+        -f "$TEMPLATES_DIR/CODEBASE_UNDERSTANDING_REFERENCE.md" \
         -- "$MESSAGE" 2>&1 | tee /dev/stderr) || true
 
     if echo "$OUTPUT" | grep -q "<promise>PLAN_COMPLETE</promise>"; then

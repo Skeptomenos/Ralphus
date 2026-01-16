@@ -25,7 +25,7 @@ updated: 2025-01-13
 **Protocol:** State-Machine Execution via SSH.
 **Rule:** Always CHECK status first. NEVER assume.
 
-**Remote Path:** `~/Repos/ralphus/skill/ralphus-remote/scripts/` (Scripts exist on server)
+**Remote Path:** `~/Repos/ralphus/skills/ralphus-remote/scripts/` (Scripts exist on server)
 
 ---
 
@@ -35,7 +35,7 @@ Run this command immediately to understand the repo state on the remote server:
 
 ```bash
 # Replace {project_path} with the actual path (e.g., /docker/my-project)
-ssh homelab "bash ~/Repos/ralphus/skill/ralphus-remote/scripts/status.sh {project_path}"
+ssh homelab "bash ~/Repos/ralphus/skills/ralphus-remote/scripts/status.sh {project_path}"
 ```
 
 **Output Interpretation:**
@@ -62,19 +62,19 @@ ssh homelab "bash ~/Repos/ralphus/skill/ralphus-remote/scripts/status.sh {projec
 
 ### A. Prepare Repository
 ```bash
-ssh homelab "bash ~/Repos/ralphus/skill/ralphus-remote/scripts/prepare.sh {project_path}"
+ssh homelab "bash ~/Repos/ralphus/skills/ralphus-remote/scripts/prepare.sh {project_path}"
 ```
 *Action: Scaffolds files, creates branch on remote.*
 
 ### B. Launch Planning Loop
 ```bash
-ssh homelab "bash ~/Repos/ralphus/skill/ralphus-remote/scripts/launch.sh {project_path} plan"
+ssh homelab "bash ~/Repos/ralphus/skills/ralphus-remote/scripts/launch.sh {project_path} plan"
 ```
 *Action: Starts tmux session in PLAN mode.*
 
 ### C. Launch Build Loop (Ultrawork)
 ```bash
-ssh homelab "bash ~/Repos/ralphus/skill/ralphus-remote/scripts/launch.sh {project_path} build ultrawork"
+ssh homelab "bash ~/Repos/ralphus/skills/ralphus-remote/scripts/launch.sh {project_path} build ultrawork"
 ```
 *Action: Starts tmux session in BUILD mode with Ultrawork enabled.*
 
@@ -85,4 +85,4 @@ ssh homelab "bash ~/Repos/ralphus/skill/ralphus-remote/scripts/launch.sh {projec
 1.  **NO AUTO-PILOT**: On first trigger, you MUST run `status.sh` and report to the user. Do NOT auto-launch.
 2.  **ONE LOOP RULE**: If `RUNNING: true`, do NOT start another session.
 3.  **SSH WRAPPER**: All commands must be wrapped in `ssh homelab "..."`.
-4.  **REMOTE SCRIPTS**: Use the scripts at `~/Repos/ralphus/skill/ralphus-remote/scripts/`. Do not cat/echo scripts over the wire.
+4.  **REMOTE SCRIPTS**: Use the scripts at `~/Repos/ralphus/skills/ralphus-remote/scripts/`. Do not cat/echo scripts over the wire.

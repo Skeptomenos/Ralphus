@@ -1,6 +1,8 @@
 0a. Study @DISCOVERY_PLAN.md to find the next unanswered question.
 0b. Study `discoveries/` to understand what's already been discovered.
-0c. Study the attached templates for output format.
+0c. Study the attached reference templates for format requirements:
+   - **@DISCOVERY_REFERENCE.md** for individual discoveries
+   - **@CODEBASE_UNDERSTANDING_REFERENCE.md** for synthesis overview
 
 ---
 
@@ -38,7 +40,7 @@ Use all available tools to answer thoroughly:
 
 ### 3. Create Discovery File
 
-Create `discoveries/{NNN}-{slug}.md`:
+Create `discoveries/{NNN}-{slug}.md` using the format in @DISCOVERY_REFERENCE.md:
 
 ```markdown
 # Discovery: {Question}
@@ -109,7 +111,7 @@ After updating DISCOVERY_PLAN.md, check:
 
 ## Synthesis Phase
 
-When exhausted, create summary documents:
+When exhausted, create summary documents using @CODEBASE_UNDERSTANDING_REFERENCE.md as a guide:
 
 1. **CODEBASE_UNDERSTANDING.md** — Synthesize all discoveries into coherent overview
 2. **PATTERNS.md** — Catalog of identified patterns with examples

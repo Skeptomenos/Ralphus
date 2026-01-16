@@ -1,7 +1,7 @@
 0a. **Verify specs directory**: Run `ls specs/` to confirm it exists. All specifications MUST be in `specs/`.
 0b. **Detect project structure**: Run `ls` to identify source directory (`src/`, `Sources/`, `lib/`, `app/`) and test directory (`tests/`, `Tests/`, `test/`). Use actual names in all searches.
 0c. Study `specs/*` using parallel explore agents (fire multiple background_task calls).
-0d. Study @IMPLEMENTATION_PLAN.md.
+0d. Study @IMPLEMENTATION_PLAN.md. Use @IMPLEMENTATION_PLAN_REFERENCE.md as a format guide if you need to update or clarify the plan structure.
 
 1. Follow @IMPLEMENTATION_PLAN.md. Pick the **first incomplete task**. Complete ONLY this task: implement → build → test → mark complete. Before changes, search codebase using explore agents via background_task. Consult Oracle when stuck after 2+ attempts.
 2. After each task, run build and tests. If functionality is missing, add it per specs. Ultrathink.

@@ -28,7 +28,7 @@ updated: 2025-01-13
 Run this command immediately to understand the repo state:
 
 ```bash
-bash ~/.config/opencode/skill/ralphus-local/scripts/status.sh
+bash $RALPHUS_HOME/skills/ralphus-local/scripts/status.sh
 ```
 
 **Output Interpretation:**
@@ -54,19 +54,19 @@ bash ~/.config/opencode/skill/ralphus-local/scripts/status.sh
 
 ### A. Prepare Repository
 ```bash
-bash ~/.config/opencode/skill/ralphus-local/scripts/prepare.sh
+bash $RALPHUS_HOME/skills/ralphus-local/scripts/prepare.sh
 ```
 *Action: Scaffolds files, creates branch.*
 
 ### B. Launch Planning Loop
 ```bash
-bash ~/.config/opencode/skill/ralphus-local/scripts/launch.sh plan
+bash $RALPHUS_HOME/skills/ralphus-local/scripts/launch.sh plan
 ```
 *Action: Starts tmux session in PLAN mode.*
 
 ### C. Launch Build Loop (Ultrawork)
 ```bash
-bash ~/.config/opencode/skill/ralphus-local/scripts/launch.sh build ultrawork
+bash $RALPHUS_HOME/skills/ralphus-local/scripts/launch.sh build ultrawork
 ```
 *Action: Starts tmux session in BUILD mode with Ultrawork enabled.*
 

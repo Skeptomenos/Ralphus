@@ -133,9 +133,9 @@ while true; do
     # Attach both the prompt and all template files for context
     OUTPUT=$("$OPENCODE" run --agent "$AGENT" \
         -f "$PROMPT_FILE" \
-        -f "$TEMPLATES_DIR/SPEC_FORMAT.md" \
-        -f "$TEMPLATES_DIR/SUMMARY_HEADER.md" \
-        -f "$TEMPLATES_DIR/TEST_UTILITIES.md" \
+        -f "$TEMPLATES_DIR/SPEC_FORMAT_REFERENCE.md" \
+        -f "$TEMPLATES_DIR/SUMMARY_HEADER_REFERENCE.md" \
+        -f "$TEMPLATES_DIR/TEST_UTILITIES_REFERENCE.md" \
         -- "$MESSAGE" 2>&1 | tee /dev/stderr) || true
 
     # Check completion signals

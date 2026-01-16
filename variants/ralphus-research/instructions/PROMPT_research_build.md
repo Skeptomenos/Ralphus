@@ -21,6 +21,11 @@
 
 4. **WRITE ARTIFACTS** in `knowledge/[NNN-topic-slug]/`:
 
+   Refer to the following reference templates for format requirements:
+   - **@SUMMARY_REFERENCE.md** for SUMMARY.md
+   - **@QUIZ_REFERENCE.md** for QUIZ.md
+   - **@CONNECTIONS_REFERENCE.md** for CONNECTIONS.md
+
    **SUMMARY.md** - The knowledge artifact:
    - ELI5: Simple explanation anyone could understand (1-2 paragraphs)
    - Technical: Detailed explanation with proper terminology (2-3 paragraphs)

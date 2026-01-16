@@ -1,40 +1,32 @@
 #!/bin/bash
-# Ralphus Research - Autonomous Learning Loop
-# Usage: ./ralphus/ralphus-research/scripts/loop.sh [plan] [ultrawork|ulw] [max_iterations]
+# Ralphus - Autonomous Coding Loop for OpenCode
+# Usage: ./loop.sh [plan] [ultrawork|ulw] [max_iterations]
 # Examples:
-#   ./loop.sh                  # Research mode, unlimited iterations
-#   ./loop.sh 20               # Research mode, max 20 iterations
+#   ./loop.sh                  # Build mode, unlimited iterations
+#   ./loop.sh 20               # Build mode, max 20 iterations
 #   ./loop.sh plan             # Plan mode, unlimited iterations
 #   ./loop.sh plan 5           # Plan mode, max 5 iterations
-#   ./loop.sh ultrawork        # Research mode with ultrawork
-#   ./loop.sh ulw 10           # Ultrawork research, max 10 iterations
+#   ./loop.sh ultrawork        # Build mode with ultrawork
+#   ./loop.sh ulw 10           # Ultrawork build, max 10 iterations
+#   ./loop.sh plan ultrawork   # Plan mode with ultrawork
+#   ./loop.sh plan ulw 5       # Ultrawork plan, max 5 iterations
 
 set -euo pipefail
 
-# Central location (where prompts/templates live)
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-RALPHUS_RESEARCH_DIR="$(dirname "$SCRIPT_DIR")"
-INSTRUCTIONS_DIR="$RALPHUS_RESEARCH_DIR/instructions"
-TEMPLATES_DIR="$RALPHUS_RESEARCH_DIR/templates"
-
-# Working directory (where project files live)
-WORKING_DIR="${RALPHUS_WORKING_DIR:-$(pwd)}"
-
-# Configuration
+# Configuration (override via environment variables)
 AGENT="${RALPH_AGENT:-Sisyphus}"
 OPENCODE="${OPENCODE_BIN:-opencode}"
-QUESTIONS_DIR="$WORKING_DIR/questions"
 ULTRAWORK=0
 
 # Parse arguments
-MODE="research"
-PROMPT_FILE="$INSTRUCTIONS_DIR/PROMPT_research_build.md"
+MODE="build"
+PROMPT_FILE="PROMPT_build.md"
 MAX_ITERATIONS=0
 
 for arg in "$@"; do
     if [ "$arg" = "plan" ]; then
         MODE="plan"
-        PROMPT_FILE="$INSTRUCTIONS_DIR/PROMPT_research_plan.md"
+        PROMPT_FILE="PROMPT_plan.md"
     elif [ "$arg" = "ultrawork" ] || [ "$arg" = "ulw" ]; then
         ULTRAWORK=1
     elif [[ "$arg" =~ ^[0-9]+$ ]]; then
@@ -46,40 +38,32 @@ ITERATION=0
 CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
 
 # Header
-echo "=== RALPHUS RESEARCH: $MODE mode | $AGENT | $CURRENT_BRANCH ==="
+echo "=== RALPHUS: $MODE mode | $AGENT | $CURRENT_BRANCH ==="
 [ "$ULTRAWORK" -eq 1 ] && echo "Ultrawork: enabled"
 [ "$MAX_ITERATIONS" -gt 0 ] && echo "Max iterations: $MAX_ITERATIONS"
 
+# Verify prompt file exists
 if [ ! -f "$PROMPT_FILE" ]; then
     echo "Error: $PROMPT_FILE not found"
     exit 1
 fi
 
-if [ ! -d "$TEMPLATES_DIR" ]; then
-    echo "Error: $TEMPLATES_DIR/ directory not found."
+# Build mode requires IMPLEMENTATION_PLAN.md
+if [ "$MODE" = "build" ] && [ ! -f "IMPLEMENTATION_PLAN.md" ]; then
+    echo "Error: IMPLEMENTATION_PLAN.md not found."
+    echo "Run planning mode first: ./loop.sh plan"
     exit 1
 fi
 
-if [ ! -d "$QUESTIONS_DIR" ]; then
-    echo "Error: $QUESTIONS_DIR/ directory not found."
-    echo "Create $QUESTIONS_DIR/*.md files with your research questions first."
-    exit 1
-fi
-
-if [ "$MODE" = "research" ] && [ ! -f "$WORKING_DIR/RESEARCH_PLAN.md" ]; then
-    echo "Error: RESEARCH_PLAN.md not found in $WORKING_DIR"
-    echo "Run planning mode first: $0 plan"
-    exit 1
-fi
-
-LAST_BRANCH_FILE="$WORKING_DIR/.last-branch"
+# Archive previous run if branch changed
+LAST_BRANCH_FILE=".last-branch"
 if [ -f "$LAST_BRANCH_FILE" ]; then
     LAST_BRANCH=$(cat "$LAST_BRANCH_FILE")
     if [ "$LAST_BRANCH" != "$CURRENT_BRANCH" ]; then
-        ARCHIVE_DIR="$WORKING_DIR/archive/$(date +%Y-%m-%d)-$LAST_BRANCH"
+        ARCHIVE_DIR="archive/$(date +%Y-%m-%d)-$LAST_BRANCH"
         mkdir -p "$ARCHIVE_DIR"
-        cp "$WORKING_DIR/RESEARCH_PLAN.md" "$ARCHIVE_DIR/" 2>/dev/null || true
-        cp -r "$WORKING_DIR/knowledge/" "$ARCHIVE_DIR/" 2>/dev/null || true
+        cp IMPLEMENTATION_PLAN.md "$ARCHIVE_DIR/" 2>/dev/null || true
+        cp AGENTS.md "$ARCHIVE_DIR/" 2>/dev/null || true
         echo "Archived previous run to $ARCHIVE_DIR"
     fi
 fi
@@ -112,22 +96,18 @@ while true; do
         MESSAGE="Read the attached prompt file and execute the instructions"
     fi
 
-    OUTPUT=$("$OPENCODE" run --agent "$AGENT" \
-        -f "$PROMPT_FILE" \
-        -f "$TEMPLATES_DIR/RESEARCH_PLAN_REFERENCE.md" \
-        -f "$TEMPLATES_DIR/SUMMARY_REFERENCE.md" \
-        -f "$TEMPLATES_DIR/QUIZ_REFERENCE.md" \
-        -f "$TEMPLATES_DIR/CONNECTIONS_REFERENCE.md" \
-        -- "$MESSAGE" 2>&1 | tee /dev/stderr) || true
+    # Run OpenCode with the prompt file
+    OUTPUT=$("$OPENCODE" run --agent "$AGENT" -f "$PROMPT_FILE" -- "$MESSAGE" 2>&1 | tee /dev/stderr) || true
 
-        if echo "$OUTPUT" | grep -q "<promise>PLAN_COMPLETE</promise>"; then
+    # Check completion signals
+    if echo "$OUTPUT" | grep -q "<promise>PLAN_COMPLETE</promise>"; then
         echo "=== PLANNING COMPLETE ===" && exit 0
     fi
     if echo "$OUTPUT" | grep -q "<promise>PHASE_COMPLETE</promise>"; then
-        echo "=== TOPIC COMPLETE - next iteration ==="
+        echo "=== PHASE COMPLETE - next iteration ==="
     fi
     if echo "$OUTPUT" | grep -q "<promise>COMPLETE</promise>"; then
-        echo "=== ALL TOPICS LEARNED ===" && exit 0
+        echo "=== ALL TASKS COMPLETE ===" && exit 0
     fi
     if echo "$OUTPUT" | grep -q "<promise>BLOCKED:"; then
         echo "=== BLOCKED ===" && echo "$OUTPUT" | grep -o "<promise>BLOCKED:[^<]*</promise>" && exit 1

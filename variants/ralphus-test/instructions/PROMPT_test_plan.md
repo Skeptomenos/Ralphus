@@ -4,11 +4,11 @@ You are preparing a test specification for autonomous test creation.
 
 ## Reference Templates (ATTACHED)
 
-The following template files are attached to this prompt. Study them FIRST:
+The following template files are attached to this prompt. Study them FIRST for format requirements:
 
-1. **SPEC_FORMAT.md** — Required table structure, status symbols, column requirements
-2. **SUMMARY_HEADER.md** — Progress tracking header format with percentage
-3. **TEST_UTILITIES.md** — Priority 0 test infrastructure section
+1. **SPEC_FORMAT_REFERENCE.md** — Required table structure, status symbols, column requirements
+2. **SUMMARY_HEADER_REFERENCE.md** — Progress tracking header format with percentage
+3. **TEST_UTILITIES_REFERENCE.md** — Priority 0 test infrastructure section
 
 ## Phase 0: Discovery
 
@@ -20,7 +20,7 @@ The following template files are attached to this prompt. Study them FIRST:
 
 ## Phase 1: Normalize the Specification
 
-1. **Add status column**: Convert all test tables to the format in the attached SPEC_FORMAT.md.
+1. **Add status column**: Convert all test tables to the format in the attached @SPEC_FORMAT_REFERENCE.md.
 
 2. **Preserve existing completion**: If a test file already exists and passes, mark as `[x]`.
 
@@ -33,13 +33,13 @@ For each test case, evaluate:
 - Does it require setup that other tests also need?
 - Is the expected behavior clear and testable?
 
-**If too complex**: Break into atomic units per the attached SPEC_FORMAT.md.
+**If too complex**: Break into atomic units per the attached @SPEC_FORMAT_REFERENCE.md.
 
 **If needs shared setup**: Add to Priority 0 utilities section.
 
 ## Phase 3: Identify Prerequisites
 
-If the spec lacks a test utilities section, create one following the attached TEST_UTILITIES.md.
+If the spec lacks a test utilities section, create one following the attached @TEST_UTILITIES_REFERENCE.md.
 
 Common utilities to identify:
 - Session/auth mocking
@@ -59,7 +59,7 @@ For each test, ensure:
 
 ## Phase 5: Add Summary Header
 
-Add a progress tracking section at the top per the attached SUMMARY_HEADER.md.
+Add a progress tracking section at the top per the attached @SUMMARY_HEADER_REFERENCE.md.
 
 ## Phase 6: Commit and Complete
 

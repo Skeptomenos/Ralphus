@@ -1,10 +1,11 @@
 0a. **Verify specs directory**: Run `ls specs/` to confirm it exists. If missing, error: "specs/ directory required. Create specs/*.md files first."
 0b. Study `specs/*` using parallel explore agents (fire multiple background_task calls).
-0c. Study @IMPLEMENTATION_PLAN.md (if present) to understand existing plan and project structure.
+0c. Study @IMPLEMENTATION_PLAN.md (if present) to understand existing plan and project structure. If missing, use @IMPLEMENTATION_PLAN_REFERENCE.md as a template for the new plan.
 0d. If no IMPLEMENTATION_PLAN.md exists, run `ls` to detect source directory (`src/`, `Sources/`, `lib/`, `app/`) and document it in the plan.
 0e. Study @AGENTS.md, README.md, VISION.md, DESIGN.md, or docs/* to understand project goals and vision.
+0f. Study the attached @IMPLEMENTATION_PLAN_REFERENCE.md to understand the expected format.
 
-1. Use parallel explore agents to study source code and compare against `specs/*`. Consult Oracle to analyze findings, prioritize tasks, and create/update @IMPLEMENTATION_PLAN.md as a prioritized list. Search for TODOs, placeholders, skipped tests, inconsistent patterns. Consider what's needed to achieve the project's stated goals.
+1. Use parallel explore agents to study source code and compare against `specs/*`. Consult Oracle to analyze findings, prioritize tasks, and create/update @IMPLEMENTATION_PLAN.md as a prioritized list. Search for TODOs, placeholders, skipped tests, inconsistent patterns. Consider what's needed to achieve the project's stated goals. Use the format defined in @IMPLEMENTATION_PLAN_REFERENCE.md.
 
 **Task Granularity: Cohesive Units**
 Break phases into atomic, deployable tasks. Each task must be a **complete logic unit** (e.g., "Implement POST /login with tests", not "Add types").

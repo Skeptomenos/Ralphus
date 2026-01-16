@@ -1,6 +1,6 @@
 0a. Study the codebase structure using parallel explore agents. Get a high-level overview before planning.
-0b. Study @DISCOVERY_PLAN.md (if present) to understand existing discovery progress.
-0c. Study the attached templates to understand the expected output format.
+0b. Study @DISCOVERY_PLAN.md (if present) to understand existing discovery progress. If missing, use @DISCOVERY_PLAN_REFERENCE.md as a template.
+0c. Study the attached @DISCOVERY_PLAN_REFERENCE.md to understand the expected format.
 
 ---
 
@@ -17,6 +17,7 @@ You are creating a discovery plan for understanding this codebase in depth.
    - Key configuration files (package.json, Cargo.toml, pyproject.toml, etc.)
 
 2. **Generate DISCOVERY_PLAN.md** with seed questions tailored to THIS codebase:
+   - Use @DISCOVERY_PLAN_REFERENCE.md as your structure guide.
    - Start with the template categories (Architecture, Patterns, Conventions, Data Flow, Tricks)
    - Add project-specific questions based on what you observe
    - Remove irrelevant questions (e.g., no frontend questions for a CLI tool)
