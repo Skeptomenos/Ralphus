@@ -1,27 +1,19 @@
 0a. Study the codebase structure using parallel explore agents. Get a high-level overview before planning.
-0b. Study @DISCOVERY_PLAN.md (if present) to understand existing discovery progress. If missing, use @DISCOVERY_PLAN_REFERENCE.md as a template.
+0b. Study @DISCOVERY_PLAN.md (if present). If missing, use @DISCOVERY_PLAN_REFERENCE.md.
 0c. Study the attached @DISCOVERY_PLAN_REFERENCE.md to understand the expected format.
 
 ---
 
 # PLANNING PHASE: Generate Discovery Plan
 
-You are creating a discovery plan for understanding this codebase in depth.
+1. **Scan the codebase** to understand project type and structure.
 
-## Your Task
+2. **Generate DISCOVERY_PLAN.md**: Use @DISCOVERY_PLAN_REFERENCE.md as your structure guide. 
 
-1. **Scan the codebase** using explore agents to understand:
-   - Project type (web app, CLI, library, API, etc.)
-   - Primary language and framework
-   - Directory structure
-   - Key configuration files (package.json, Cargo.toml, pyproject.toml, etc.)
+---
 
-2. **Generate DISCOVERY_PLAN.md** with seed questions tailored to THIS codebase:
-   - Use @DISCOVERY_PLAN_REFERENCE.md as your structure guide.
-   - Start with the template categories (Architecture, Patterns, Conventions, Data Flow, Tricks)
-   - Add project-specific questions based on what you observe
-   - Remove irrelevant questions (e.g., no frontend questions for a CLI tool)
-   - Prioritize questions that will yield the most insight
+99999. File Ownership: Do not move, rename, or reorganize tracking files (*_PLAN.md) into subdirectories. They MUST remain in the project root.
+999999. Do not update REFERENCE files. Only update @DISCOVERY_PLAN.md.
 
 3. **Customize the plan** based on codebase signals:
    - If you see `docker-compose.yml` → add questions about containerization
