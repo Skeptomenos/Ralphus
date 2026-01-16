@@ -4,14 +4,20 @@
 
 set -euo pipefail
 
+# Central location (where prompts/templates live)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 RALPHUS_CODE_DIR="$(dirname "$SCRIPT_DIR")"
-
-AGENT="${RALPH_AGENT:-Sisyphus}"
-OPENCODE="${OPENCODE_BIN:-opencode}"
-SPECS_DIR="specs"
 INSTRUCTIONS_DIR="$RALPHUS_CODE_DIR/instructions"
 TEMPLATES_DIR="$RALPHUS_CODE_DIR/templates"
+
+# Working directory (where project files live)
+# Set by wrapper, or defaults to current directory for direct invocation
+WORKING_DIR="${RALPHUS_WORKING_DIR:-$(pwd)}"
+
+# Configuration
+AGENT="${RALPH_AGENT:-Sisyphus}"
+OPENCODE="${OPENCODE_BIN:-opencode}"
+SPECS_DIR="$WORKING_DIR/specs"
 ULTRAWORK=0
 
 MODE="build"
@@ -52,20 +58,20 @@ if [ ! -d "$SPECS_DIR" ]; then
     exit 1
 fi
 
-if [ "$MODE" = "build" ] && [ ! -f "IMPLEMENTATION_PLAN.md" ]; then
-    echo "Error: IMPLEMENTATION_PLAN.md not found."
+if [ "$MODE" = "build" ] && [ ! -f "$WORKING_DIR/IMPLEMENTATION_PLAN.md" ]; then
+    echo "Error: IMPLEMENTATION_PLAN.md not found in $WORKING_DIR"
     echo "Run planning mode first: $0 plan"
     exit 1
 fi
 
-LAST_BRANCH_FILE=".last-branch"
+LAST_BRANCH_FILE="$WORKING_DIR/.last-branch"
 if [ -f "$LAST_BRANCH_FILE" ]; then
     LAST_BRANCH=$(cat "$LAST_BRANCH_FILE")
     if [ "$LAST_BRANCH" != "$CURRENT_BRANCH" ]; then
-        ARCHIVE_DIR="archive/$(date +%Y-%m-%d)-$LAST_BRANCH"
+        ARCHIVE_DIR="$WORKING_DIR/archive/$(date +%Y-%m-%d)-$LAST_BRANCH"
         mkdir -p "$ARCHIVE_DIR"
-        cp IMPLEMENTATION_PLAN.md "$ARCHIVE_DIR/" 2>/dev/null || true
-        cp AGENTS.md "$ARCHIVE_DIR/" 2>/dev/null || true
+        cp "$WORKING_DIR/IMPLEMENTATION_PLAN.md" "$ARCHIVE_DIR/" 2>/dev/null || true
+        cp "$WORKING_DIR/AGENTS.md" "$ARCHIVE_DIR/" 2>/dev/null || true
         echo "Archived previous run to $ARCHIVE_DIR"
     fi
 fi

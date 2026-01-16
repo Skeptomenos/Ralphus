@@ -12,29 +12,34 @@ Ralphus is a **meta-framework** for autonomous coding loops. It orchestrates LLM
 
 ## Build & Run
 
-### This Repository (The Playbook)
+### Central Execution (Recommended)
 
 ```bash
-# No build step — this is a template repository
-# Validate shell scripts
-shellcheck files/loop.sh
-
-# Test the loop locally (requires opencode or claude CLI)
-./files/loop.sh plan 1    # Single planning iteration
-./files/loop.sh 1         # Single build iteration
+# From any project directory
+cd ~/my-project
+ralphus code plan      # Generate implementation plan
+ralphus code           # Run build loop
+ralphus code ulw 20    # Ultrawork mode, max 20 iterations
+ralphus test plan      # Test creation planning
+ralphus discover       # Codebase understanding
 ```
 
-### Target Project (After Copying Files)
+The `ralphus` wrapper lives in `~/.local/bin/` and routes to the correct variant in `~/ralphus/variants/`.
+
+### Direct Invocation (Alternative)
 
 ```bash
-# Phase 1: Generate implementation plan
-./loop.sh plan
+# If you copied the variant into your project
+./ralphus/ralphus-code/scripts/loop.sh plan
+./ralphus/ralphus-code/scripts/loop.sh
 
-# Phase 2: Execute autonomous build loop
-./loop.sh              # Unlimited iterations
-./loop.sh 20           # Max 20 iterations
+# Or from central location with explicit working dir
+RALPHUS_WORKING_DIR=$(pwd) ~/ralphus/variants/ralphus-code/scripts/loop.sh plan
+```
 
-# Stop gracefully
+### Stop Gracefully
+
+```bash
 Ctrl+C                 # Finish current task, then stop
 pkill -f opencode      # Nuclear option
 ```
@@ -213,13 +218,18 @@ OPENCODE_BIN="opencode"          # Binary path
 
 ## Operational Notes
 
-<!-- Add learnings here as you discover them -->
+Succinct learnings about how to RUN the project:
 
-### Discovered Patterns
-- (Add patterns discovered during operation)
+- OpenCode CLI required: `opencode run --agent Sisyphus -f PROMPT.md "message"`
+- Default agent is Sisyphus, override with `RALPH_AGENT=build`
+- Remote homelab uses `~/.opencode/bin/opencode` path
 
-### Known Issues
-- (Document issues encountered)
+### Codebase Patterns
 
-### Workarounds
-- (Document any workarounds needed)
+...
+
+```bash
+# Lint shell scripts
+shellcheck files/loop.sh
+bash -n files/loop.sh    # Validate syntax
+```

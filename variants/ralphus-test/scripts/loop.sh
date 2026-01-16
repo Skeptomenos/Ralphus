@@ -9,16 +9,19 @@
 
 set -euo pipefail
 
-# Resolve script directory and ralphus-test root
+# Central location (where prompts/templates live)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 RALPHUS_TEST_DIR="$(dirname "$SCRIPT_DIR")"
-
-# Configuration (override via environment variables)
-AGENT="${RALPH_AGENT:-Sisyphus}"
-OPENCODE="${OPENCODE_BIN:-opencode}"
-TEST_SPECS_DIR="test-specs"
 TEMPLATES_DIR="$RALPHUS_TEST_DIR/templates"
 INSTRUCTIONS_DIR="$RALPHUS_TEST_DIR/instructions"
+
+# Working directory (where project files live)
+WORKING_DIR="${RALPHUS_WORKING_DIR:-$(pwd)}"
+
+# Configuration
+AGENT="${RALPH_AGENT:-Sisyphus}"
+OPENCODE="${OPENCODE_BIN:-opencode}"
+TEST_SPECS_DIR="$WORKING_DIR/test-specs"
 ULTRAWORK=0
 
 # Parse arguments
@@ -81,14 +84,12 @@ if [ "$MODE" = "test" ]; then
     fi
 fi
 
-# Archive previous run if branch changed
-LAST_BRANCH_FILE=".last-branch"
+LAST_BRANCH_FILE="$WORKING_DIR/.last-branch"
 if [ -f "$LAST_BRANCH_FILE" ]; then
     LAST_BRANCH=$(cat "$LAST_BRANCH_FILE")
     if [ "$LAST_BRANCH" != "$CURRENT_BRANCH" ]; then
-        ARCHIVE_DIR="archive/$(date +%Y-%m-%d)-$LAST_BRANCH"
+        ARCHIVE_DIR="$WORKING_DIR/archive/$(date +%Y-%m-%d)-$LAST_BRANCH"
         mkdir -p "$ARCHIVE_DIR"
-        # Archive all test specs
         cp -r "$TEST_SPECS_DIR" "$ARCHIVE_DIR/" 2>/dev/null || true
         echo "Archived previous run to $ARCHIVE_DIR"
     fi

@@ -4,13 +4,18 @@
 
 set -euo pipefail
 
+# Central location (where prompts/templates live)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 RALPHUS_DISCOVER_DIR="$(dirname "$SCRIPT_DIR")"
-
-AGENT="${RALPH_AGENT:-Sisyphus}"
-OPENCODE="${OPENCODE_BIN:-opencode}"
 INSTRUCTIONS_DIR="$RALPHUS_DISCOVER_DIR/instructions"
 TEMPLATES_DIR="$RALPHUS_DISCOVER_DIR/templates"
+
+# Working directory (where project files live)
+WORKING_DIR="${RALPHUS_WORKING_DIR:-$(pwd)}"
+
+# Configuration
+AGENT="${RALPH_AGENT:-Sisyphus}"
+OPENCODE="${OPENCODE_BIN:-opencode}"
 ULTRAWORK=0
 
 MODE="discover"
@@ -45,22 +50,22 @@ if [ ! -d "$TEMPLATES_DIR" ]; then
     exit 1
 fi
 
-if [ "$MODE" = "discover" ] && [ ! -f "DISCOVERY_PLAN.md" ]; then
-    echo "Error: DISCOVERY_PLAN.md not found."
+if [ "$MODE" = "discover" ] && [ ! -f "$WORKING_DIR/DISCOVERY_PLAN.md" ]; then
+    echo "Error: DISCOVERY_PLAN.md not found in $WORKING_DIR"
     echo "Run planning mode first: $0 plan"
     exit 1
 fi
 
-mkdir -p discoveries
+mkdir -p "$WORKING_DIR/discoveries"
 
-LAST_BRANCH_FILE=".last-branch"
+LAST_BRANCH_FILE="$WORKING_DIR/.last-branch"
 if [ -f "$LAST_BRANCH_FILE" ]; then
     LAST_BRANCH=$(cat "$LAST_BRANCH_FILE")
     if [ "$LAST_BRANCH" != "$CURRENT_BRANCH" ]; then
-        ARCHIVE_DIR="archive/$(date +%Y-%m-%d)-$LAST_BRANCH"
+        ARCHIVE_DIR="$WORKING_DIR/archive/$(date +%Y-%m-%d)-$LAST_BRANCH"
         mkdir -p "$ARCHIVE_DIR"
-        cp DISCOVERY_PLAN.md "$ARCHIVE_DIR/" 2>/dev/null || true
-        cp -r discoveries/ "$ARCHIVE_DIR/" 2>/dev/null || true
+        cp "$WORKING_DIR/DISCOVERY_PLAN.md" "$ARCHIVE_DIR/" 2>/dev/null || true
+        cp -r "$WORKING_DIR/discoveries/" "$ARCHIVE_DIR/" 2>/dev/null || true
         echo "Archived previous run to $ARCHIVE_DIR"
     fi
 fi

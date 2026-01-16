@@ -82,74 +82,84 @@ variants/ralphus-{name}/
 - Sisyphus agent configured (or set `RALPH_AGENT` to your preferred agent)
 - Git repository initialized in your project
 
-## Quick Start
+## Quick Start (Central Execution)
 
-### 1. Copy a Variant to Your Project
+The recommended way to use Ralphus is with **central execution** — one installation, use from any project.
+
+### 1. Install Ralphus
 
 ```bash
-# Clone ralphus (or add as submodule)
+# Clone to your home directory
 git clone https://github.com/Skeptomenos/Ralphus.git ~/ralphus
 
+# Install the wrapper command
+cp ~/ralphus/scripts/ralphus ~/.local/bin/
+chmod +x ~/.local/bin/ralphus
+```
+
+### 2. Use From Any Project
+
+```bash
+cd ~/my-project
+
+# Create specs directory
+mkdir -p specs
+echo "# My Feature" > specs/feature.md
+
+# Run Ralphus
+ralphus code plan      # Generate implementation plan
+ralphus code           # Run build loop
+ralphus code ulw 20    # Ultrawork mode, max 20 iterations
+```
+
+### Available Variants
+
+| Command | Purpose | Required Directory |
+|---------|---------|-------------------|
+| `ralphus code` | Feature implementation | `specs/` |
+| `ralphus test` | Test creation | `test-specs/` |
+| `ralphus research` | Deep learning | `questions/` |
+| `ralphus discover` | Codebase understanding | (none) |
+
+### How It Works
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                           YOUR PROJECT                                  │
+│                         (current directory)                             │
+├─────────────────────────────────────────────────────────────────────────┤
+│  specs/                    <- Your specifications                       │
+│  IMPLEMENTATION_PLAN.md    <- Generated here                            │
+│  src/                      <- Your source code                          │
+└─────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    │ ralphus code plan
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         ~/ralphus/variants/                             │
+│                         (central storage)                               │
+├─────────────────────────────────────────────────────────────────────────┤
+│  Prompts, templates, and loop logic                                     │
+│  Shared across all your projects                                        │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+See [docs/CENTRAL_EXECUTION.md](docs/CENTRAL_EXECUTION.md) for full details.
+
+---
+
+## Alternative: Copy Variant to Project
+
+If you prefer self-contained projects:
+
+```bash
 # Copy the variant you need
 mkdir -p ./ralphus
 cp -r ~/ralphus/variants/ralphus-code ./ralphus/ralphus-code
-```
 
-### 2. Create Required Directories
-
-Each variant expects a specific directory:
-
-| Variant | Required Directory | Contents |
-|---------|-------------------|----------|
-| `ralphus-code` | `specs/` | Feature specifications (`*.md`) |
-| `ralphus-test` | `test-specs/` | Test specifications (`*.md`) |
-| `ralphus-research` | `questions/` | Research questions (`*.md`) |
-| `ralphus-discover` | (none) | Just run it on any codebase |
-
-```bash
-# For ralphus-code
-mkdir -p specs
-echo "# My Feature Spec" > specs/my-feature.md
-
-# For ralphus-test
-mkdir -p test-specs
-echo "# Test Spec" > test-specs/tests.md
-```
-
-### 3. Run the Loop
-
-```bash
-# Planning phase (generates tracking file)
+# Run directly
 ./ralphus/ralphus-code/scripts/loop.sh plan
-
-# Build phase (executes tasks)
 ./ralphus/ralphus-code/scripts/loop.sh
-```
-
-### Variant-Specific Usage
-
-**ralphus-code** (feature implementation):
-```bash
-./ralphus/ralphus-code/scripts/loop.sh plan    # Generate IMPLEMENTATION_PLAN.md
-./ralphus/ralphus-code/scripts/loop.sh         # Build features
-```
-
-**ralphus-test** (test creation):
-```bash
-./ralphus/ralphus-test/scripts/loop.sh plan    # Prepare test spec with checkboxes
-./ralphus/ralphus-test/scripts/loop.sh         # Create tests one by one
-```
-
-**ralphus-research** (deep research):
-```bash
-./ralphus/ralphus-research/scripts/loop.sh plan   # Create research plan
-./ralphus/ralphus-research/scripts/loop.sh        # Execute research
-```
-
-**ralphus-discover** (codebase understanding):
-```bash
-./ralphus/ralphus-discover/scripts/loop.sh plan   # Generate discovery plan
-./ralphus/ralphus-discover/scripts/loop.sh        # Discover codebase patterns
 ```
 
 ---
@@ -219,9 +229,14 @@ ralphus/
 ├── AGENTS.md                    # Template for target projects
 ├── CHANGELOG.md
 │
+├── scripts/
+│   └── ralphus                  # Central execution wrapper
+│
 ├── docs/                        # Documentation
-│   ├── ULTRAWORK.md             # Ultrawork philosophy
+│   ├── CENTRAL_EXECUTION.md     # Central execution architecture
+│   ├── VARIANT_BLUEPRINT.md     # Template for creating new variants
 │   ├── LOOP_VARIANTS.md         # Variant concept paper
+│   ├── ULTRAWORK.md             # Ultrawork philosophy
 │   └── references/              # Research materials
 │
 ├── variants/                    # Loop variants (WHAT to do)

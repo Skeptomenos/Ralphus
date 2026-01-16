@@ -11,16 +11,19 @@
 
 set -euo pipefail
 
-# Resolve paths relative to this script (not CWD)
+# Central location (where prompts/templates live)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 RALPHUS_RESEARCH_DIR="$(dirname "$SCRIPT_DIR")"
-
-# Configuration (override via environment variables)
-AGENT="${RALPH_AGENT:-Sisyphus}"
-OPENCODE="${OPENCODE_BIN:-opencode}"
-QUESTIONS_DIR="questions"
 INSTRUCTIONS_DIR="$RALPHUS_RESEARCH_DIR/instructions"
 TEMPLATES_DIR="$RALPHUS_RESEARCH_DIR/templates"
+
+# Working directory (where project files live)
+WORKING_DIR="${RALPHUS_WORKING_DIR:-$(pwd)}"
+
+# Configuration
+AGENT="${RALPH_AGENT:-Sisyphus}"
+OPENCODE="${OPENCODE_BIN:-opencode}"
+QUESTIONS_DIR="$WORKING_DIR/questions"
 ULTRAWORK=0
 
 # Parse arguments
@@ -63,21 +66,20 @@ if [ ! -d "$QUESTIONS_DIR" ]; then
     exit 1
 fi
 
-if [ "$MODE" = "research" ] && [ ! -f "RESEARCH_PLAN.md" ]; then
-    echo "Error: RESEARCH_PLAN.md not found."
+if [ "$MODE" = "research" ] && [ ! -f "$WORKING_DIR/RESEARCH_PLAN.md" ]; then
+    echo "Error: RESEARCH_PLAN.md not found in $WORKING_DIR"
     echo "Run planning mode first: $0 plan"
     exit 1
 fi
 
-# Archive previous run if branch changed
-LAST_BRANCH_FILE=".last-branch"
+LAST_BRANCH_FILE="$WORKING_DIR/.last-branch"
 if [ -f "$LAST_BRANCH_FILE" ]; then
     LAST_BRANCH=$(cat "$LAST_BRANCH_FILE")
     if [ "$LAST_BRANCH" != "$CURRENT_BRANCH" ]; then
-        ARCHIVE_DIR="archive/$(date +%Y-%m-%d)-$LAST_BRANCH"
+        ARCHIVE_DIR="$WORKING_DIR/archive/$(date +%Y-%m-%d)-$LAST_BRANCH"
         mkdir -p "$ARCHIVE_DIR"
-        cp RESEARCH_PLAN.md "$ARCHIVE_DIR/" 2>/dev/null || true
-        cp -r knowledge/ "$ARCHIVE_DIR/" 2>/dev/null || true
+        cp "$WORKING_DIR/RESEARCH_PLAN.md" "$ARCHIVE_DIR/" 2>/dev/null || true
+        cp -r "$WORKING_DIR/knowledge/" "$ARCHIVE_DIR/" 2>/dev/null || true
         echo "Archived previous run to $ARCHIVE_DIR"
     fi
 fi
