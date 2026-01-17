@@ -59,8 +59,54 @@ Then came **Sisyphus** — the OpenCode agent cursed to roll context windows uph
 |---------|---------|----------------|----------|
 | `ralphus-code` | Implement features from specs | `specs/` | `IMPLEMENTATION_PLAN.md` |
 | `ralphus-test` | Create tests from test specs | `test-specs/` | `TEST_PLAN.md` |
+| `ralphus-review` | Code review and audit | (none) | `REVIEW_PLAN.md` |
+| `ralphus-product` | Slice brain dumps into ideas | `inbox/` | `ideas/*.md` |
+| `ralphus-architect` | Generate specs from ideas | `ideas/` | `specs/*.md` |
 | `ralphus-research` | Deep research on topics | `questions/` | `RESEARCH_PLAN.md` |
 | `ralphus-discover` | Understand a codebase | (none) | `DISCOVERY_PLAN.md` |
+
+## The Ralphus Factory
+
+The complete autonomous software factory pipeline:
+
+```
+┌──────────────┐      ┌───────────────┐      ┌───────────────┐
+│              │      │               │      │               │
+│  Brain Dump  │─────▶│ ralphus       │─────▶│ ralphus       │
+│  (inbox/*.md)│      │ product       │      │ architect     │
+│              │      │ (Slice Ideas) │      │ (Write Specs) │
+└──────────────┘      └───────────────┘      └───────────────┘
+                              │                      │
+                              ▼                      ▼
+                      ┌───────────────┐      ┌───────────────┐
+                      │               │      │               │
+                      │ ideas/*.md    │      │ specs/*.md    │
+                      │               │      │               │
+                      └───────────────┘      └───────────────┘
+                                                     │
+                                                     ▼
+┌──────────────┐      ┌───────────────┐      ┌───────────────┐
+│              │      │               │      │               │
+│ ralphus      │◀─────│ ralphus       │◀─────│ ralphus       │
+│ review       │      │ code          │      │ code plan     │
+│ (Audit)      │      │ (Build)       │      │ (Task List)   │
+└──────────────┘      └───────────────┘      └───────────────┘
+       │                      │
+       ▼                      ▼
+┌──────────────┐      ┌───────────────┐
+│              │      │               │
+│ reviews/*.md │      │ IMPLEMENTATION│
+│              │      │ _PLAN.md      │
+└──────────────┘      └───────────────┘
+       │
+       ▼
+┌───────────────┐     ┌───────────────┐
+│               │     │               │
+│ ralphus       │────▶│ ralphus       │
+│ architect     │     │ code          │
+│ triage        │     │ (Fix Bugs)    │
+└───────────────┘     └───────────────┘
+```
 
 ---
 

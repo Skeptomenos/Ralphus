@@ -17,11 +17,25 @@ Ralphus is a **meta-framework** for autonomous coding loops. It orchestrates LLM
 ```bash
 # From any project directory
 cd ~/my-project
-ralphus code plan      # Generate implementation plan
-ralphus code           # Run build loop
-ralphus code ulw 20    # Ultrawork mode, max 20 iterations
-ralphus test plan      # Test creation planning
-ralphus discover       # Codebase understanding
+
+# 1. Product (Brain Dump -> Ideas)
+echo "Need a leaderboard" > inbox/dump.md
+ralphus product
+
+# 2. Architect (Ideas -> Specs)
+ralphus architect feature
+
+# 3. Build (Specs -> Code)
+ralphus code plan
+ralphus code
+
+# 4. Review (Code -> Findings)
+ralphus review plan pr
+ralphus review
+
+# 5. Fix (Findings -> Fixes)
+ralphus architect triage
+ralphus code
 ```
 
 The `ralphus` wrapper lives in `~/.local/bin/` and routes to the correct variant in `~/ralphus/variants/`.
@@ -83,6 +97,24 @@ ralphus/                          # This playbook repo
 │   ├── PROMPT_build.md           # Build phase instructions
 │   ├── AGENTS.md                 # Template for target project
 │   └── IMPLEMENTATION_PLAN.md    # Task tracking (generated)
+├── variants/                     # The Autonomous Factory
+│   ├── ralphus-code/             # Builder
+│   ├── ralphus-test/             # Tester
+│   ├── ralphus-review/           # Auditor
+│   ├── ralphus-product/          # PM (Slicer)
+│   ├── ralphus-architect/        # Tech Lead (Spec)
+│   ├── ralphus-research/         # Learner
+│   └── ralphus-discover/         # Explorer
+├── skill/                        # Homelab remote execution
+│   ├── SKILL.md                  # Remote management skill
+```
+ralphus/                          # This playbook repo
+├── files/                        # Copy these to target project
+│   ├── loop.sh                   # The eternal loop
+│   ├── PROMPT_plan.md            # Planning phase instructions
+│   ├── PROMPT_build.md           # Build phase instructions
+│   ├── AGENTS.md                 # Template for target project
+│   └── IMPLEMENTATION_PLAN.md    # Task tracking (generated)
 ├── skill/                        # Homelab remote execution
 │   ├── SKILL.md                  # Remote management skill
 │   └── config/
@@ -132,18 +164,41 @@ Study @IMPLEMENTATION_PLAN.md
 
 ---
 
-## The Ralphus Cycle
+## The Ralphus Factory Cycle
 
 ```
-1. Read the tracking plan (*_PLAN.md)
-2. Pick highest priority incomplete task
-3. Search codebase first (don't assume not implemented)
-4. Implement using parallel subagents
-5. Run tests (backpressure)
-6. If pass: commit, push, update plan
-7. If fail: fix or document in plan
-8. Context clears → repeat from step 1
+┌──────────────┐      ┌───────────────┐      ┌───────────────┐
+│              │      │               │      │               │
+│  Brain Dump  │─────▶│ ralphus       │─────▶│ ralphus       │
+│  (inbox/*.md)│      │ product       │      │ architect     │
+│              │      │ (Slice Ideas) │      │ (Write Specs) │
+└──────────────┘      └───────────────┘      └───────────────┘
+                              │                      │
+                              ▼                      ▼
+                      ┌───────────────┐      ┌───────────────┐
+                      │               │      │               │
+                      │ ideas/*.md    │      │ specs/*.md    │
+                      │               │      │               │
+                      └───────────────┘      └───────────────┘
+                                                     │
+                                                     ▼
+┌──────────────┐      ┌───────────────┐      ┌───────────────┐
+│              │      │               │      │               │
+│ ralphus      │◀─────│ ralphus       │◀─────│ ralphus       │
+│ review       │      │ code          │      │ code plan     │
+│ (Audit)      │      │ (Build)       │      │ (Task List)   │
+└──────────────┘      └───────────────┘      └───────────────┘
 ```
+
+### Roles & Responsibilities
+
+| Role | Variant | Input | Output | Purpose |
+|------|---------|-------|--------|---------|
+| **Product** | `ralphus-product` | `inbox/` | `ideas/` | Slice messy ideas into atomic features. |
+| **Architect** | `ralphus-architect` | `ideas/` | `specs/` | Research feasibility and write rigorous specs. |
+| **Builder** | `ralphus-code` | `specs/` | Code | Implement features and pass tests. |
+| **Auditor** | `ralphus-review` | Code | `reviews/` | Check security, style, and correctness. |
+| **Fixer** | `ralphus-architect` | `reviews/` | `specs/fixes.md` | Convert findings into fixable tasks. |
 
 ---
 
