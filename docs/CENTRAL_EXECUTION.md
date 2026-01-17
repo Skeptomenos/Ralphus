@@ -68,59 +68,31 @@ The wrapper should:
 
 ## Variant Discovery
 
-### Option A: Hardcoded Mapping (Simple)
-```bash
-case "$VARIANT" in
-    code)     VARIANT_DIR="ralphus-code" ;;
-    test)     VARIANT_DIR="ralphus-test" ;;
-    # ... must update wrapper for each new variant
-esac
-```
+### Directory Convention (Zero Config)
 
-### Option B: Configuration File (Extensible) ✓ Recommended
-```
-variants/
-├── variants.json          <- Variant registry
-├── ralphus-code/
-├── ralphus-test/
-└── ralphus-custom/        <- Just add entry to variants.json
-```
+The wrapper uses a simple directory convention for auto-discovery:
 
-**variants.json**:
-```json
-{
-  "code": {
-    "path": "ralphus-code",
-    "description": "Feature implementation from specs",
-    "requires": ["specs/"]
-  },
-  "test": {
-    "path": "ralphus-test", 
-    "description": "Test creation from test specs",
-    "requires": ["test-specs/"]
-  },
-  "research": {
-    "path": "ralphus-research",
-    "description": "Deep research on topics",
-    "requires": ["questions/"]
-  },
-  "discover": {
-    "path": "ralphus-discover",
-    "description": "Codebase understanding",
-    "requires": []
-  }
-}
-```
-
-### Option C: Directory Convention (Zero Config)
 ```bash
 # Auto-discover: any folder matching ralphus-* becomes a variant
 # Short name = folder name minus "ralphus-" prefix
 ls variants/ | grep "^ralphus-" | sed 's/ralphus-//'
-# => code, test, research, discover
+# => code, test, review, product, architect, research, discover
 ```
 
-**Recommendation**: Option C with Option B as override. Auto-discover by convention, but allow `variants.json` for metadata (description, requirements, aliases).
+### No Wrapper Changes Required
+
+To add a new variant, simply create `variants/ralphus-newname/`. The wrapper will automatically detect it and extract the description from the `loop.sh` header comment.
+
+```bash
+# In variants/ralphus-newname/scripts/loop.sh
+#!/bin/bash
+# Ralphus Newname - Does cool things
+```
+
+`ralphus help` will display:
+```
+  newname      Does cool things
+```
 
 ---
 
@@ -269,6 +241,8 @@ ralphus code ulw           # Ultrawork mode
 
 # Other variants
 ralphus test plan          # Plan test creation
+ralphus review plan pr     # Plan PR review
+ralphus architect feature  # Generate specs from ideas
 ralphus discover           # Discover codebase
 ralphus research ulw 10    # Research with limits
 
