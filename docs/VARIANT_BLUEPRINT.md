@@ -14,11 +14,24 @@ variants/ralphus-{name}/
 │   ├── PROMPT_{name}_plan.md    # Planning phase prompt (REQUIRED)
 │   └── PROMPT_{name}_build.md   # Execution phase prompt (REQUIRED)
 ├── templates/               # Format references for the agent
-│   └── *.md                 # At least one template file
+│   └── *_REFERENCE.md       # REQUIRED: Unique suffix to avoid project name collisions
 └── README.md                # Variant documentation (REQUIRED)
 ```
 
 **Naming Convention**: `ralphus-{name}` where `{name}` is a single lowercase word (e.g., `code`, `test`, `discover`, `research`).
+
+---
+
+## Technical Standards
+
+### 1. Template Naming (Shadow File Avoidance)
+To prevent `opencode` from prioritizing central templates over project files, all template files MUST have the `_REFERENCE.md` suffix. 
+*   **Bad**: `templates/IMPLEMENTATION_PLAN.md`
+*   **Good**: `templates/IMPLEMENTATION_PLAN_REFERENCE.md`
+
+### 2. File Ownership Guardrail
+Every prompt MUST include a high-priority guardrail to prevent agents from moving tracking files.
+> `99999. File Ownership: Do not move, rename, or reorganize tracking files (*_PLAN.md) into subdirectories. They MUST remain in the project root.`
 
 ---
 
@@ -140,10 +153,10 @@ while true; do
         MESSAGE="Read the attached prompt file and execute the instructions"
     fi
 
-    # Run OpenCode with prompt and template files
+    # Run OpenCode with prompt and reference template files
     OUTPUT=$("$OPENCODE" run --agent "$AGENT" \
         -f "$PROMPT_FILE" \
-        -f "$TEMPLATES_DIR/{TEMPLATE1}.md" \
+        -f "$TEMPLATES_DIR/{TEMPLATE1}_REFERENCE.md" \
         -- "$MESSAGE" 2>&1 | tee /dev/stderr) || true
 
     # Check completion signals
@@ -315,10 +328,10 @@ your-project/
 
 | Variant | Specs Dir | Tracking File | Default Mode | Templates |
 |---------|-----------|---------------|--------------|-----------|
-| code | `specs/` | `IMPLEMENTATION_PLAN.md` | build | `IMPLEMENTATION_PLAN.md` |
-| test | `test-specs/` | (checkboxes in specs) | test | `SPEC_FORMAT.md`, `TEST_UTILITIES.md` |
-| research | `questions/` | `RESEARCH_PLAN.md` | research | `SUMMARY.md`, `QUIZ.md`, `CONNECTIONS.md` |
-| discover | (none) | `DISCOVERY_PLAN.md` | discover | `DISCOVERY.md`, `CODEBASE_UNDERSTANDING.md` |
+| code | `specs/` | `IMPLEMENTATION_PLAN.md` | build | `IMPLEMENTATION_PLAN_REFERENCE.md` |
+| test | `test-specs/` | `TEST_PLAN.md` | test | `TEST_PLAN_REFERENCE.md`, `SPEC_FORMAT_REFERENCE.md` |
+| research | `questions/` | `RESEARCH_PLAN.md` | research | `SUMMARY_REFERENCE.md`, `QUIZ_REFERENCE.md` |
+| discover | (none) | `DISCOVERY_PLAN.md` | discover | `DISCOVERY_REFERENCE.md`, `CODEBASE_UNDERSTANDING_REFERENCE.md` |
 
 ---
 
@@ -384,4 +397,6 @@ trap 'SHUTDOWN=1; echo "Finishing current iteration..."' INT TERM
 | Skip the planning phase | Always have plan + build modes |
 | Use different completion signals | Stick to the standard signals |
 | Forget graceful shutdown | Always include the trap handler |
+| Name templates generic names | Use `_REFERENCE.md` suffix |
+| Let agent reorganize tracking files | Include "File Ownership" guardrail |
 | Skip README.md | Document usage for humans |

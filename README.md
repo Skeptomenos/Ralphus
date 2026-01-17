@@ -62,6 +62,22 @@ Then came **Sisyphus** — the OpenCode agent cursed to roll context windows uph
 | `ralphus-research` | Deep research on topics | `questions/` | `RESEARCH_PLAN.md` |
 | `ralphus-discover` | Understand a codebase | (none) | `DISCOVERY_PLAN.md` |
 
+---
+
+## Lessons Learned & Gotchas
+
+### 1. Template Name Collisions (Shadowing)
+**Problem**: If a central template has the same name as a project file (e.g., `IMPLEMENTATION_PLAN.md`), the agent will prioritize the attached template and "lose" the project's actual progress.
+**Fix**: All central templates must end in `_REFERENCE.md`.
+
+### 2. Recursive Organization Trap
+**Problem**: Autonomous agents may try to "clean up" the root by moving tracking files into subdirectories (e.g., moving `IMPLEMENTATION_PLAN.md` to `docs/planning/`), which breaks the loop logic.
+**Fix**: Every variant includes a high-priority "File Ownership" guardrail preventing this behavior.
+
+### 3. Directory Context
+**Problem**: Scripts can get confused between the Ralphus installation and the project working directory.
+**Fix**: Always use `SCRIPT_DIR` for internal Ralphus files and `$WORKING_DIR` (set via `RALPHUS_WORKING_DIR`) for project files. Ensure the script `cd`s to the project root at startup.
+
 Each variant contains:
 ```
 variants/ralphus-{name}/
@@ -79,6 +95,7 @@ variants/ralphus-{name}/
 ## Prerequisites
 
 - [OpenCode](https://github.com/opencode-ai/opencode) installed
+- [tmux](https://github.com/tmux/tmux) installed (`brew install tmux`)
 - Sisyphus agent configured (or set `RALPH_AGENT` to your preferred agent)
 - Git repository initialized in your project
 
