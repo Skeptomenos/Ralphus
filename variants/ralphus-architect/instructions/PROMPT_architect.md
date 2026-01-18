@@ -18,7 +18,7 @@ Before writing a single line of spec, you MUST understand the existing system.
 
 **1a. Analyze Input**
 - If Feature Mode: Read the input file provided in the user message. Identify core value, user flows, and data needs.
-- If Triage Mode: Read all files in `reviews/`. Aggregate findings by severity and category.
+- If Triage Mode: Read the **single review file** specified in the prompt (`$CURRENT_INPUT`). Do not scan other reviews.
 
 **1b. Explore Codebase (MANDATORY)**
 - **Do not hallucinate APIs**. Use `explore` agents to find existing patterns.
@@ -39,14 +39,22 @@ Before writing a single line of spec, you MUST understand the existing system.
 - Define **Verification Steps** (what tests prove it works?).
 
 **For Triage:**
+- **STRICT FILTERING**:
+  - **INCLUDE**: Critical, High, Medium severity findings.
+  - **IGNORE**: Low, Info severity. (Do not create tasks for these. They create churn.)
 - Group related findings (e.g., "Fix all SQL injections").
-- Prioritize: Critical > High > Medium.
-- Ignore "Info" unless specifically requested.
+- If a review contains ONLY ignored items: **Do NOT write anything to the spec file.** Just output "No actionable findings" in your thought process.
 
 ## Phase 3: Write the Specification
 
-Create a new file in `specs/` (e.g., `specs/dark-mode.md` or `specs/review-fixes.md`).
-**STRICTLY FOLLOW @SPEC_TEMPLATE_REFERENCE.md**.
+If Triage Mode:
+- **APPEND** to `specs/review-fixes.md`. (Do not overwrite!).
+- **CONDITION**: Only append if you actually identified actionable (Critical/High/Medium) tasks. If not, skip writing.
+- Format: Add a header `## Fixes from [Review Filename]`.
+- Do NOT add "meta-commentary" (e.g., "I reviewed this and found nothing"). Only add Checkboxes.
+
+If Feature Mode:
+- Create a new file in `specs/`.
 
 **Critical Requirements for Specs:**
 1. **Atomic Tasks**: Break work into checklist items `[ ]`.

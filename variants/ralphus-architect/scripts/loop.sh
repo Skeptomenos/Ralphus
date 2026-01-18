@@ -87,9 +87,14 @@ if [ "$MODE" = "triage" ]; then
         echo "Error: $REVIEWS_DIR not found. Run 'ralphus review' first."
         exit 1
     fi
-    FINDING_COUNT=$(find "$REVIEWS_DIR" -name "*_review.md" | wc -l)
+    mkdir -p "$REVIEWS_DIR/processed"
+    
+    # Check if there are any unprocessed reviews
+    # find reviews/ -maxdepth 1 -name "*.md"
+    FINDING_COUNT=$(find "$REVIEWS_DIR" -maxdepth 1 -name "*_review.md" | wc -l)
     if [ "$FINDING_COUNT" -eq 0 ]; then
-        echo "No review files found in $REVIEWS_DIR."
+        echo "No unprocessed review files found in $REVIEWS_DIR."
+        echo "Check $REVIEWS_DIR/processed/ for completed items."
         exit 0
     fi
 fi
@@ -147,8 +152,18 @@ while true; do
         MESSAGE="Act as Senior Architect. Analyze '$CURRENT_INPUT' and existing codebase. Create a technical specification in '$SPECS_DIR/$(basename "$CURRENT_INPUT")'."
         
     else
-        # Triage mode
-        MESSAGE="Act as Senior Architect. Analyze 'reviews/*.md' and create a fix specification in 'specs/review-fixes.md'."
+        # Triage mode (Processed Folder Pattern)
+        # 1. Find first unprocessed review
+        CURRENT_INPUT=$(find "$REVIEWS_DIR" -maxdepth 1 -name "*_review.md" | head -n 1)
+        
+        if [ -z "$CURRENT_INPUT" ]; then
+            echo "All reviews processed!"
+            exit 0
+        fi
+        
+        echo "Triaging: $(basename "$CURRENT_INPUT")"
+        
+        MESSAGE="Act as Senior Architect. Analyze '$CURRENT_INPUT'. Extract actionable fixes and APPEND them to 'specs/review-fixes.md'. Use the format in @SPEC_TEMPLATE_REFERENCE.md."
     fi
     
     echo "Task: $MESSAGE"
@@ -157,13 +172,28 @@ while true; do
         MESSAGE="$MESSAGE ulw"
     fi
 
+    # Export for prompt
+    export CURRENT_INPUT="$CURRENT_INPUT"
+
     OUTPUT=$("$OPENCODE" run --agent "$AGENT" \
         -f "$INSTRUCTIONS_DIR/PROMPT_architect.md" \
         -f "$TEMPLATES_DIR/SPEC_TEMPLATE_REFERENCE.md" \
         -f "$TEMPLATES_DIR/ARCHITECT_PLAN_REFERENCE.md" \
         -- "$MESSAGE" 2>&1 | tee /dev/stderr) || true
 
-    # Check signals
+    # Post-processing for Triage: Move to processed
+    if [ "$MODE" = "triage" ] && [ -f "$CURRENT_INPUT" ]; then
+        mv "$CURRENT_INPUT" "$REVIEWS_DIR/processed/"
+        echo "Moved $(basename "$CURRENT_INPUT") to processed/"
+        
+        # Don't exit loop, continue to next file until max iterations
+        if echo "$OUTPUT" | grep -q "<promise>COMPLETE</promise>"; then
+            echo "Item complete."
+        fi
+        continue
+    fi
+
+    # Check signals (for Feature mode)
     if echo "$OUTPUT" | grep -q "<promise>COMPLETE</promise>"; then
         echo "=== ARCHITECT COMPLETE ==="
         exit 0
