@@ -18,7 +18,7 @@
 
 ## Phase 2: Update Spec Template
 
-- [ ] 2.1 Add "Task Format" section to `SPEC_TEMPLATE_REFERENCE.md`
+- [x] 2.1 Add "Task Format" section to `SPEC_TEMPLATE_REFERENCE.md`
       File: `variants/ralphus-architect/templates/SPEC_TEMPLATE_REFERENCE.md`
       Location: Before "## Verification Steps"
       Content: Task format with good/bad examples showing grouped vs granular tasks

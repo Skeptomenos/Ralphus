@@ -38,6 +38,27 @@ OR: This spec addresses security vulnerabilities found in the auth module.
 - [ ] Update `App.tsx` to wrap with provider.
 - [ ] Add toggle switch to `SettingsPage.tsx`.
 
+## Task Format
+
+Each task should include:
+1. **What to build** (files, functions, components)
+2. **Test criteria** (how to verify it works)
+3. Optional: **Dependencies** (what must exist first)
+
+**Good Example:**
+- [ ] 2.3 Create variant config files for all 7 variants
+      Files: variants/*/config.sh (code, review, architect, product, test, research, discover)
+      Pattern: VARIANT_NAME, TRACKING_FILE, DEFAULT_PROMPT, REQUIRED_DIRS
+      Test: Each config.sh sources without error, required vars are set
+      Depends: 2.1 (shared library exists)
+
+**Bad Example (too granular):**
+- [ ] 2.3 Create config.sh for ralphus-code
+- [ ] 2.4 Create config.sh for ralphus-test
+- [ ] 2.5 Create config.sh for ralphus-discover
+- [ ] 2.6 Create config.sh for ralphus-research
+... (4 separate tasks for identical work)
+
 ## Verification Steps
 <!-- How to prove it works -->
 - Run `npm test src/features/settings`.
