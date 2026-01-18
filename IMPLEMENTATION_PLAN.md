@@ -48,7 +48,7 @@
 
 ## Phase 5: Validation
 
-- [ ] 5.1 Run all verification commands from spec
+- [x] 5.1 Run all verification commands from spec (all 5 tests passed)
       Tests:
         - `grep -c "Task Batching Guidelines" variants/ralphus-architect/instructions/PROMPT_architect.md`
         - `grep -c "15-25 tasks" variants/ralphus-architect/instructions/PROMPT_architect.md`
