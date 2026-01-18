@@ -47,7 +47,7 @@
 - [x] 3.4 Refactor `variants/ralphus-product/scripts/loop.sh`: Source config.sh and lib/loop_core.sh; implement sequential (non-loop) pattern; keep init/process modes; call run_sequential "$@"
 - [x] 3.5 Refactor `variants/ralphus-test/scripts/loop.sh`: Source config.sh and lib/loop_core.sh; implement get_templates() for test templates; implement validate_variant() for test-specs completion check; call run_loop "$@" (168 -> 68 lines, 60% reduction)
 - [x] 3.6 Refactor `variants/ralphus-research/scripts/loop.sh`: Source config.sh and lib/loop_core.sh; implement get_templates() for research templates; call run_loop "$@" (146 -> 59 lines, 60% reduction)
-- [ ] 3.7 Refactor `variants/ralphus-discover/scripts/loop.sh`: Source config.sh and lib/loop_core.sh; implement get_templates() for discover templates; call run_loop "$@"
+- [x] 3.7 Refactor `variants/ralphus-discover/scripts/loop.sh`: Source config.sh and lib/loop_core.sh; implement get_templates() for discover templates; call run_loop "$@" (126 -> 49 lines, 61% reduction)
 
 ---
 
