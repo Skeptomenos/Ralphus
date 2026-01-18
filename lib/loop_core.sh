@@ -394,5 +394,39 @@ check_shutdown() {
 }
 
 # =============================================================================
-# Remaining core functions (1.10 - 1.16) to be implemented in subsequent tasks
+# 1.10 check_max_iterations() - Check if iteration limit has been reached
+# =============================================================================
+# Called at the beginning of each loop iteration to check if the maximum number
+# of iterations has been reached. Used to limit runaway loops.
+#
+# Uses globals:
+#   MAX_ITERATIONS - Maximum allowed iterations (0 = unlimited)
+#   ITERATION - Current iteration count
+#
+# Returns:
+#   0 - Continue looping (limit not reached or unlimited)
+#   1 - Stop looping (iteration limit reached)
+#
+# Example usage in run_loop():
+#   if ! check_max_iterations; then
+#       echo "Max iterations ($MAX_ITERATIONS) reached."
+#       exit 0
+#   fi
+# =============================================================================
+check_max_iterations() {
+    # If MAX_ITERATIONS is 0 or unset, no limit - always continue
+    if [[ "${MAX_ITERATIONS:-0}" -eq 0 ]]; then
+        return 0
+    fi
+
+    # Check if we've reached or exceeded the limit
+    if [[ "$ITERATION" -ge "$MAX_ITERATIONS" ]]; then
+        return 1
+    fi
+
+    return 0
+}
+
+# =============================================================================
+# Remaining core functions (1.11 - 1.16) to be implemented in subsequent tasks
 # =============================================================================
