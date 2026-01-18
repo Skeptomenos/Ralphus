@@ -94,6 +94,8 @@ Implement modular loop architecture using the Ralphus factory pipeline:
 | 3 | Medium | Build | Every iteration re-reads IMPLEMENTATION_PLAN.md and runs `ls` | Consider caching or context persistence between iterations |
 | 4 | Low | Build | Tag format inconsistent (0.0.1 vs v0.0.7) | Standardize in loop_core.sh |
 | 5 | High | Architect | Task granularity too fine - 50 tasks at ~3min each = 2.5 hours | Group related tasks (e.g., all shutdown functions = 1 task) |
+| 7 | Medium | Build | Building monolith - 838 lines in single file (spec said ~200) | 382 comment lines (46%!) + 76 blank = 458 non-code. Actual code ~380 lines. Heavy documentation. |
+| 8 | Low | Build | No modular file splitting | Could split into lib/init.sh, lib/loop.sh, lib/signals.sh etc. |
 | 6 | ~~Medium~~ | ~~Build~~ | ~~No context persistence between iterations~~ | **INVALID** - Fresh context IS the feature. IMPLEMENTATION_PLAN.md is the persistence layer. This prevents hallucination accumulation. |
 
 ---
