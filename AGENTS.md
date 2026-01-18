@@ -4,7 +4,7 @@
 
 ## Project Overview
 
-Ralphus is a **meta-framework** for autonomous coding loops. It orchestrates LLM agents (Sisyphus/Claude) to iteratively implement features from specs. This is NOT a traditional codebase—it's a playbook meant to be copied into target projects.
+Ralphus is a **meta-framework** for autonomous coding loops. It orchestrates LLM agents to iteratively implement features from specs. This is NOT a traditional codebase—it's a playbook meant to be copied into target projects.
 
 **Core Philosophy**: "Let Ralphus Ralphus" — the loop is self-correcting through backpressure (failing tests).
 
@@ -120,7 +120,6 @@ ralphus/                          # This playbook repo
 │   ├── ralphus-review/           # Auditor
 │   ├── ralphus-architect/        # Tech Lead (Spec)
 │   ├── ralphus-product/          # PM (Slicer)
-│   ├── ralphus-test/             # Tester
 │   ├── ralphus-research/         # Learner
 │   └── ralphus-discover/         # Explorer
 ├── skills/                       # OpenCode skills
@@ -251,15 +250,6 @@ See `variants/ralphus-architect/instructions/PROMPT_architect.md` for full Task 
 
 ---
 
-## Completion Signals
-
-| Signal | Meaning |
-|--------|---------|
-| `<promise>COMPLETE</promise>` | All tasks done, loop exits cleanly |
-| `<promise>BLOCKED:[task]:[reason]</promise>` | Stuck, needs human intervention |
-
----
-
 ## Error Recovery Protocol
 
 1. **Test fails**: Fix the code, not the test
@@ -267,20 +257,6 @@ See `variants/ralphus-architect/instructions/PROMPT_architect.md` for full Task 
 3. **15 min no progress**: Output `<promise>BLOCKED:[task]:[reason]</promise>`
 
 **Never**: Delete failing tests, spin on same error, leave code broken
-
----
-
-## OpenCode / Sisyphus Configuration
-
-```bash
-RALPH_AGENT="Sisyphus"           # Agent to use
-OPENCODE_BIN="opencode"          # Binary path
-```
-
-| Claude Code | OpenCode |
-|-------------|----------|
-| `claude -p` | `opencode run --agent Sisyphus` |
-| `--model opus` | `--agent Sisyphus` |
 
 ---
 
@@ -300,17 +276,7 @@ OPENCODE_BIN="opencode"          # Binary path
 
 Succinct learnings about how to RUN the project:
 
-- OpenCode CLI required: `opencode run --agent Sisyphus -f PROMPT.md "message"`
-- Default agent is Sisyphus, override with `RALPH_AGENT=build`
+- OpenCode CLI required: `opencode run -f PROMPT.md "message"`
+- Prompts are inlined (not attached via `-f`) to prevent path leakage to agents
 - Remote homelab uses `~/.opencode/bin/opencode` path
-
-### Codebase Patterns
-
-...
-
-```bash
-# Lint shell scripts
-shellcheck variants/*/scripts/loop.sh
-bash -n variants/*/scripts/loop.sh    # Validate syntax
-```
-
+- Override agent with `RALPH_AGENT=<agent-name>` environment variable
