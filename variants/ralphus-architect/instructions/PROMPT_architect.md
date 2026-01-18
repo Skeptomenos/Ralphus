@@ -50,8 +50,11 @@ Before writing a single line of spec, you MUST understand the existing system.
 If Triage Mode:
 - **APPEND** to `specs/review-fixes.md`. (Do not overwrite!).
 - **CONDITION**: Only append if you actually identified actionable (Critical/High/Medium) tasks. If not, skip writing.
-- Format: Add a header `## Fixes from [Review Filename]`.
-- Do NOT add "meta-commentary" (e.g., "I reviewed this and found nothing"). Only add Checkboxes.
+- **HEADER**: Add a header `## Fixes from @reviews/processed/[Review Filename]`.
+  - **CRITICAL**: Use the `@reviews/processed/` path because the script moves the file there!
+  - If you don't link the file, the Coder won't know how to fix it.
+- **CONTENT**: Use checklists. If the fix is simple, include it inline. If complex, rely on the link.
+- Do NOT add "meta-commentary". Only add Checkboxes.
 
 If Feature Mode:
 - Create a new file in `specs/`.
