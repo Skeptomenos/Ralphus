@@ -63,7 +63,7 @@
 
 - [x] 5.1 Run `bash -n lib/loop_core.sh` - verify syntax
 - [x] 5.2 Run `bash -n variants/*/scripts/loop.sh` - verify all variant scripts
-- [ ] 5.3 Run `shellcheck lib/loop_core.sh` - fix any warnings
+- [x] 5.3 Run `shellcheck lib/loop_core.sh` - fix any warnings
 - [ ] 5.4 Run `shellcheck variants/*/scripts/loop.sh` - fix any warnings
 - [ ] 5.5 Test `ralphus code plan` - verify plan mode works
 - [ ] 5.6 Test `ralphus code` - verify build mode works

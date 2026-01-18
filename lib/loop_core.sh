@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC2034  # Globals are intentionally set for variant hooks to access
 # =============================================================================
 # loop_core.sh - Shared library for Ralphus autonomous loop variants
 # =============================================================================
@@ -326,7 +327,9 @@ archive_on_branch_change() {
         # Check if branch has changed
         if [[ "$last_branch" != "$CURRENT_BRANCH" ]]; then
             # Create archive directory with date and last branch name
-            local archive_dir="$WORKING_DIR/archive/$(date +%Y-%m-%d)-$last_branch"
+            # SC2155: Declare and assign separately to avoid masking return values
+            local archive_dir
+            archive_dir="$WORKING_DIR/archive/$(date +%Y-%m-%d)-$last_branch"
             mkdir -p "$archive_dir"
 
             # Copy each file in ARCHIVE_FILES array
@@ -531,7 +534,7 @@ run_opencode() {
 #   EXTRA_SIGNALS - Optional array of additional signals to check (from config.sh)
 #
 # Sets globals:
-#   SIGNAL_FOUND - The signal that was detected (empty if none)
+#   SIGNAL_FOUND - The signal that was detected (empty if none), exported for variant hooks
 #   BLOCKED_REASON - Extracted reason from BLOCKED signal (if applicable)
 #
 # Returns:
