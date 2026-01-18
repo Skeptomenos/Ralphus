@@ -144,14 +144,10 @@ validate_variant() {
 # =============================================================================
 # Hook: get_templates() - Return template files for opencode
 # =============================================================================
+# Note: PROJECT_CONTEXT.md is not attached - agent reads it directly from working dir
 get_templates() {
     echo "$TEMPLATES_DIR/SPEC_TEMPLATE_REFERENCE.md"
     echo "$TEMPLATES_DIR/ARCHITECT_PLAN_REFERENCE.md"
-    
-    # Include PROJECT_CONTEXT.md if it exists
-    if [[ -f "$WORKING_DIR/PROJECT_CONTEXT.md" ]]; then
-        echo "$WORKING_DIR/PROJECT_CONTEXT.md"
-    fi
 }
 
 # =============================================================================

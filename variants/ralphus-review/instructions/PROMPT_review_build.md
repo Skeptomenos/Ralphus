@@ -15,12 +15,13 @@ You are executing code reviews from the review plan, acting as a senior engineer
 
 ## Phase 0: Load Context
 
-0a. **Read @REVIEW_PLAN.md**: Find the first incomplete `[ ]` review item.
-0b. **Get file content**: Based on `REVIEW_TARGET`:
+0a. **Read Project Context**: If @PROJECT_CONTEXT.md exists, read it for coding conventions and anti-patterns.
+0b. **Read @REVIEW_PLAN.md**: Find the first incomplete `[ ]` review item.
+0c. **Get file content**: Based on `REVIEW_TARGET`:
     - `pr`: Use `git show HEAD:path/to/file` and compare with `git show $MAIN_BRANCH:path/to/file`
     - `diff`: Use `git diff path/to/file` to see uncommitted changes
     - `codebase`/`files`: Read the file directly
-0c. **Study context**: Read related files (imports, tests, types) using explore agents.
+0d. **Study context**: Read related files (imports, tests, types) using explore agents.
 
 ## Phase 1: Execute Review
 

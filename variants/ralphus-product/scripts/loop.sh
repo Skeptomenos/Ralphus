@@ -54,15 +54,12 @@ validate_variant() {
 }
 
 # Get template files based on mode
+# Note: PROJECT_CONTEXT.md is not attached - agent reads it directly from working dir
 get_templates() {
     if [[ "$MODE" = "init" ]]; then
         echo "$TEMPLATES_DIR/CONTEXT_TEMPLATE_REFERENCE.md"
     else
         echo "$TEMPLATES_DIR/IDEA_TEMPLATE_REFERENCE.md"
-        # Attach PROJECT_CONTEXT.md if it exists
-        if [[ -f "$WORKING_DIR/PROJECT_CONTEXT.md" ]]; then
-            echo "$WORKING_DIR/PROJECT_CONTEXT.md"
-        fi
     fi
 }
 
