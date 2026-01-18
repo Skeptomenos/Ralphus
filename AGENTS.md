@@ -198,7 +198,7 @@ Study @IMPLEMENTATION_PLAN.md
 | **Architect** | `ralphus-architect` | `ideas/` | `specs/` | Research feasibility and write rigorous specs. |
 | **Builder** | `ralphus-code` | `specs/` | Code | Implement features and pass tests. |
 | **Auditor** | `ralphus-review` | Code | `reviews/` | Check security, style, and correctness. |
-| **Fixer** | `ralphus-architect` | `reviews/` | `specs/fixes.md` | Convert findings into fixable tasks. |
+| **Fixer** | `ralphus-architect` | `reviews/` | `specs/review-fixes.md` | Triage findings. STRICTLY ignores Low/Info. Moves processed reviews to `reviews/processed/`. |
 
 ---
 
