@@ -66,10 +66,19 @@ Implement modular loop architecture using the Ralphus factory pipeline:
 ### Launch
 - **Command**: `ralphus code`
 - **Started**: 2026-01-18 ~10:16 AM
-- **Status**: Running
+- **Status**: Running (Iteration 5)
 
 ### Observations
-<!-- Will be updated as we watch -->
+1. **Incremental Progress**: Each iteration completes exactly 1 task - very disciplined approach.
+2. **Tagging Each Change**: Creating semver tags (0.0.1, 0.0.2, 0.0.3, 0.0.4...) after each task.
+3. **Inline Testing**: Writing and running bash tests inline before committing - excellent practice!
+4. **Syntax Validation**: Running `bash -n` before every commit.
+5. **Shellcheck Missing**: `shellcheck` not installed on this machine - noted but continued.
+6. **Clean Summaries**: Each iteration ends with a clear summary of what was done.
+7. **Progress So Far** (as of iteration 5):
+   - lib/loop_core.sh: 211 lines
+   - Tasks completed: 4/50
+   - Tags created: 0.0.1 through 0.0.4
 
 ---
 

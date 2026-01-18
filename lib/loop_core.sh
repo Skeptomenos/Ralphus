@@ -207,5 +207,35 @@ parse_variant_args() {
 }
 
 # =============================================================================
-# Remaining core functions (1.5 - 1.16) to be implemented in subsequent tasks
+# 1.5 show_header() - Display startup banner with current configuration
+# =============================================================================
+# Prints a formatted header showing the variant name, mode, agent, and branch.
+# Also displays ultrawork and max_iterations if they are set.
+#
+# Uses globals:
+#   VARIANT_NAME - From config.sh (e.g., "code", "review", "architect")
+#   MODE - From parse_common_args() (e.g., "build", "plan")
+#   AGENT - From init_ralphus() (default: "Sisyphus")
+#   CURRENT_BRANCH - Git branch name
+#   ULTRAWORK - Flag (0 or 1)
+#   MAX_ITERATIONS - Iteration limit (0 = unlimited)
+# =============================================================================
+show_header() {
+    echo ""
+    echo "=== RALPHUS ${VARIANT_NAME:-unknown}: ${MODE} mode | ${AGENT} | ${CURRENT_BRANCH:-no-branch} ==="
+    
+    # Show optional settings if enabled
+    if [[ "$ULTRAWORK" -eq 1 ]]; then
+        echo "    Ultrawork: ENABLED"
+    fi
+    
+    if [[ "$MAX_ITERATIONS" -gt 0 ]]; then
+        echo "    Max iterations: ${MAX_ITERATIONS}"
+    fi
+    
+    echo ""
+}
+
+# =============================================================================
+# Remaining core functions (1.6 - 1.16) to be implemented in subsequent tasks
 # =============================================================================
