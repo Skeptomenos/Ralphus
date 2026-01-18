@@ -52,8 +52,25 @@ while [[ $# -gt 0 ]]; do
             ULTRAWORK=1
             shift
             ;;
+        [0-9]*)
+            MAX_ITERATIONS=$1
+            shift
+            ;;
+        help|--help|-h)
+            echo "Usage: ralphus architect [feature <file> | triage] [ulw] [N]"
+            echo ""
+            echo "Modes:"
+            echo "  feature <file>   Convert raw idea file to rigorous spec"
+            echo "  triage           Convert reviews/ findings to fix spec"
+            echo ""
+            echo "Options:"
+            echo "  ulw              Ultrawork mode"
+            echo "  N                Max iterations (e.g. 10)"
+            exit 0
+            ;;
         *)
             echo "Unknown argument: $1"
+            echo "Run 'ralphus architect help' for usage."
             exit 1
             ;;
     esac
@@ -103,14 +120,15 @@ fi
 mkdir -p "$SPECS_DIR"
 
 ITERATION=0
-MAX_ITERATIONS=10 # Allow batch processing up to 10 ideas by default
+MAX_ITERATIONS=0 # Default: Unlimited
 
 echo "=== RALPHUS ARCHITECT: $MODE | $AGENT ==="
 
 # Execution Loop
 while true; do
     ITERATION=$((ITERATION + 1))
-    if [ "$ITERATION" -gt "$MAX_ITERATIONS" ]; then
+    if [ "$MAX_ITERATIONS" -gt 0 ] && [ "$ITERATION" -gt "$MAX_ITERATIONS" ]; then
+        echo "Reached max iterations: $MAX_ITERATIONS"
         break
     fi
 
@@ -175,10 +193,20 @@ while true; do
     # Export for prompt
     export CURRENT_INPUT="$CURRENT_INPUT"
 
+    # Prepare arguments
+    OPTS=(
+        -f "$INSTRUCTIONS_DIR/PROMPT_architect.md"
+        -f "$TEMPLATES_DIR/SPEC_TEMPLATE_REFERENCE.md"
+        -f "$TEMPLATES_DIR/ARCHITECT_PLAN_REFERENCE.md"
+    )
+    
+    # Attach Context if it exists
+    if [ -f "$WORKING_DIR/PROJECT_CONTEXT.md" ]; then
+        OPTS+=(-f "$WORKING_DIR/PROJECT_CONTEXT.md")
+    fi
+
     OUTPUT=$("$OPENCODE" run --agent "$AGENT" \
-        -f "$INSTRUCTIONS_DIR/PROMPT_architect.md" \
-        -f "$TEMPLATES_DIR/SPEC_TEMPLATE_REFERENCE.md" \
-        -f "$TEMPLATES_DIR/ARCHITECT_PLAN_REFERENCE.md" \
+        "${OPTS[@]}" \
         -- "$MESSAGE" 2>&1 | tee /dev/stderr) || true
 
     # Post-processing for Triage: Move to processed

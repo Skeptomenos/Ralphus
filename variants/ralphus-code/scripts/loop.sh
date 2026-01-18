@@ -23,6 +23,7 @@ ULTRAWORK=0
 MODE="build"
 PROMPT_FILE="$INSTRUCTIONS_DIR/PROMPT_build.md"
 MAX_ITERATIONS=0
+CUSTOM_PROMPT=""
 
 for arg in "$@"; do
     if [ "$arg" = "plan" ]; then
@@ -32,6 +33,19 @@ for arg in "$@"; do
         ULTRAWORK=1
     elif [[ "$arg" =~ ^[0-9]+$ ]]; then
         MAX_ITERATIONS=$arg
+    elif [ "$arg" = "help" ] || [ "$arg" = "--help" ] || [ "$arg" = "-h" ]; then
+        echo "Usage: ralphus code [plan] [ulw] [N] [\"custom prompt\"]"
+        exit 0
+    else
+        # Custom prompt injection
+        if [ -f "$arg" ]; then
+            # If argument is a file, read its content
+            CONTENT=$(cat "$arg")
+            CUSTOM_PROMPT="$CUSTOM_PROMPT $CONTENT"
+        else
+            # Otherwise treat as text string
+            CUSTOM_PROMPT="$CUSTOM_PROMPT $arg"
+        fi
     fi
 done
 
@@ -98,6 +112,10 @@ while true; do
         MESSAGE="Read the attached prompt file and execute the instructions. ulw"
     else
         MESSAGE="Read the attached prompt file and execute the instructions"
+    fi
+    
+    if [ -n "$CUSTOM_PROMPT" ]; then
+        MESSAGE="$MESSAGE. Additional Instructions: $CUSTOM_PROMPT"
     fi
 
     OUTPUT=$("$OPENCODE" run --agent "$AGENT" \

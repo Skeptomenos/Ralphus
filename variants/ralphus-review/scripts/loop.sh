@@ -171,12 +171,22 @@ while true; do
         MESSAGE="Read the attached prompt file and execute the instructions. Review target: $REVIEW_TARGET. Main branch: $MAIN_BRANCH."
     fi
 
+    # Prepare arguments
+    OPTS=(
+        -f "$PROMPT_FILE"
+        -f "$TEMPLATES_DIR/REVIEW_PLAN_REFERENCE.md"
+        -f "$TEMPLATES_DIR/REVIEW_CHECKLIST_REFERENCE.md"
+        -f "$TEMPLATES_DIR/REVIEW_FINDING_REFERENCE.md"
+    )
+    
+    # Attach Context if it exists
+    if [ -f "$WORKING_DIR/PROJECT_CONTEXT.md" ]; then
+        OPTS+=(-f "$WORKING_DIR/PROJECT_CONTEXT.md")
+    fi
+
     # Run OpenCode with the prompt file and templates
     OUTPUT=$("$OPENCODE" run --agent "$AGENT" \
-        -f "$PROMPT_FILE" \
-        -f "$TEMPLATES_DIR/REVIEW_PLAN_REFERENCE.md" \
-        -f "$TEMPLATES_DIR/REVIEW_CHECKLIST_REFERENCE.md" \
-        -f "$TEMPLATES_DIR/REVIEW_FINDING_REFERENCE.md" \
+        "${OPTS[@]}" \
         -- "$MESSAGE" 2>&1 | tee /dev/stderr) || true
 
     # Check completion signals

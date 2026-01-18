@@ -19,15 +19,45 @@ OPENCODE="${OPENCODE_BIN:-opencode}"
 INBOX_DIR="$WORKING_DIR/inbox"
 ARCHIVE_DIR="$INBOX_DIR/archive"
 IDEAS_DIR="$WORKING_DIR/ideas"
+MODE="process"
 ULTRAWORK=0
 
 # Arguments
+if [ "${1:-}" = "init" ]; then
+    MODE="init"
+    shift
+elif [ "${1:-}" = "help" ] || [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
+    echo "Usage: ralphus product [init] [ulw]"
+    echo ""
+    echo "Modes:"
+    echo "  (default)   Process inbox/ -> ideas/"
+    echo "  init        Establish PROJECT_CONTEXT.md from docs"
+    exit 0
+elif [ "${1:-}" = "ultrawork" ] || [ "${1:-}" = "ulw" ]; then
+    ULTRAWORK=1
+fi
+
 if [ "${1:-}" = "ultrawork" ] || [ "${1:-}" = "ulw" ]; then
     ULTRAWORK=1
 fi
 
 # Ensure directories exist
 mkdir -p "$INBOX_DIR" "$ARCHIVE_DIR" "$IDEAS_DIR"
+
+if [ "$MODE" = "init" ]; then
+    echo "=== RALPHUS PRODUCT: Initialization Mode ==="
+    MESSAGE="Act as Head of Product. Read documentation and existing specs to establish PROJECT_CONTEXT.md. Do NOT process inbox yet."
+    
+    if [ "$ULTRAWORK" -eq 1 ]; then MESSAGE="$MESSAGE ulw"; fi
+
+    "$OPENCODE" run --agent "$AGENT" \
+        -f "$INSTRUCTIONS_DIR/PROMPT_product_init.md" \
+        -f "$TEMPLATES_DIR/CONTEXT_TEMPLATE_REFERENCE.md" \
+        -- "$MESSAGE"
+        
+    echo "Context initialized. Run 'ralphus product' to process inbox."
+    exit 0
+fi
 
 # Check for files
 FILES=$(find "$INBOX_DIR" -maxdepth 1 -name "*.md")
@@ -43,9 +73,9 @@ for file in $FILES; do
     echo -e "\nProcessing: $(basename "$file")"
     
     if [ "$ULTRAWORK" -eq 1 ]; then
-        MESSAGE="Act as Product Manager. Analyze this file, slice into atomic ideas in '$IDEAS_DIR/', and archive the input. ulw"
+        MESSAGE="Act as Product Manager. Read 'PROJECT_CONTEXT.md'. Analyze this file, slice into atomic ideas in '$IDEAS_DIR/', update the Context roadmap, and archive the input. ulw"
     else
-        MESSAGE="Act as Product Manager. Analyze this file, slice into atomic ideas in '$IDEAS_DIR/', and archive the input."
+        MESSAGE="Act as Product Manager. Read 'PROJECT_CONTEXT.md'. Analyze this file, slice into atomic ideas in '$IDEAS_DIR/', update the Context roadmap, and archive the input."
     fi
 
     # We pass the content of the file implicitly by attaching it? 
@@ -56,9 +86,19 @@ for file in $FILES; do
     export INPUT_FILE="$file"
     export ARCHIVE_DIR="$ARCHIVE_DIR"
 
+    # Prepare arguments
+    OPTS=(
+        -f "$INSTRUCTIONS_DIR/PROMPT_product.md"
+        -f "$TEMPLATES_DIR/IDEA_TEMPLATE_REFERENCE.md"
+    )
+    
+    # Attach Context if it exists
+    if [ -f "$WORKING_DIR/PROJECT_CONTEXT.md" ]; then
+        OPTS+=(-f "$WORKING_DIR/PROJECT_CONTEXT.md")
+    fi
+
     OUTPUT=$("$OPENCODE" run --agent "$AGENT" \
-        -f "$INSTRUCTIONS_DIR/PROMPT_product.md" \
-        -f "$TEMPLATES_DIR/IDEA_TEMPLATE_REFERENCE.md" \
+        "${OPTS[@]}" \
         -- "$MESSAGE Input file: $file" 2>&1 | tee /dev/stderr) || true
 
     # Move processed file to archive (if agent didn't do it)

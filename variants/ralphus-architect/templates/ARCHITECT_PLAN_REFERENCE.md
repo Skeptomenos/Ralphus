@@ -14,9 +14,15 @@
 | UI | Tailwind | Add `dark:` classes |
 
 ## Strategy
-1. **Migration**: First, ensure DB supports new field.
-2. **Backend**: Expose via existing User API.
-3. **Frontend**: Build UI last.
+1. **Filtering**: Ignore Low/Info findings. Only fix Critical/High/Medium.
+2. **Grouping**: Combine duplicate issues (e.g. same import error in 5 files).
+3. **Specification**: Create atomic, testable tasks for `ralphus-code`.
+
+## Action Plan
+- [ ] Read review file
+- [ ] Extract actionable items
+- [ ] Append to `specs/review-fixes.md` (if any)
+- [ ] Move to `processed/` (handled by script)
 
 ## Risk Assessment
 - **Breaking Changes**: None expected.

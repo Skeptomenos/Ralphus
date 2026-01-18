@@ -10,15 +10,20 @@ The Technical Product Manager for your autonomous team. Converts raw brain dumps
 ## Usage
 
 ```bash
-# 1. Dump your thoughts
+# 1. Initialize Context (First run only)
+ralphus product init
+# Result: Reads docs/ and creates PROJECT_CONTEXT.md (Vision & Constraints)
+
+# 2. Dump your thoughts
 echo "I want a leaderboard. Top 10 users. Reset weekly." > inbox/leaderboard_dump.md
 
-# 2. Run Product
+# 3. Run Product Loop
 ralphus product
 
 # Result: 
 # - inbox/leaderboard_dump.md is MOVED to inbox/archive/
-# - ideas/leaderboard.md is CREATED with User Story, Scope, and Assumptions.
+# - ideas/leaderboard.md is CREATED
+# - PROJECT_CONTEXT.md is UPDATED with the new active feature
 ```
 
 ## Why use this?
