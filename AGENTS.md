@@ -208,6 +208,25 @@ Study @IMPLEMENTATION_PLAN.md
 
 ---
 
+## Task Batching
+
+Group implementation tasks by **testable deliverable**, not by code unit. Target: **15-25 tasks per feature**.
+
+| Scope | Tasks | Example |
+|-------|-------|---------|
+| New module with multiple functions | 1 | "Create lib/signals.sh with all signal handling" |
+| Similar config files (5-7 files) | 1-2 | "Create config.sh for all variants" |
+| Refactor similar scripts | 2-3 | "Refactor simple variants" + "Refactor complex variants" |
+| Documentation across files | 1 | "Update AGENTS.md and add inline comments" |
+
+**Anti-patterns**: One task per function, one task per file (when files are related), tasks without test criteria.
+
+**Warning**: If you have 40+ tasks, you're too granular. Re-group.
+
+See `variants/ralphus-architect/instructions/PROMPT_architect.md` for full Task Batching Guidelines.
+
+---
+
 ## Subagent Delegation
 
 | Operation | Subagents | Notes |

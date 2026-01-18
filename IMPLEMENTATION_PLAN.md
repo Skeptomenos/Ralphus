@@ -38,7 +38,7 @@
 
 ## Phase 4: Update Operational Playbook
 
-- [ ] 4.1 Add Task Batching section to `AGENTS.md`
+- [x] 4.1 Add Task Batching section to `AGENTS.md`
       File: `AGENTS.md`
       Location: After "## The Ralphus Factory Cycle" section
       Content: Condensed task batching heuristics for operational reference
