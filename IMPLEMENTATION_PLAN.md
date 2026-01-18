@@ -80,7 +80,7 @@
 
 ## Phase 6: Documentation
 
-- [ ] 6.1 Update `AGENTS.md` Operational Notes section with new architecture
+- [x] 6.1 Update `AGENTS.md` Operational Notes section with new architecture
 - [ ] 6.2 Add inline comments in `lib/loop_core.sh` explaining hook system
 - [ ] 6.3 Update usage comments in each variant's loop.sh
 

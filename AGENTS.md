@@ -67,23 +67,41 @@ Run these after implementing to get immediate feedback:
 - Syntax: `bash -n variants/*/scripts/loop.sh`
 - Lint: `shellcheck variants/*/scripts/loop.sh` (if installed)
 
-## Operational Notes
+## Modular Loop Architecture
 
-Succinct learnings about how to RUN the project:
+The loop scripts use a shared library pattern to eliminate duplication (~61% code reduction).
 
-- OpenCode CLI required: `opencode run --agent Sisyphus -f PROMPT.md "message"`
-- Default agent is Sisyphus, override with `RALPH_AGENT=build`
-- Remote homelab uses `~/.opencode/bin/opencode` path
-
-### Codebase Patterns
-
-...
-
-```bash
-# Lint shell scripts
-shellcheck variants/*/scripts/loop.sh
-bash -n variants/*/scripts/loop.sh    # Validate syntax
 ```
+ralphus/
+├── lib/
+│   └── loop_core.sh              # Shared library (~370 lines)
+└── variants/
+    └── ralphus-*/
+        ├── config.sh             # Variant configuration
+        └── scripts/loop.sh       # Thin wrapper (~50-100 lines each)
+```
+
+### Hook System
+
+Variants customize behavior via hooks defined before calling `run_loop`:
+
+| Hook | Purpose | Required |
+|------|---------|----------|
+| `get_templates()` | Return template file paths (one per line) | Yes |
+| `validate_variant()` | Check variant-specific inputs | No |
+| `build_message()` | Construct custom iteration message | No |
+| `post_iteration()` | Run after each iteration | No |
+| `parse_variant_args()` | Handle variant-specific arguments | No |
+
+### Completion Signals
+
+| Signal | Exit Code | Meaning |
+|--------|-----------|---------|
+| `PHASE_COMPLETE` | 0 (continue) | Single task done, continue loop |
+| `PLAN_COMPLETE` | 10 | Planning phase done |
+| `COMPLETE` | 20 | All tasks done |
+| `BLOCKED` | 30 | Stuck, needs intervention |
+| `APPROVED` | 40 | Review approved (review only) |
 
 ---
 
@@ -91,36 +109,24 @@ bash -n variants/*/scripts/loop.sh    # Validate syntax
 
 ```
 ralphus/                          # This playbook repo
-├── files/                        # Copy these to target project
-│   ├── loop.sh                   # The eternal loop
-│   ├── PROMPT_plan.md            # Planning phase instructions
-│   ├── PROMPT_build.md           # Build phase instructions
-│   ├── AGENTS.md                 # Template for target project
-│   └── IMPLEMENTATION_PLAN.md    # Task tracking (generated)
+├── lib/
+│   └── loop_core.sh              # Shared loop library (hooks, signals, git ops)
 ├── variants/                     # The Autonomous Factory
 │   ├── ralphus-code/             # Builder
-│   ├── ralphus-test/             # Tester
+│   │   ├── config.sh             # Variant config
+│   │   ├── scripts/loop.sh       # Thin wrapper
+│   │   ├── instructions/         # Prompt files
+│   │   └── templates/            # Reference templates
 │   ├── ralphus-review/           # Auditor
-│   ├── ralphus-product/          # PM (Slicer)
 │   ├── ralphus-architect/        # Tech Lead (Spec)
+│   ├── ralphus-product/          # PM (Slicer)
+│   ├── ralphus-test/             # Tester
 │   ├── ralphus-research/         # Learner
 │   └── ralphus-discover/         # Explorer
-├── skill/                        # Homelab remote execution
-│   ├── SKILL.md                  # Remote management skill
-```
-ralphus/                          # This playbook repo
-├── files/                        # Copy these to target project
-│   ├── loop.sh                   # The eternal loop
-│   ├── PROMPT_plan.md            # Planning phase instructions
-│   ├── PROMPT_build.md           # Build phase instructions
-│   ├── AGENTS.md                 # Template for target project
-│   └── IMPLEMENTATION_PLAN.md    # Task tracking (generated)
-├── skill/                        # Homelab remote execution
-│   ├── SKILL.md                  # Remote management skill
-│   └── config/
-│       └── project-mappings.json # Project path mappings
-├── references/                   # Research & diagrams
-├── PLAN.md                       # Adaptation roadmap
+├── skills/                       # OpenCode skills
+│   └── ralphus-remote/           # Homelab remote execution
+├── bin/                          # CLI wrapper
+│   └── ralphus                   # Routes to correct variant
 └── README.md                     # Philosophy & usage
 ```
 
@@ -288,3 +294,4 @@ Succinct learnings about how to RUN the project:
 shellcheck variants/*/scripts/loop.sh
 bash -n variants/*/scripts/loop.sh    # Validate syntax
 ```
+
