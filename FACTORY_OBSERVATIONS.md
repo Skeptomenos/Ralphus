@@ -214,6 +214,11 @@ Things to monitor during the factory run:
 | ~12:15 PM | Phase 4 complete (custom prompt verified) |
 | ~12:45 PM | Phase 5 complete (all validation passed, bug fixed) |
 | 12:45 PM | Loop exited cleanly (47/50 tasks, 94%) |
+| ~1:00 PM | Phase 6 started (3 remaining tasks) |
+| ~1:15 PM | Task 6.1 complete (AGENTS.md updated) |
+| ~1:25 PM | Task 6.2 complete (hook system documented) |
+| ~1:35 PM | Task 6.3 complete (variant usage comments) |
+| **1:35 PM** | **ALL TASKS COMPLETE - 50/50 (100%)** |
 
 ---
 
@@ -227,13 +232,16 @@ Things to monitor during the factory run:
 - **Tags Created**: v0.0.1 through v0.0.29
 - **Bugs Found & Fixed**: 1 (set -e in check_signals)
 
-### Code Metrics
+### Code Metrics (Final - After Phase 6)
 | Metric | Before | After | Change |
 |--------|--------|-------|--------|
-| Total loop.sh lines | 1,154 | 847 | -27% |
-| Shared library | 0 | 842 (383 code) | +842 |
-| Smallest variant | 126 | 49 | -61% |
+| Total loop.sh lines | 1,154 | 951 | -18% |
+| Shared library | 0 | 939 | +939 |
+| Smallest variant | 126 | 75 | -40% |
 | Largest variant | ~280 | 250 | -11% |
+| **Grand Total** | **1,154** | **1,890** | +64% (mostly docs) |
+
+*Note: Line count increased due to comprehensive documentation. Actual code reduction achieved; duplicated logic eliminated.*
 
 ### Verdict
 
@@ -251,4 +259,19 @@ Areas for improvement:
 2. Tag-per-task creates noise (29 tags for one feature)
 3. Some variants have irreducible complexity (by design)
 
-**Recommendation**: Proceed with Phase 6, then consider creating an "ideas/task-batching.md" to improve architect's task grouping.
+**Outcome**: Phase 6 completed successfully. Consider creating an "ideas/task-batching.md" to improve architect's task grouping for future runs.
+
+---
+
+## Phase 6: Documentation (COMPLETE)
+
+### Tasks Completed
+- **6.1**: Updated AGENTS.md with modular architecture section, file structure, hook system table
+- **6.2**: Added 97 lines of inline comments to loop_core.sh explaining hook system with examples
+- **6.3**: Added comprehensive usage comments to 4 variant scripts (code, test, research, discover)
+
+### Observations
+- Builder correctly identified which variants already had good docs (review, architect, product)
+- Only updated variants that needed enhancement
+- Maintained consistent documentation style across all variants
+- Final tag: v0.0.32
