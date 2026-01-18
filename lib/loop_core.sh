@@ -349,5 +349,27 @@ archive_on_branch_change() {
 }
 
 # =============================================================================
-# Remaining core functions (1.8 - 1.16) to be implemented in subsequent tasks
+# 1.8 setup_shutdown_handler() - Configure graceful shutdown on INT/TERM signals
+# =============================================================================
+# Sets up a trap handler for INT (Ctrl+C) and TERM signals. When triggered,
+# sets SHUTDOWN=1 to signal the main loop to exit after the current iteration.
+#
+# Uses globals:
+#   SHUTDOWN - Set to 0 initially, becomes 1 when shutdown requested
+#
+# Behavior:
+#   - Sets SHUTDOWN=0 to initialize
+#   - Traps INT and TERM signals
+#   - When signal received: sets SHUTDOWN=1 and prints warning message
+#
+# Note: This allows the loop to complete its current iteration before exiting,
+# preventing partial operations or data corruption.
+# =============================================================================
+setup_shutdown_handler() {
+    SHUTDOWN=0
+    trap 'SHUTDOWN=1; echo -e "\n⚠ Shutdown requested. Finishing current iteration..."' INT TERM
+}
+
+# =============================================================================
+# Remaining core functions (1.9 - 1.16) to be implemented in subsequent tasks
 # =============================================================================

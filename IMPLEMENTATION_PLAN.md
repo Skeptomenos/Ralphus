@@ -15,7 +15,7 @@
 - [x] 1.5 Implement `show_header()`: Print variant name, mode, agent, current branch; print ultrawork and max_iterations if set
 - [x] 1.6 Implement `validate_common()`: Check PROMPT_FILE exists; check TEMPLATES_DIR exists
 - [x] 1.7 Implement `archive_on_branch_change()`: Read LAST_BRANCH_FILE, compare to CURRENT_BRANCH; if different, create archive dir and copy ARCHIVE_FILES; write CURRENT_BRANCH to LAST_BRANCH_FILE
-- [ ] 1.8 Implement `setup_shutdown_handler()`: Set SHUTDOWN=0; trap INT TERM to set SHUTDOWN=1 with message
+- [x] 1.8 Implement `setup_shutdown_handler()`: Set SHUTDOWN=0; trap INT TERM to set SHUTDOWN=1 with message
 - [ ] 1.9 Implement `check_shutdown()`: If SHUTDOWN=1, echo and exit 0
 - [ ] 1.10 Implement `check_max_iterations()`: If MAX_ITERATIONS > 0 and ITERATION >= MAX_ITERATIONS, return 1
 - [ ] 1.11 Implement `build_base_message()`: Construct message with optional ulw suffix; append CUSTOM_PROMPT if set
