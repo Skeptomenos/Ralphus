@@ -1,8 +1,34 @@
 #!/bin/bash
+# =============================================================================
 # Ralphus Test - Autonomous Test Creation Loop
+# =============================================================================
+# Creates comprehensive tests from test specifications in test-specs/.
+# Uses the shared library loop pattern with plan/build modes.
+#
 # Usage: ralphus test [plan] [ulw] [N] ["custom prompt"]
 #
+# Modes:
+#   plan        Create TEST_PLAN.md from test-specs/*.md
+#   (default)   Execute TEST_PLAN.md, creating tests one by one
+#
+# Options:
+#   ulw         Enable ultrawork mode for complex reasoning
+#   N           Max iterations (e.g., 10 to stop after 10 tests)
+#   "<string>"  Append custom instructions to the prompt
+#
+# Examples:
+#   ralphus test plan              # Analyze specs, create TEST_PLAN.md
+#   ralphus test                   # Execute plan, create tests iteratively
+#   ralphus test ulw 5             # Ultrawork mode, max 5 iterations
+#   ralphus test "focus on edge"   # Custom prompt: focus on edge cases
+#
+# Completion Signals:
+#   PHASE_COMPLETE  - Test finished, continue to next
+#   COMPLETE        - All tests created
+#   BLOCKED         - Cannot proceed, needs intervention
+#
 # Thin wrapper that sources the shared library and provides variant-specific hooks.
+# =============================================================================
 
 set -euo pipefail
 

@@ -82,7 +82,7 @@
 
 - [x] 6.1 Update `AGENTS.md` Operational Notes section with new architecture
 - [x] 6.2 Add inline comments in `lib/loop_core.sh` explaining hook system (enhanced header with "How to Implement Hooks" section, added detailed docstrings for each hook with examples)
-- [ ] 6.3 Update usage comments in each variant's loop.sh
+- [x] 6.3 Update usage comments in each variant's loop.sh (added comprehensive header blocks to code, test, research, discover with Usage, Modes, Options, Examples, and Completion Signals sections)
 
 ---
 

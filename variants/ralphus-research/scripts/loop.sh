@@ -1,8 +1,34 @@
 #!/bin/bash
+# =============================================================================
 # Ralphus Research - Autonomous Learning Loop
+# =============================================================================
+# Researches topics from questions/ directory, producing summaries, quizzes,
+# and knowledge connections. Uses the shared library loop pattern.
+#
 # Usage: ralphus research [plan] [ulw] [N] ["custom prompt"]
 #
+# Modes:
+#   plan        Create RESEARCH_PLAN.md from questions/*.md
+#   (default)   Execute RESEARCH_PLAN.md, answering questions iteratively
+#
+# Options:
+#   ulw         Enable ultrawork mode for deep research
+#   N           Max iterations (e.g., 10 to limit research cycles)
+#   "<string>"  Append custom instructions to the prompt
+#
+# Examples:
+#   ralphus research plan              # Analyze questions, create plan
+#   ralphus research                   # Execute plan, research iteratively
+#   ralphus research ulw               # Deep research with ultrawork
+#   ralphus research "include papers"  # Custom: include academic papers
+#
+# Completion Signals:
+#   PHASE_COMPLETE  - Research item complete, continue to next
+#   COMPLETE        - All research complete
+#   BLOCKED         - Cannot proceed, needs intervention
+#
 # Thin wrapper that sources the shared library and provides variant-specific hooks.
+# =============================================================================
 
 set -euo pipefail
 

@@ -1,8 +1,34 @@
 #!/bin/bash
+# =============================================================================
 # Ralphus Code - Autonomous Feature Implementation Loop
+# =============================================================================
+# Implements features from specs/*.md by following IMPLEMENTATION_PLAN.md.
+# Uses the shared library loop pattern with plan/build modes.
+#
 # Usage: ralphus code [plan] [ulw] [N] ["custom prompt"]
 #
+# Modes:
+#   plan        Create IMPLEMENTATION_PLAN.md from specs/*.md
+#   (default)   Execute IMPLEMENTATION_PLAN.md task by task
+#
+# Options:
+#   ulw         Enable ultrawork mode for complex reasoning
+#   N           Max iterations (e.g., 10 to stop after 10 tasks)
+#   "<string>"  Append custom instructions to the prompt
+#
+# Examples:
+#   ralphus code plan              # Analyze specs, create IMPLEMENTATION_PLAN.md
+#   ralphus code                   # Execute plan, one task per iteration
+#   ralphus code ulw 5             # Ultrawork mode, max 5 iterations
+#   ralphus code "focus on tests"  # Custom prompt appended to message
+#
+# Completion Signals:
+#   PHASE_COMPLETE  - Task finished, continue to next task
+#   COMPLETE        - All tasks done
+#   BLOCKED         - Cannot proceed, needs intervention
+#
 # Thin wrapper that sources the shared library and provides variant-specific hooks.
+# =============================================================================
 
 set -euo pipefail
 

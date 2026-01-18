@@ -1,8 +1,34 @@
 #!/bin/bash
+# =============================================================================
 # Ralphus Discover - Autonomous Codebase Discovery Loop
+# =============================================================================
+# Explores and documents codebase architecture, patterns, and structure.
+# Produces discoveries/ documentation from systematic exploration.
+#
 # Usage: ralphus discover [plan] [ulw] [N] ["custom prompt"]
 #
+# Modes:
+#   plan        Create DISCOVERY_PLAN.md (exploration objectives)
+#   (default)   Execute DISCOVERY_PLAN.md, documenting discoveries iteratively
+#
+# Options:
+#   ulw         Enable ultrawork mode for thorough exploration
+#   N           Max iterations (e.g., 10 to limit discovery cycles)
+#   "<string>"  Append custom instructions to the prompt
+#
+# Examples:
+#   ralphus discover plan               # Create exploration plan
+#   ralphus discover                    # Execute plan, explore iteratively
+#   ralphus discover ulw 5              # Ultrawork mode, max 5 iterations
+#   ralphus discover "focus on auth"    # Custom: focus on auth subsystem
+#
+# Completion Signals:
+#   PHASE_COMPLETE  - Discovery complete, continue to next area
+#   COMPLETE        - All discoveries documented
+#   BLOCKED         - Cannot proceed, needs intervention
+#
 # Thin wrapper that sources the shared library and provides variant-specific hooks.
+# =============================================================================
 
 set -euo pipefail
 
