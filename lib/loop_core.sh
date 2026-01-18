@@ -612,5 +612,49 @@ check_signals() {
 }
 
 # =============================================================================
-# Remaining core functions (1.14 - 1.16) to be implemented in subsequent tasks
+# 1.14 git_push() - Push with retry and -u fallback
+# =============================================================================
+# Pushes current branch to origin. Falls back to -u flag if branch doesn't exist
+# on remote (creates upstream tracking). Non-fatal - logs warning on failure.
+#
+# Uses globals:
+#   WORKING_DIR - Directory to run git commands in
+#   CURRENT_BRANCH - Branch name to push
+#
+# Returns:
+#   0 - Always (non-fatal, continues even on failure)
+#
+# Behavior:
+#   1. Checks if we're in a git repository
+#   2. Attempts normal push to origin
+#   3. On failure, retries with -u flag to set upstream tracking
+#   4. On second failure, prints warning but doesn't exit
+#
+# Example usage:
+#   git add -A && git commit -m "task complete"
+#   git_push
+# =============================================================================
+git_push() {
+    # Skip if not in a git repository
+    if ! (cd "$WORKING_DIR" && git rev-parse --git-dir > /dev/null 2>&1); then
+        return 0
+    fi
+
+    # Skip if no branch name available
+    if [[ -z "${CURRENT_BRANCH:-}" ]]; then
+        return 0
+    fi
+
+    # Attempt to push, fallback to -u if branch doesn't exist on remote
+    (cd "$WORKING_DIR" && git push origin "$CURRENT_BRANCH" 2>/dev/null) || {
+        echo "Note: Failed to push. Creating remote branch..."
+        (cd "$WORKING_DIR" && git push -u origin "$CURRENT_BRANCH" 2>/dev/null) || \
+            echo "Warning: Could not push to remote"
+    }
+
+    return 0
+}
+
+# =============================================================================
+# Remaining core functions (1.15 - 1.16) to be implemented in subsequent tasks
 # =============================================================================
