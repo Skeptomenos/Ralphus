@@ -1,93 +1,79 @@
-# Modular Loop Architecture - Implementation Plan
+# Implementation Plan
 
-> **Spec**: `specs/modular-loop.md`
-> **Goal**: Refactor 7 variant loop scripts into shared library + thin wrappers
-> **Target**: 1,154 lines -> ~450 lines (61% reduction)
-
----
-
-## Phase 1: Create Shared Library
-
-- [x] 1.1 Create `lib/` directory in ralphus root
-- [x] 1.2 Create `lib/loop_core.sh` with shebang, header comment, and `set -euo pipefail`
-- [x] 1.3 Implement `init_ralphus()`: Parse SCRIPT_DIR, VARIANT_DIR from caller; set WORKING_DIR from RALPHUS_WORKING_DIR or pwd; set AGENT from RALPH_AGENT (default: Sisyphus); set OPENCODE from OPENCODE_BIN (default: opencode); initialize ULTRAWORK=0, MODE="build", MAX_ITERATIONS=0, CUSTOM_PROMPT=""
-- [x] 1.4 Implement `parse_common_args()`: Handle plan, ulw/ultrawork, numeric (max iterations), help, custom strings/files; store results in global variables
-- [x] 1.5 Implement `show_header()`: Print variant name, mode, agent, current branch; print ultrawork and max_iterations if set
-- [x] 1.6 Implement `validate_common()`: Check PROMPT_FILE exists; check TEMPLATES_DIR exists
-- [x] 1.7 Implement `archive_on_branch_change()`: Read LAST_BRANCH_FILE, compare to CURRENT_BRANCH; if different, create archive dir and copy ARCHIVE_FILES; write CURRENT_BRANCH to LAST_BRANCH_FILE
-- [x] 1.8 Implement `setup_shutdown_handler()`: Set SHUTDOWN=0; trap INT TERM to set SHUTDOWN=1 with message
-- [x] 1.9 Implement `check_shutdown()`: If SHUTDOWN=1, echo and exit 0
-- [x] 1.10 Implement `check_max_iterations()`: If MAX_ITERATIONS > 0 and ITERATION >= MAX_ITERATIONS, return 1
-- [x] 1.11 Implement `build_base_message()`: Construct message with optional ulw suffix; append CUSTOM_PROMPT if set
-- [x] 1.12 Implement `run_opencode()`: Accept template files as arguments; execute $OPENCODE run with --agent, -f flags, capture output
-- [x] 1.13 Implement `check_signals()`: Check for PLAN_COMPLETE, PHASE_COMPLETE, COMPLETE, BLOCKED, APPROVED; return appropriate exit codes
-- [x] 1.14 Implement `git_push()`: Push to origin with retry and -u fallback
-- [x] 1.15 Implement `run_loop()`: Main entry point calling init, parse, validate, loop; call variant hooks: validate_variant, get_templates, build_message, post_iteration
-- [x] 1.16 Add default no-op implementations for optional hooks (validate_variant, get_archive_files, build_message, post_iteration)
+> **Active Spec**: `specs/task-batching.md`
+> **Goal**: Improve architect task grouping to reduce 40-50 tasks to 15-25 per feature
+> **Type**: Prompt Engineering (no code changes)
 
 ---
 
-## Phase 2: Create Variant Configs
+## Phase 1: Update Architect Prompt
 
-- [x] 2.1 Create `variants/ralphus-code/config.sh` with: VARIANT_NAME="code", TRACKING_FILE="IMPLEMENTATION_PLAN.md", LAST_BRANCH_FILE=".last-branch", DEFAULT_PROMPT="PROMPT_build.md", PLAN_PROMPT="PROMPT_plan.md", REQUIRED_DIRS=("specs"), ARCHIVE_FILES=("IMPLEMENTATION_PLAN.md" "AGENTS.md")
-- [x] 2.2 Create `variants/ralphus-review/config.sh` with: VARIANT_NAME="review", TRACKING_FILE="REVIEW_PLAN.md", LAST_BRANCH_FILE=".last-review-branch", DEFAULT_PROMPT="PROMPT_review_build.md", PLAN_PROMPT="PROMPT_review_plan.md", ARCHIVE_FILES=("REVIEW_PLAN.md" "reviews"), EXTRA_SIGNALS=("APPROVED")
-- [x] 2.3 Create `variants/ralphus-architect/config.sh` with: VARIANT_NAME="architect", TRACKING_FILE="", LAST_BRANCH_FILE=".last-architect-branch", DEFAULT_PROMPT="PROMPT_architect.md", LOOP_TYPE="file-iterator"
-- [x] 2.4 Create `variants/ralphus-product/config.sh` with: VARIANT_NAME="product", DEFAULT_PROMPT="PROMPT_product.md", PLAN_PROMPT="PROMPT_product_init.md", REQUIRED_DIRS=("inbox"), LOOP_TYPE="sequential"
-- [x] 2.5 Create `variants/ralphus-test/config.sh` with: VARIANT_NAME="test", TRACKING_FILE="", LAST_BRANCH_FILE=".last-branch", DEFAULT_PROMPT="PROMPT_test_build.md", PLAN_PROMPT="PROMPT_test_plan.md", REQUIRED_DIRS=("test-specs"), ARCHIVE_FILES=("test-specs")
-- [x] 2.6 Create `variants/ralphus-research/config.sh` with: VARIANT_NAME="research", TRACKING_FILE="RESEARCH_PLAN.md", DEFAULT_PROMPT="PROMPT_research_build.md", PLAN_PROMPT="PROMPT_research_plan.md"
-- [x] 2.7 Create `variants/ralphus-discover/config.sh` with: VARIANT_NAME="discover", TRACKING_FILE="DISCOVERY_PLAN.md", DEFAULT_PROMPT="PROMPT_discover_build.md", PLAN_PROMPT="PROMPT_discover_plan.md"
+- [x] 1.1 Add "Task Batching Guidelines" section to `PROMPT_architect.md`
+      File: `variants/ralphus-architect/instructions/PROMPT_architect.md`
+      Location: After "Phase 2: Architect the Solution", before "Phase 3: Write the Specification"
+      Content: Include rules, anti-patterns, grouping heuristics table, and target task count (15-25)
+      Test: `grep -c "Task Batching Guidelines" variants/ralphus-architect/instructions/PROMPT_architect.md` returns 1
 
 ---
 
-## Phase 3: Refactor Variant Loop Scripts
+## Phase 2: Update Spec Template
 
-- [x] 3.1 Refactor `variants/ralphus-code/scripts/loop.sh`: Source config.sh and lib/loop_core.sh; implement get_templates() returning IMPLEMENTATION_PLAN_REFERENCE.md; implement validate_variant() checking specs/ and IMPLEMENTATION_PLAN.md; call run_loop "$@"
-- [x] 3.2 Refactor `variants/ralphus-review/scripts/loop.sh`: Source config.sh and lib/loop_core.sh; implement parse_variant_args() for pr/diff/files targets; implement validate_variant() for PR mode branch check; implement get_templates() returning 3 template files; implement build_message() adding REVIEW_TARGET and MAIN_BRANCH; implement post_iteration() for review artifact commits; call run_loop "$@"
-- [x] 3.3 Refactor `variants/ralphus-architect/scripts/loop.sh`: Source config.sh and lib/loop_core.sh; ADD MISSING SHUTDOWN HANDLER via setup_shutdown_handler(); implement parse_variant_args() for feature/triage modes; implement file-iterator loop pattern; call run_loop "$@"
-- [x] 3.4 Refactor `variants/ralphus-product/scripts/loop.sh`: Source config.sh and lib/loop_core.sh; implement sequential (non-loop) pattern; keep init/process modes; call run_sequential "$@"
-- [x] 3.5 Refactor `variants/ralphus-test/scripts/loop.sh`: Source config.sh and lib/loop_core.sh; implement get_templates() for test templates; implement validate_variant() for test-specs completion check; call run_loop "$@" (168 -> 68 lines, 60% reduction)
-- [x] 3.6 Refactor `variants/ralphus-research/scripts/loop.sh`: Source config.sh and lib/loop_core.sh; implement get_templates() for research templates; call run_loop "$@" (146 -> 59 lines, 60% reduction)
-- [x] 3.7 Refactor `variants/ralphus-discover/scripts/loop.sh`: Source config.sh and lib/loop_core.sh; implement get_templates() for discover templates; call run_loop "$@" (126 -> 49 lines, 61% reduction)
+- [ ] 2.1 Add "Task Format" section to `SPEC_TEMPLATE_REFERENCE.md`
+      File: `variants/ralphus-architect/templates/SPEC_TEMPLATE_REFERENCE.md`
+      Location: Before "## Verification Steps"
+      Content: Task format with good/bad examples showing grouped vs granular tasks
+      Test: `grep -c "Task Format" variants/ralphus-architect/templates/SPEC_TEMPLATE_REFERENCE.md` returns 1
 
 ---
 
-## Phase 4: Propagate Custom Prompt Injection
+## Phase 3: Strengthen Plan Mode Prompt
 
-- [x] 4.1 Ensure parse_common_args() handles custom strings/files: check if arg is file with -f, cat and append; else append as string
-- [x] 4.2 Ensure build_base_message() appends CUSTOM_PROMPT when set
-- [x] 4.3 Test custom prompt with each variant: `ralphus code "focus on tests"`, `ralphus review "check security only"`, `ralphus architect feature "prioritize API design"`
+- [ ] 3.1 Enhance granularity guidance in `PROMPT_plan.md`
+      File: `variants/ralphus-code/instructions/PROMPT_plan.md`
+      Location: Expand existing "Task Granularity" section (lines 9-13)
+      Content: Add explicit batching rules, anti-patterns, and warning for 40+ tasks
+      Test: `grep -c "40+" variants/ralphus-code/instructions/PROMPT_plan.md` returns 1
+
+---
+
+## Phase 4: Update Operational Playbook
+
+- [ ] 4.1 Add Task Batching section to `AGENTS.md`
+      File: `AGENTS.md`
+      Location: After "## The Ralphus Factory Cycle" section
+      Content: Condensed task batching heuristics for operational reference
+      Test: `grep "Task Batching" AGENTS.md` returns match
 
 ---
 
 ## Phase 5: Validation
 
-- [x] 5.1 Run `bash -n lib/loop_core.sh` - verify syntax
-- [x] 5.2 Run `bash -n variants/*/scripts/loop.sh` - verify all variant scripts
-- [x] 5.3 Run `shellcheck lib/loop_core.sh` - fix any warnings
-- [x] 5.4 Run `shellcheck variants/*/scripts/loop.sh` - fix any warnings (only SC1091 info about sourced files, no actual warnings)
-- [x] 5.5 Test `ralphus code plan` - verify plan mode works (fixed set -e bug in check_signals)
-- [x] 5.6 Test `ralphus code` - verify build mode works
-- [x] 5.7 Test `ralphus code ulw 5` - verify ultrawork and max iterations
-- [x] 5.8 Test `ralphus code "custom instructions"` - verify prompt injection
-- [x] 5.9 Test `ralphus review plan pr` - verify PR mode (validates branch correctly)
-- [x] 5.10 Test `ralphus architect feature` - verify feature mode
-- [x] 5.11 Test `ralphus architect triage` - verify triage mode
-- [x] 5.12 Test `ralphus product init` - verify init mode
-- [x] 5.13 Test Ctrl+C during loop - verify graceful shutdown (handler integrated in run_loop)
-- [x] 5.14 Run `wc -l lib/loop_core.sh variants/*/scripts/loop.sh` - 1689 total (373 code lines in lib + 847 in variants)
+- [ ] 5.1 Run all verification commands from spec
+      Tests:
+        - `grep -c "Task Batching Guidelines" variants/ralphus-architect/instructions/PROMPT_architect.md`
+        - `grep -c "15-25 tasks" variants/ralphus-architect/instructions/PROMPT_architect.md`
+        - `grep -c "Task Format" variants/ralphus-architect/templates/SPEC_TEMPLATE_REFERENCE.md`
+        - `grep -c "40+" variants/ralphus-code/instructions/PROMPT_plan.md`
+        - `grep "Task Batching" AGENTS.md`
 
 ---
 
-## Phase 6: Documentation
+## Completed Specs
 
-- [x] 6.1 Update `AGENTS.md` Operational Notes section with new architecture
-- [x] 6.2 Add inline comments in `lib/loop_core.sh` explaining hook system (enhanced header with "How to Implement Hooks" section, added detailed docstrings for each hook with examples)
-- [x] 6.3 Update usage comments in each variant's loop.sh (added comprehensive header blocks to code, test, research, discover with Usage, Modes, Options, Examples, and Completion Signals sections)
+### modular-loop.md (COMPLETE)
+
+All 50+ tasks completed. See `specs/modular-loop.md` for details.
+
+Key deliverables:
+- `lib/loop_core.sh` - Shared library (~373 lines)
+- 7 variant configs (`config.sh`) and thin wrapper scripts
+- Hook system: `get_templates()`, `validate_variant()`, `build_message()`, `post_iteration()`
+- Signal system: PLAN_COMPLETE, PHASE_COMPLETE, COMPLETE, BLOCKED, APPROVED
 
 ---
 
 ## Notes
 
-- **Zero Breaking Changes**: All existing `ralphus <variant>` commands must work identically
-- **Priority**: Phase 1 > Phase 2 > Phase 3 (parallel within phase) > Phase 4 > Phase 5 > Phase 6
-- **Dependencies**: Phase 3 depends on Phase 1+2 completion; Phase 4 verifies Phase 3; Phase 5 is testing
+- **Priority**: task-batching is prompt-only, low risk, high impact
+- **Appendix content**: Use content from `specs/task-batching.md` Appendix A and B
+- **Success criteria**: 15-25 tasks per feature instead of 40-50

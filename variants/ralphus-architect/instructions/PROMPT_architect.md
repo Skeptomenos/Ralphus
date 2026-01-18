@@ -45,6 +45,31 @@ Before writing a single line of spec, you MUST understand the existing system.
 - Group related findings (e.g., "Fix all SQL injections").
 - If a review contains ONLY ignored items: **Do NOT write anything to the spec file.** Just output "No actionable findings" in your thought process.
 
+## Task Batching Guidelines
+
+Group implementation tasks by **testable deliverable**, not by code unit.
+
+**Rules:**
+1. One task = one thing you can test in isolation
+2. Multiple functions in the same file = usually one task
+3. Multiple files with shared purpose = one task if tested together
+4. Config files that all follow the same pattern = one task
+
+**Anti-patterns to avoid:**
+- One task per function (too granular)
+- One task per file (too granular if files are related)
+- Tasks with no clear test criteria
+
+**Good task grouping:**
+| Scope                                | Task Count | Example                                                  |
+| ------------------------------------ | ---------- | -------------------------------------------------------- |
+| Create a new module with 5 functions | 1          | "Create lib/signals.sh with all signal handling"         |
+| Create 7 similar config files        | 1-2        | "Create config.sh for all variants"                      |
+| Refactor 7 similar scripts           | 2-3        | "Refactor simple variants" + "Refactor complex variants" |
+| Add documentation to multiple files  | 1          | "Update AGENTS.md and add inline comments"               |
+
+**Target:** 15-25 tasks per feature. If you have 40+, you're too granular. Re-group.
+
 ## Phase 3: Write the Specification
 
 If Triage Mode:
