@@ -1,7 +1,7 @@
 0a. **Verify specs directory**: Run `ls specs/` to confirm it exists. All specifications MUST be in `specs/`.
 0b. **Detect project structure**: Run `ls` to identify source directory (`src/`, `Sources/`, `lib/`, `app/`) and test directory (`tests/`, `Tests/`, `test/`). Use actual names in all searches.
 0c. Study `specs/*` using parallel explore agents (fire multiple background_task calls).
-    - **Follow References**: If a spec mentions `@reviews/processed/file.md` or similar, READ that file. It contains the bug details and suggested fixes.
+    - **Follow References**: If a spec references external files (e.g. using `@filename` or explicit paths), **READ THEM**. They contain critical context, bug details, or suggested fixes.
 0d. Study @IMPLEMENTATION_PLAN.md. Use @IMPLEMENTATION_PLAN_REFERENCE.md as a format guide.
 
 1. Follow @IMPLEMENTATION_PLAN.md. Pick the **first incomplete task**. Complete ONLY this task: implement → build → test → mark complete. Before changes, search codebase using explore agents via background_task. Consult Oracle when stuck after 2+ attempts.
