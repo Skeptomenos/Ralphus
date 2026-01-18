@@ -286,5 +286,68 @@ validate_common() {
 }
 
 # =============================================================================
-# Remaining core functions (1.7 - 1.16) to be implemented in subsequent tasks
+# 1.7 archive_on_branch_change() - Archive files when switching branches
+# =============================================================================
+# Detects when the git branch has changed since the last run and archives
+# relevant files to prevent overwriting work from a previous branch.
+#
+# Uses globals:
+#   WORKING_DIR - Project working directory
+#   CURRENT_BRANCH - Current git branch name (from init_ralphus)
+#   LAST_BRANCH_FILE - Filename to store last branch (from config.sh)
+#   ARCHIVE_FILES - Array of files to archive (from config.sh)
+#
+# Behavior:
+#   1. Reads LAST_BRANCH_FILE from WORKING_DIR to get previous branch
+#   2. Compares to CURRENT_BRANCH
+#   3. If different, creates archive/<date>-<last-branch>/ and copies ARCHIVE_FILES
+#   4. Writes CURRENT_BRANCH to LAST_BRANCH_FILE for next run
+#
+# Note: Uses || true for copy operations to avoid failure if files don't exist.
+# =============================================================================
+archive_on_branch_change() {
+    # Skip if no LAST_BRANCH_FILE configured
+    if [[ -z "${LAST_BRANCH_FILE:-}" ]]; then
+        return 0
+    fi
+
+    # Skip if no current branch (not a git repo or detached HEAD)
+    if [[ -z "${CURRENT_BRANCH:-}" ]]; then
+        return 0
+    fi
+
+    local last_branch_path="$WORKING_DIR/$LAST_BRANCH_FILE"
+    local last_branch=""
+
+    # Read the last branch if the file exists
+    if [[ -f "$last_branch_path" ]]; then
+        last_branch=$(cat "$last_branch_path")
+
+        # Check if branch has changed
+        if [[ "$last_branch" != "$CURRENT_BRANCH" ]]; then
+            # Create archive directory with date and last branch name
+            local archive_dir="$WORKING_DIR/archive/$(date +%Y-%m-%d)-$last_branch"
+            mkdir -p "$archive_dir"
+
+            # Copy each file in ARCHIVE_FILES array
+            # Uses || true to ignore errors if files don't exist
+            if [[ -n "${ARCHIVE_FILES:-}" ]]; then
+                for file in "${ARCHIVE_FILES[@]}"; do
+                    local source_path="$WORKING_DIR/$file"
+                    if [[ -e "$source_path" ]]; then
+                        cp -r "$source_path" "$archive_dir/" 2>/dev/null || true
+                    fi
+                done
+            fi
+
+            echo "Archived previous run to $archive_dir"
+        fi
+    fi
+
+    # Always write current branch to the file for next run
+    echo "$CURRENT_BRANCH" > "$last_branch_path"
+}
+
+# =============================================================================
+# Remaining core functions (1.8 - 1.16) to be implemented in subsequent tasks
 # =============================================================================
