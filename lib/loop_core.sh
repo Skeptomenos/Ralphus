@@ -107,7 +107,7 @@ CURRENT_BRANCH=""
 # Sets:
 #   SCRIPT_DIR, VARIANT_DIR - From arguments
 #   WORKING_DIR - From RALPHUS_WORKING_DIR env or pwd
-#   AGENT - From RALPH_AGENT env or "Sisyphus"
+#   AGENT - From RALPH_AGENT env or empty (system default)
 #   OPENCODE - From OPENCODE_BIN env or "opencode"
 #   INSTRUCTIONS_DIR, TEMPLATES_DIR - Derived from VARIANT_DIR
 #   ULTRAWORK, MODE, MAX_ITERATIONS, CUSTOM_PROMPT - Initialized to defaults
@@ -135,8 +135,8 @@ init_ralphus() {
     # Set working directory: env var takes precedence, fallback to pwd
     WORKING_DIR="${RALPHUS_WORKING_DIR:-$(pwd)}"
 
-    # Set agent: env var takes precedence, fallback to Sisyphus
-    AGENT="${RALPH_AGENT:-Sisyphus}"
+    # Set agent: env var takes precedence, fallback to system default (empty)
+    AGENT="${RALPH_AGENT:-}"
 
     # Set opencode binary: env var takes precedence, fallback to opencode
     OPENCODE="${OPENCODE_BIN:-opencode}"
@@ -268,7 +268,7 @@ parse_variant_args() {
 # Uses globals:
 #   VARIANT_NAME - From config.sh (e.g., "code", "review", "architect")
 #   MODE - From parse_common_args() (e.g., "build", "plan")
-#   AGENT - From init_ralphus() (default: "Sisyphus")
+#   AGENT - From init_ralphus() (default: system default)
 #   CURRENT_BRANCH - Git branch name
 #   ULTRAWORK - Flag (0 or 1)
 #   MAX_ITERATIONS - Iteration limit (0 = unlimited)
@@ -505,34 +505,100 @@ check_max_iterations() {
 # uses this default implementation.
 # =============================================================================
 build_base_message() {
-    # Standard base message used by most variants
-    MESSAGE="Read the attached prompt file and execute the instructions"
+    # Build supplementary message (ulw flag and custom prompts)
+    # The main instructions are now inlined via build_inline_prompt()
+    MESSAGE=""
     
     # Append ultrawork suffix if enabled
     if [[ "$ULTRAWORK" -eq 1 ]]; then
-        MESSAGE="$MESSAGE ulw"
+        MESSAGE="ulw"
     fi
     
     # Append custom prompt if provided
     if [[ -n "${CUSTOM_PROMPT:-}" ]]; then
-        MESSAGE="$MESSAGE. Additional Instructions: $CUSTOM_PROMPT"
+        MESSAGE="${MESSAGE:+$MESSAGE }$CUSTOM_PROMPT"
     fi
 }
 
 # =============================================================================
-# 1.12 run_opencode() - Execute opencode with prompt and template files
+# build_inline_prompt() - Construct inline prompt with file content separators
 # =============================================================================
-# Runs the opencode CLI with the configured agent, prompt file, and any
-# additional template files. Captures output while also displaying it.
+# Reads file content and concatenates with minimal headers.
+# Prevents path leakage by not passing file paths to opencode.
 #
 # Arguments:
-#   $@ - Additional template files to include via -f flags
+#   $1 - Main prompt file (instructions)
+#   $@ - Additional template files to inline
+#
+# Returns:
+#   Echoes the concatenated content with separators
+#   Returns 1 if main prompt file is missing
+#
+# Behavior:
+#   - Main prompt is inlined as-is (no header)
+#   - Template files get a "## Reference: <label>" header
+#   - Files in WORKING_DIR are skipped (agent can read those directly)
+#   - Missing files trigger a warning (non-fatal for templates)
+# =============================================================================
+build_inline_prompt() {
+    local prompt_file="$1"
+    shift
+    local template_files=("$@")
+    local result=""
+    
+    # Inline the main prompt (required)
+    if [[ -f "$prompt_file" ]]; then
+        result+=$(cat "$prompt_file")
+        result+=$'\n\n'
+    else
+        echo "ERROR: Prompt file not found: $prompt_file" >&2
+        return 1
+    fi
+    
+    # Inline template files with minimal headers
+    for file in "${template_files[@]}"; do
+        # Skip empty entries
+        [[ -z "$file" ]] && continue
+        
+        # Skip files in working dir - agent can read those directly
+        if [[ "$file" == "$WORKING_DIR"* ]]; then
+            continue
+        fi
+        
+        if [[ -f "$file" ]]; then
+            local filename label
+            filename=$(basename "$file")
+            # Create readable label: remove extension, replace underscores with spaces
+            label="${filename%.*}"
+            label="${label//_/ }"
+            
+            result+=$'---\n\n'
+            result+="## Reference: $label"
+            result+=$'\n\n'
+            result+=$(cat "$file")
+            result+=$'\n\n'
+        else
+            echo "WARNING: Template file not found: $file" >&2
+        fi
+    done
+    
+    echo "$result"
+}
+
+# =============================================================================
+# 1.12 run_opencode() - Execute opencode with inlined prompt and templates
+# =============================================================================
+# Runs the opencode CLI with the configured agent and inlined prompt content.
+# Inlines all prompt and template files to prevent path leakage.
+#
+# Arguments:
+#   $@ - Additional template files to inline
 #
 # Uses globals:
 #   OPENCODE - Path to opencode binary (from init_ralphus)
 #   AGENT - Agent name to use (from init_ralphus)
 #   PROMPT_FILE - Main prompt file path (from validate_common)
-#   MESSAGE - The message to send (from build_base_message or build_message)
+#   MESSAGE - Supplementary message (ulw, custom prompts) from build_message
 #   WORKING_DIR - Directory to run opencode in
 #
 # Returns:
@@ -540,10 +606,11 @@ build_base_message() {
 #   Returns the exit code from opencode (or 0 if using || true pattern)
 #
 # Behavior:
-#   1. Builds command with --agent and -f flags for prompt and templates
-#   2. Executes in WORKING_DIR context
-#   3. Uses tee to both capture output and display in real-time
-#   4. Suppresses exit code failures (|| true) since signals indicate completion
+#   1. Inlines prompt and template files via build_inline_prompt()
+#   2. Appends MESSAGE (ulw/custom prompts) at the end
+#   3. Executes in WORKING_DIR context
+#   4. Uses tee to both capture output and display in real-time
+#   5. Suppresses exit code failures (|| true) since signals indicate completion
 #
 # Example:
 #   build_base_message
@@ -553,22 +620,26 @@ build_base_message() {
 run_opencode() {
     local template_files=("$@")
     
-    # Build the command arguments
+    # Build inline prompt with all files
+    local inline_prompt
+    inline_prompt=$(build_inline_prompt "$PROMPT_FILE" "${template_files[@]}") || return 1
+    
+    # Append supplementary message (ulw, custom prompts) at the end
+    if [[ -n "${MESSAGE:-}" ]]; then
+        inline_prompt+="$MESSAGE"
+    fi
+    
+    # Build command arguments
     local cmd_args=()
-    cmd_args+=(run --agent "$AGENT")
+    cmd_args+=(run)
     
-    # Add the main prompt file
-    cmd_args+=(-f "$PROMPT_FILE")
+    # Add agent if specified
+    if [[ -n "${AGENT:-}" ]]; then
+        cmd_args+=(--agent "$AGENT")
+    fi
     
-    # Add all template files
-    for template in "${template_files[@]}"; do
-        if [[ -n "$template" && -f "$template" ]]; then
-            cmd_args+=(-f "$template")
-        fi
-    done
-    
-    # Add separator and message
-    cmd_args+=(-- "$MESSAGE")
+    # Add the inlined prompt as the message
+    cmd_args+=(-- "$inline_prompt")
     
     # Execute opencode in WORKING_DIR, capture output while displaying
     # Uses || true to prevent exit on non-zero return (signals indicate completion)
