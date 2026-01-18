@@ -428,5 +428,42 @@ check_max_iterations() {
 }
 
 # =============================================================================
-# Remaining core functions (1.11 - 1.16) to be implemented in subsequent tasks
+# 1.11 build_base_message() - Construct the base message for opencode execution
+# =============================================================================
+# Builds the standard message sent to opencode with optional ultrawork suffix
+# and custom prompt injection.
+#
+# Uses globals:
+#   ULTRAWORK - Flag (0 or 1) to append "ulw" suffix
+#   CUSTOM_PROMPT - Additional instructions to append (optional)
+#
+# Sets:
+#   MESSAGE - The constructed message string for opencode
+#
+# Behavior:
+#   1. Starts with standard "Read the attached prompt file..." message
+#   2. If ULTRAWORK=1, appends " ulw" suffix
+#   3. If CUSTOM_PROMPT is set, appends ". Additional Instructions: $CUSTOM_PROMPT"
+#
+# Note: Variants can override this by defining their own build_message() hook.
+# The run_loop() function calls build_message() first if defined, otherwise
+# uses this default implementation.
+# =============================================================================
+build_base_message() {
+    # Standard base message used by most variants
+    MESSAGE="Read the attached prompt file and execute the instructions"
+    
+    # Append ultrawork suffix if enabled
+    if [[ "$ULTRAWORK" -eq 1 ]]; then
+        MESSAGE="$MESSAGE ulw"
+    fi
+    
+    # Append custom prompt if provided
+    if [[ -n "${CUSTOM_PROMPT:-}" ]]; then
+        MESSAGE="$MESSAGE. Additional Instructions: $CUSTOM_PROMPT"
+    fi
+}
+
+# =============================================================================
+# Remaining core functions (1.12 - 1.16) to be implemented in subsequent tasks
 # =============================================================================

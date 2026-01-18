@@ -86,7 +86,12 @@ Implement modular loop architecture using the Ralphus factory pipeline:
 
 | # | Severity | Phase | Description | Resolution |
 |---|----------|-------|-------------|------------|
-| 1 | - | - | - | - |
+| 1 | Medium | All | Agent "Sisyphus" not found - falls back to default | Make agent name configurable or detect available agents |
+| 2 | Low | Build | Shellcheck not installed - skipped | Graceful skip is fine, maybe suggest installation |
+| 3 | Medium | Build | Every iteration re-reads IMPLEMENTATION_PLAN.md and runs `ls` | Consider caching or context persistence between iterations |
+| 4 | Low | Build | Tag format inconsistent (0.0.1 vs v0.0.7) | Standardize in loop_core.sh |
+| 5 | High | Architect | Task granularity too fine - 50 tasks at ~3min each = 2.5 hours | Group related tasks (e.g., all shutdown functions = 1 task) |
+| 6 | Medium | Build | No context persistence between iterations | Each iteration starts fresh, wastes tokens re-reading same files |
 
 ---
 
@@ -94,15 +99,27 @@ Implement modular loop architecture using the Ralphus factory pipeline:
 
 Things to monitor during the factory run:
 
-- [ ] Does architect properly analyze existing loop.sh files?
-- [ ] Does architect identify both loop patterns (eternal vs file-based)?
-- [ ] Is the generated spec actionable and complete?
-- [ ] Does code planner break down tasks correctly?
-- [ ] Does builder create lib/loop_core.sh correctly?
-- [ ] Does builder refactor all 7 variants?
-- [ ] Are there any infinite loops or stuck states?
-- [ ] Does graceful shutdown (Ctrl+C) work?
-- [ ] Are completion signals emitted correctly?
+- [x] Does architect properly analyze existing loop.sh files? **YES - used Task subagents**
+- [x] Does architect identify both loop patterns (eternal vs file-based)? **YES - spec mentions LOOP_TYPE**
+- [x] Is the generated spec actionable and complete? **YES - 351 lines, very detailed**
+- [x] Does code planner break down tasks correctly? **YES - but TOO granular (50 tasks)**
+- [x] Does builder create lib/loop_core.sh correctly? **YES - in progress, 398 lines**
+- [ ] Does builder refactor all 7 variants? **Not yet - Phase 3**
+- [ ] Are there any infinite loops or stuck states? **No issues so far**
+- [ ] Does graceful shutdown (Ctrl+C) work? **Not tested yet**
+- [x] Are completion signals emitted correctly? **YES - PHASE_COMPLETE working**
+
+## Key Learnings for Ralphus Improvement
+
+1. **Task Granularity**: Architect should group related functions into single tasks. 50 atomic tasks is overkill.
+
+2. **Context Persistence**: Builder wastes tokens re-reading same files every iteration. Should cache.
+
+3. **Inline Testing**: The pattern of writing bash tests before commit is excellent - should be standardized.
+
+4. **Parallel Subagents**: Used effectively for exploration - good pattern.
+
+5. **Tag-per-Task**: Creates clean audit trail but 50 tags for one feature is excessive.
 
 ---
 
