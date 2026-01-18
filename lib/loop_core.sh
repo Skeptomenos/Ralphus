@@ -803,8 +803,9 @@ run_loop() {
         run_opencode "${templates[@]}"
 
         # 8g. Check for completion signals
-        check_signals
-        local signal_code=$?
+        # Note: Must capture exit code with || true to prevent set -e from exiting
+        local signal_code=0
+        check_signals || signal_code=$?
 
         # 8h. Handle exit codes based on signals
         case $signal_code in

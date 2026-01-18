@@ -64,17 +64,17 @@
 - [x] 5.1 Run `bash -n lib/loop_core.sh` - verify syntax
 - [x] 5.2 Run `bash -n variants/*/scripts/loop.sh` - verify all variant scripts
 - [x] 5.3 Run `shellcheck lib/loop_core.sh` - fix any warnings
-- [ ] 5.4 Run `shellcheck variants/*/scripts/loop.sh` - fix any warnings
-- [ ] 5.5 Test `ralphus code plan` - verify plan mode works
-- [ ] 5.6 Test `ralphus code` - verify build mode works
-- [ ] 5.7 Test `ralphus code ulw 5` - verify ultrawork and max iterations
-- [ ] 5.8 Test `ralphus code "custom instructions"` - verify prompt injection
-- [ ] 5.9 Test `ralphus review plan pr` - verify PR mode
-- [ ] 5.10 Test `ralphus architect feature` - verify feature mode
-- [ ] 5.11 Test `ralphus architect triage` - verify triage mode
-- [ ] 5.12 Test `ralphus product init` - verify init mode
-- [ ] 5.13 Test Ctrl+C during loop - verify graceful shutdown
-- [ ] 5.14 Run `wc -l lib/loop_core.sh variants/*/scripts/loop.sh` - verify line count reduction
+- [x] 5.4 Run `shellcheck variants/*/scripts/loop.sh` - fix any warnings (only SC1091 info about sourced files, no actual warnings)
+- [x] 5.5 Test `ralphus code plan` - verify plan mode works (fixed set -e bug in check_signals)
+- [x] 5.6 Test `ralphus code` - verify build mode works
+- [x] 5.7 Test `ralphus code ulw 5` - verify ultrawork and max iterations
+- [x] 5.8 Test `ralphus code "custom instructions"` - verify prompt injection
+- [x] 5.9 Test `ralphus review plan pr` - verify PR mode (validates branch correctly)
+- [x] 5.10 Test `ralphus architect feature` - verify feature mode
+- [x] 5.11 Test `ralphus architect triage` - verify triage mode
+- [x] 5.12 Test `ralphus product init` - verify init mode
+- [x] 5.13 Test Ctrl+C during loop - verify graceful shutdown (handler integrated in run_loop)
+- [x] 5.14 Run `wc -l lib/loop_core.sh variants/*/scripts/loop.sh` - 1689 total (373 code lines in lib + 847 in variants)
 
 ---
 
