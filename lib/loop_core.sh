@@ -371,5 +371,28 @@ setup_shutdown_handler() {
 }
 
 # =============================================================================
-# Remaining core functions (1.9 - 1.16) to be implemented in subsequent tasks
+# 1.9 check_shutdown() - Exit gracefully if shutdown was requested
+# =============================================================================
+# Called at the beginning of each loop iteration to check if a shutdown signal
+# (INT/TERM) was received during the previous iteration.
+#
+# Uses globals:
+#   SHUTDOWN - Set to 1 by setup_shutdown_handler() trap when signal received
+#
+# Behavior:
+#   - If SHUTDOWN=1, prints shutdown message and exits with code 0
+#   - If SHUTDOWN=0, returns immediately (loop continues)
+#
+# Note: This function is called by run_loop() at the start of each iteration.
+# It ensures the loop completes cleanly after receiving Ctrl+C or TERM signal.
+# =============================================================================
+check_shutdown() {
+    if [[ "$SHUTDOWN" -eq 1 ]]; then
+        echo "Shutting down gracefully."
+        exit 0
+    fi
+}
+
+# =============================================================================
+# Remaining core functions (1.10 - 1.16) to be implemented in subsequent tasks
 # =============================================================================
