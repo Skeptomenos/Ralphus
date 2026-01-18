@@ -31,39 +31,32 @@ Then came **Sisyphus** — the OpenCode agent cursed to roll context windows uph
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                              VARIANTS                                   │
-│             (What to do - prompts, templates, loop)                     │
+│             (What to do - prompts, templates, thin wrapper)             │
 ├──────────────────┬──────────────────┬──────────────────┬────────────────┤
 │  ralphus-code    │  ralphus-test    │ ralphus-research │ ralphus-discover│
 │  (features)      │  (tests)         │ (learning)       │ (onboarding)   │
 └────────┬─────────┴────────┬─────────┴────────┬─────────┴────────┬───────┘
          │                 │                 │                 │
-         └────────────┬────┴────────┬────────┴────────┬────────┘
-                      │             │                 │
-         ┌────────────▼─────────────▼────────────┐
-         │              SKILLS                   │
-         │      (Where to run - execution)       │
-         ├───────────────────┬───────────────────┤
-         │   ralphus-local   │  ralphus-remote   │
-         │   (tmux here)     │  (SSH to homelab) │
-         └───────────────────┴───────────────────┘
+         └─────────────────┴────────┬────────┴─────────────────┘
+                                    │
+                        ┌───────────▼───────────┐
+                        │    lib/loop_core.sh   │
+                        │   (Shared Library)    │
+                        └───────────┬───────────┘
+                                    │
+         ┌──────────────────────────┴──────────────────────────┐
+         │                        SKILLS                       │
+         │               (Where to run - execution)             │
+         ├──────────────────────────┬──────────────────────────┤
+         │       ralphus-local      │      ralphus-remote      │
+         │       (tmux here)        │      (SSH to homelab)    │
+         └──────────────────────────┴──────────────────────────┘
 ```
 
-**Variants** define *what* to do — the prompts, templates, and loop logic.
+**Variants** define *what* to do — configuration, prompts, and templates. They are thin wrappers around the **Modular Loop Library** (`lib/loop_core.sh`).
 **Skills** define *where* to run — local tmux or remote homelab via SSH.
 
 ---
-
-## Variants
-
-| Variant | Purpose | Spec Directory | Tracking |
-|---------|---------|----------------|----------|
-| `ralphus-code` | Implement features from specs | `specs/` | `IMPLEMENTATION_PLAN.md` |
-| `ralphus-test` | Create tests from test specs | `test-specs/` | `TEST_PLAN.md` |
-| `ralphus-review` | Code review and audit | (none) | `REVIEW_PLAN.md` |
-| `ralphus-product` | Slice brain dumps into ideas | `inbox/` | `ideas/*.md` |
-| `ralphus-architect` | Generate specs from ideas | `ideas/` | `specs/*.md` |
-| `ralphus-research` | Deep research on topics | `questions/` | `RESEARCH_PLAN.md` |
-| `ralphus-discover` | Understand a codebase | (none) | `DISCOVERY_PLAN.md` |
 
 ## The Ralphus Factory
 
@@ -108,6 +101,28 @@ The complete autonomous software factory pipeline:
 └───────────────┘     └───────────────┘
 ```
 
+### Roles & Responsibilities
+
+| Role | Variant | Input | Output | Purpose |
+|------|---------|-------|--------|---------|
+| **Product** | `ralphus-product` | `inbox/` | `ideas/` | Slice messy ideas into atomic features. |
+| **Architect** | `ralphus-architect` | `ideas/` | `specs/` | Research feasibility and write rigorous specs. |
+| **Builder** | `ralphus-code` | `specs/` | Code | Implement features and pass tests. |
+| **Auditor** | `ralphus-review` | Code | `reviews/` | Check security, style, and correctness. |
+| **Fixer** | `ralphus-architect` | `reviews/` | `specs/review-fixes.md` | Triage findings. |
+
+---
+
+## Task Batching
+
+Ralphus uses a **grouped task strategy** to maximize efficiency. Instead of atomic per-function tasks, implementation plans are batched by **testable deliverables**.
+
+- **Target**: 15-25 tasks per feature.
+- **Efficiency**: Reduces iteration overhead and git tag noise.
+- **Results**: Recent factory runs achieved **12x faster** completion times.
+
+See [AGENTS.md](AGENTS.md) for task grouping heuristics.
+
 ---
 
 ## Lessons Learned & Gotchas
@@ -124,16 +139,18 @@ The complete autonomous software factory pipeline:
 **Problem**: Scripts can get confused between the Ralphus installation and the project working directory.
 **Fix**: Always use `SCRIPT_DIR` for internal Ralphus files and `$WORKING_DIR` (set via `RALPHUS_WORKING_DIR`) for project files. Ensure the script `cd`s to the project root at startup.
 
-Each variant contains:
+### 4. Modular Loop Pattern
+The loop logic is centralized in `lib/loop_core.sh`. Each variant is a thin wrapper:
 ```
 variants/ralphus-{name}/
-├── README.md           # Variant-specific docs
+├── config.sh           # REQUIRED: Static configuration
+├── README.md           # REQUIRED: Variant documentation
 ├── scripts/
-│   └── loop.sh         # The eternal loop
+│   └── loop.sh         # Thin wrapper sourcing lib/loop_core.sh
 ├── instructions/
 │   ├── PROMPT_plan.md  # Planning phase
 │   └── PROMPT_build.md # Execution phase
-└── templates/          # Format references
+└── templates/          # Format references (*_REFERENCE.md)
 ```
 
 ---
@@ -183,12 +200,15 @@ ralphus code           # Run build loop
 ralphus code ulw 20    # Ultrawork mode, max 20 iterations
 ```
 
-### Available Variants
+### Available Commands
 
 | Command | Purpose | Required Directory |
 |---------|---------|-------------------|
+| `ralphus product` | Brain dump slicing | `inbox/` |
+| `ralphus architect` | Spec generation | `ideas/` |
 | `ralphus code` | Feature implementation | `specs/` |
 | `ralphus test` | Test creation | `test-specs/` |
+| `ralphus review` | Code review | (none) |
 | `ralphus research` | Deep learning | `questions/` |
 | `ralphus discover` | Codebase understanding | (none) |
 
@@ -297,15 +317,19 @@ Run any variant on homelab via SSH:
 ```
 ralphus/
 ├── README.md
-├── AGENTS.md                    # Template for target projects
+├── AGENTS.md                    # Operational playbook
 ├── CHANGELOG.md
 │
-├── scripts/
+├── bin/
 │   └── ralphus                  # Central execution wrapper
 │
+├── lib/
+│   └── loop_core.sh              # Shared Modular Loop Library
+│
 ├── docs/                        # Documentation
-│   ├── CENTRAL_EXECUTION.md     # Central execution architecture
+│   ├── MODULAR_ARCHITECTURE.md   # Shared library documentation
 │   ├── VARIANT_BLUEPRINT.md     # Template for creating new variants
+│   ├── CENTRAL_EXECUTION.md     # Central execution architecture
 │   ├── LOOP_VARIANTS.md         # Variant concept paper
 │   ├── ULTRAWORK.md             # Ultrawork philosophy
 │   └── references/              # Research materials
@@ -313,14 +337,15 @@ ralphus/
 ├── variants/                    # Loop variants (WHAT to do)
 │   ├── ralphus-code/            # Feature implementation
 │   ├── ralphus-test/            # Test creation
+│   ├── ralphus-review/          # Code review
+│   ├── ralphus-product/         # PM (Slicer)
+│   ├── ralphus-architect/       # Tech Lead (Spec)
 │   ├── ralphus-research/        # Deep research
 │   └── ralphus-discover/        # Codebase understanding
 │
 └── skills/                      # Execution modes (WHERE to run)
     ├── ralphus-local/           # Local tmux execution
     └── ralphus-remote/          # Homelab SSH execution
-        └── config/
-            └── project-mappings.json
 ```
 
 ---
@@ -368,6 +393,21 @@ When stuck and need human help:
 - **Clayton Farr** ([@ClaytonFarr](https://github.com/ClaytonFarr)) — Systematized Ralph into [ralph-playbook](https://github.com/ClaytonFarr/ralph-playbook)
 - **Sisyphus** — The OpenCode agent who rolls the boulder so you don't have to
 - **Ralph Wiggum** — For teaching us that persistence beats intelligence
+- **Opencode** — For providing the autonomous execution substrate
+
+---
+
+## License
+
+MIT — Do whatever you want. Ralphus certainly will.
+
+---
+
+<p align="center">
+  <i>"I bent my Wookiee."</i><br>
+  — Ralphus, after a particularly aggressive refactor
+</p>
+
 
 ---
 
