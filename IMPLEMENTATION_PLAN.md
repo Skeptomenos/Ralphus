@@ -29,7 +29,7 @@
 
 ## Phase 2: Create Variant Configs
 
-- [ ] 2.1 Create `variants/ralphus-code/config.sh` with: VARIANT_NAME="code", TRACKING_FILE="IMPLEMENTATION_PLAN.md", LAST_BRANCH_FILE=".last-branch", DEFAULT_PROMPT="PROMPT_build.md", PLAN_PROMPT="PROMPT_plan.md", REQUIRED_DIRS=("specs"), ARCHIVE_FILES=("IMPLEMENTATION_PLAN.md" "AGENTS.md")
+- [x] 2.1 Create `variants/ralphus-code/config.sh` with: VARIANT_NAME="code", TRACKING_FILE="IMPLEMENTATION_PLAN.md", LAST_BRANCH_FILE=".last-branch", DEFAULT_PROMPT="PROMPT_build.md", PLAN_PROMPT="PROMPT_plan.md", REQUIRED_DIRS=("specs"), ARCHIVE_FILES=("IMPLEMENTATION_PLAN.md" "AGENTS.md")
 - [ ] 2.2 Create `variants/ralphus-review/config.sh` with: VARIANT_NAME="review", TRACKING_FILE="REVIEW_PLAN.md", LAST_BRANCH_FILE=".last-review-branch", DEFAULT_PROMPT="PROMPT_review_build.md", PLAN_PROMPT="PROMPT_review_plan.md", ARCHIVE_FILES=("REVIEW_PLAN.md" "reviews"), EXTRA_SIGNALS=("APPROVED")
 - [ ] 2.3 Create `variants/ralphus-architect/config.sh` with: VARIANT_NAME="architect", TRACKING_FILE="", LAST_BRANCH_FILE=".last-architect-branch", DEFAULT_PROMPT="PROMPT_architect.md", LOOP_TYPE="file-iterator"
 - [ ] 2.4 Create `variants/ralphus-product/config.sh` with: VARIANT_NAME="product", DEFAULT_PROMPT="PROMPT_product.md", PLAN_PROMPT="PROMPT_product_init.md", REQUIRED_DIRS=("inbox"), LOOP_TYPE="sequential"
