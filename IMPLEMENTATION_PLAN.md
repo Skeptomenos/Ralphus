@@ -35,7 +35,7 @@
 - [x] 2.4 Create `variants/ralphus-product/config.sh` with: VARIANT_NAME="product", DEFAULT_PROMPT="PROMPT_product.md", PLAN_PROMPT="PROMPT_product_init.md", REQUIRED_DIRS=("inbox"), LOOP_TYPE="sequential"
 - [x] 2.5 Create `variants/ralphus-test/config.sh` with: VARIANT_NAME="test", TRACKING_FILE="", LAST_BRANCH_FILE=".last-branch", DEFAULT_PROMPT="PROMPT_test_build.md", PLAN_PROMPT="PROMPT_test_plan.md", REQUIRED_DIRS=("test-specs"), ARCHIVE_FILES=("test-specs")
 - [x] 2.6 Create `variants/ralphus-research/config.sh` with: VARIANT_NAME="research", TRACKING_FILE="RESEARCH_PLAN.md", DEFAULT_PROMPT="PROMPT_research_build.md", PLAN_PROMPT="PROMPT_research_plan.md"
-- [ ] 2.7 Create `variants/ralphus-discover/config.sh` with: VARIANT_NAME="discover", TRACKING_FILE="DISCOVERY_PLAN.md", DEFAULT_PROMPT="PROMPT_discover_build.md", PLAN_PROMPT="PROMPT_discover_plan.md"
+- [x] 2.7 Create `variants/ralphus-discover/config.sh` with: VARIANT_NAME="discover", TRACKING_FILE="DISCOVERY_PLAN.md", DEFAULT_PROMPT="PROMPT_discover_build.md", PLAN_PROMPT="PROMPT_discover_plan.md"
 
 ---
 
