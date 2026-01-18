@@ -82,6 +82,12 @@ Implement modular loop architecture using the Ralphus factory pipeline:
 8. **Phase Transitions**: Builder correctly announces "Phase 1 Complete!" with summary before moving to Phase 2.
 9. **run_loop() Implementation**: The main entry point (94 lines) correctly orchestrates all hooks and the main loop pattern.
 10. **Reading Variant Code**: Now reading existing variant loop.sh to understand what config values to extract.
+11. **Phase 3 Success**: Refactored ralphus-code/scripts/loop.sh from 148 → 57 lines (62% reduction). Clean thin wrapper pattern achieved!
+12. **Architecture Working**: The hook system works - loop.sh only defines `validate_variant()` and `get_templates()`, delegates everything else to shared library.
+13. **Self-Debugging**: Builder found bug in its own implementation - loop_core.sh was clobbering SCRIPT_DIR on source. Fixed by using temp vars `_SCRIPT_DIR` before sourcing.
+14. **Integration Testing**: Builder ran actual `loop.sh --help` and `loop.sh` to verify the refactor works in practice, not just syntax.
+15. **Integration Testing = Backpressure**: Builder correctly ran actual `loop.sh` to test refactor (not just syntax check). This provides real backpressure - if the code doesn't work, the test fails. The permission prompt was an **environment issue**, not a design flaw.
+16. **Environment Setup**: For fully autonomous operation, OpenCode permissions should be pre-configured to avoid interactive prompts blocking the loop.
 
 ---
 
@@ -119,6 +125,7 @@ Things to monitor during the factory run:
 1. **Task Granularity**: Architect should group related functions into single tasks. 50 atomic tasks is overkill.
 
 2. **Fresh Context by Design**: Each iteration re-reads IMPLEMENTATION_PLAN.md - this is CORRECT. The plan file IS the memory. Fresh context prevents hallucination accumulation across iterations.
+3. **Backpressure by Design**: Builder runs actual tests (not just syntax checks) to validate changes. If code doesn't work, test fails, loop self-corrects. This is the heart of Ralphus reliability.
 
 3. **Inline Testing**: The pattern of writing bash tests before commit is excellent - should be standardized.
 

@@ -41,9 +41,9 @@
 
 ## Phase 3: Refactor Variant Loop Scripts
 
-- [ ] 3.1 Refactor `variants/ralphus-code/scripts/loop.sh`: Source config.sh and lib/loop_core.sh; implement get_templates() returning IMPLEMENTATION_PLAN_REFERENCE.md; implement validate_variant() checking specs/ and IMPLEMENTATION_PLAN.md; call run_loop "$@"
-- [ ] 3.2 Refactor `variants/ralphus-review/scripts/loop.sh`: Source config.sh and lib/loop_core.sh; implement parse_variant_args() for pr/diff/files targets; implement validate_variant() for PR mode branch check; implement get_templates() returning 3 template files; implement build_message() adding REVIEW_TARGET and MAIN_BRANCH; implement post_iteration() for review artifact commits; call run_loop "$@"
-- [ ] 3.3 Refactor `variants/ralphus-architect/scripts/loop.sh`: Source config.sh and lib/loop_core.sh; ADD MISSING SHUTDOWN HANDLER via setup_shutdown_handler(); implement parse_variant_args() for feature/triage modes; implement file-iterator loop pattern; call run_loop "$@"
+- [x] 3.1 Refactor `variants/ralphus-code/scripts/loop.sh`: Source config.sh and lib/loop_core.sh; implement get_templates() returning IMPLEMENTATION_PLAN_REFERENCE.md; implement validate_variant() checking specs/ and IMPLEMENTATION_PLAN.md; call run_loop "$@"
+- [x] 3.2 Refactor `variants/ralphus-review/scripts/loop.sh`: Source config.sh and lib/loop_core.sh; implement parse_variant_args() for pr/diff/files targets; implement validate_variant() for PR mode branch check; implement get_templates() returning 3 template files; implement build_message() adding REVIEW_TARGET and MAIN_BRANCH; implement post_iteration() for review artifact commits; call run_loop "$@"
+- [x] 3.3 Refactor `variants/ralphus-architect/scripts/loop.sh`: Source config.sh and lib/loop_core.sh; ADD MISSING SHUTDOWN HANDLER via setup_shutdown_handler(); implement parse_variant_args() for feature/triage modes; implement file-iterator loop pattern; call run_loop "$@"
 - [ ] 3.4 Refactor `variants/ralphus-product/scripts/loop.sh`: Source config.sh and lib/loop_core.sh; implement sequential (non-loop) pattern; keep init/process modes; call run_sequential "$@"
 - [ ] 3.5 Refactor `variants/ralphus-test/scripts/loop.sh`: Source config.sh and lib/loop_core.sh; implement get_templates() for test templates; call run_loop "$@"
 - [ ] 3.6 Refactor `variants/ralphus-research/scripts/loop.sh`: Source config.sh and lib/loop_core.sh; implement get_templates() for research templates; call run_loop "$@"

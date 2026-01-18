@@ -1,166 +1,187 @@
 #!/bin/bash
 # Ralphus Architect - Specification Generator
-# Usage: ./ralphus/ralphus-architect/scripts/loop.sh [feature|triage] [file_path] [ultrawork|ulw]
+# Usage: ralphus architect [feature <file> | triage] [ulw] [N] ["custom prompt"]
 #
 # Modes:
-#   feature <file>   - Convert raw idea file to rigorous spec
+#   feature <file>   - Convert raw idea file to rigorous spec (or all ideas/ if no file)
 #   triage           - Convert reviews/ findings to fix spec
 #
 # Examples:
 #   ralphus architect feature ideas/dark-mode.md
 #   ralphus architect triage
+#
+# Thin wrapper that sources the shared library and provides variant-specific hooks.
+# Uses file-iterator pattern (processes files until none remain, not open-ended loop).
 
 set -euo pipefail
 
-# Central location
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-RALPHUS_ARCHITECT_DIR="$(dirname "$SCRIPT_DIR")"
-INSTRUCTIONS_DIR="$RALPHUS_ARCHITECT_DIR/instructions"
-TEMPLATES_DIR="$RALPHUS_ARCHITECT_DIR/templates"
+# Determine script and variant directories
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+_VARIANT_DIR="$(dirname "$_SCRIPT_DIR")"
 
-# Working directory
-WORKING_DIR="${RALPHUS_WORKING_DIR:-$(pwd)}"
+# Source variant configuration and shared library
+source "$_VARIANT_DIR/config.sh"
+source "$_VARIANT_DIR/../../lib/loop_core.sh"
 
-# Configuration
-AGENT="${RALPH_AGENT:-Sisyphus}"
-OPENCODE="${OPENCODE_BIN:-opencode}"
-SPECS_DIR="$WORKING_DIR/specs"
-IDEAS_DIR="$WORKING_DIR/ideas"
-REVIEWS_DIR="$WORKING_DIR/reviews"
-ULTRAWORK=0
+# =============================================================================
+# Variant-specific state (set by parse_variant_args)
+# =============================================================================
+ARCHITECT_MODE=""         # feature or triage
+INPUT_FILE=""             # Specific file for feature mode (optional)
+SPECS_DIR=""
+IDEAS_DIR=""
+REVIEWS_DIR=""
+CURRENT_INPUT=""          # File being processed in current iteration
 
-# Arguments
-MODE=""
-INPUT_FILE=""
-
-# Parse args
-while [[ $# -gt 0 ]]; do
-    case $1 in
+# =============================================================================
+# Hook: parse_variant_args() - Handle architect-specific arguments
+# =============================================================================
+# Handles feature and triage mode selection. Returns 0 if arg was handled.
+# =============================================================================
+parse_variant_args() {
+    local arg="$1"
+    case "$arg" in
         feature)
-            MODE="feature"
-            shift
-            if [[ -n "${1:-}" ]] && [[ ! "$1" =~ ^ulw$ ]]; then
-                INPUT_FILE="$1"
-                shift
-            fi
+            ARCHITECT_MODE="feature"
+            return 0
             ;;
         triage)
-            MODE="triage"
-            shift
-            ;;
-        ultrawork|ulw)
-            ULTRAWORK=1
-            shift
-            ;;
-        [0-9]*)
-            MAX_ITERATIONS=$1
-            shift
-            ;;
-        help|--help|-h)
-            echo "Usage: ralphus architect [feature <file> | triage] [ulw] [N]"
-            echo ""
-            echo "Modes:"
-            echo "  feature <file>   Convert raw idea file to rigorous spec"
-            echo "  triage           Convert reviews/ findings to fix spec"
-            echo ""
-            echo "Options:"
-            echo "  ulw              Ultrawork mode"
-            echo "  N                Max iterations (e.g. 10)"
-            exit 0
+            ARCHITECT_MODE="triage"
+            return 0
             ;;
         *)
-            echo "Unknown argument: $1"
-            echo "Run 'ralphus architect help' for usage."
-            exit 1
+            # Check if this is a file path for feature mode
+            if [[ "$ARCHITECT_MODE" = "feature" ]] && [[ -z "$INPUT_FILE" ]] && [[ ! "$arg" =~ ^(ulw|ultrawork|plan|[0-9]+)$ ]]; then
+                INPUT_FILE="$arg"
+                return 0
+            fi
             ;;
     esac
-done
+    return 1
+}
 
-# Default to interactive help if no mode
-if [ -z "$MODE" ]; then
-    echo "Usage: ralphus architect [feature <file> | triage]"
-    exit 1
-fi
+# =============================================================================
+# Hook: show_usage() - Architect-specific help message
+# =============================================================================
+show_usage() {
+    echo "Usage: ralphus architect [feature <file> | triage] [ulw] [N] [\"custom prompt\"]"
+    echo ""
+    echo "Modes:"
+    echo "  feature <file>   Convert raw idea file to rigorous spec"
+    echo "  triage           Convert reviews/ findings to fix spec"
+    echo ""
+    echo "Options:"
+    echo "  ulw              Ultrawork mode"
+    echo "  N                Max iterations (e.g., 10)"
+    echo "  <string>         Append custom prompt string"
+}
 
-# Validation
-if [ "$MODE" = "feature" ]; then
-    # If explicit file provided, check it
-    if [ -n "$INPUT_FILE" ]; then
-        if [ ! -f "$INPUT_FILE" ] && [ ! -f "$WORKING_DIR/$INPUT_FILE" ]; then
-            echo "Error: Input file '$INPUT_FILE' not found."
-            exit 1
-        fi
-    else
-        # No file provided, check if ideas/ directory exists
-        if [ ! -d "$IDEAS_DIR" ]; then
-            echo "Error: No input file provided and $IDEAS_DIR not found."
-            exit 1
-        fi
-    fi
-fi
-
-if [ "$MODE" = "triage" ]; then
-    if [ ! -d "$REVIEWS_DIR" ]; then
-        echo "Error: $REVIEWS_DIR not found. Run 'ralphus review' first."
+# =============================================================================
+# Hook: validate_variant() - Check architect-specific requirements
+# =============================================================================
+# Validates based on ARCHITECT_MODE:
+# - feature: ideas/ must exist (or INPUT_FILE must exist)
+# - triage: reviews/ must exist with unprocessed files
+# =============================================================================
+validate_variant() {
+    SPECS_DIR="$WORKING_DIR/specs"
+    IDEAS_DIR="$WORKING_DIR/ideas"
+    REVIEWS_DIR="$WORKING_DIR/reviews"
+    
+    # Default to interactive help if no mode
+    if [[ -z "$ARCHITECT_MODE" ]]; then
+        show_usage
         exit 1
     fi
-    mkdir -p "$REVIEWS_DIR/processed"
     
-    # Check if there are any unprocessed reviews
-    # find reviews/ -maxdepth 1 -name "*.md"
-    FINDING_COUNT=$(find "$REVIEWS_DIR" -maxdepth 1 -name "*_review.md" | wc -l)
-    if [ "$FINDING_COUNT" -eq 0 ]; then
-        echo "No unprocessed review files found in $REVIEWS_DIR."
-        echo "Check $REVIEWS_DIR/processed/ for completed items."
-        exit 0
+    # Feature mode validation
+    if [[ "$ARCHITECT_MODE" = "feature" ]]; then
+        if [[ -n "$INPUT_FILE" ]]; then
+            # Specific file provided - check it exists
+            if [[ ! -f "$INPUT_FILE" ]] && [[ ! -f "$WORKING_DIR/$INPUT_FILE" ]]; then
+                echo "ERROR: Input file '$INPUT_FILE' not found." >&2
+                return 1
+            fi
+        else
+            # No file provided - check ideas/ directory exists
+            if [[ ! -d "$IDEAS_DIR" ]]; then
+                echo "ERROR: No input file provided and $IDEAS_DIR not found." >&2
+                return 1
+            fi
+        fi
     fi
-fi
-
-# Prepare directories
-mkdir -p "$SPECS_DIR"
-
-ITERATION=0
-MAX_ITERATIONS=0 # Default: Unlimited
-
-echo "=== RALPHUS ARCHITECT: $MODE | $AGENT ==="
-
-# Execution Loop
-while true; do
-    ITERATION=$((ITERATION + 1))
-    if [ "$MAX_ITERATIONS" -gt 0 ] && [ "$ITERATION" -gt "$MAX_ITERATIONS" ]; then
-        echo "Reached max iterations: $MAX_ITERATIONS"
-        break
+    
+    # Triage mode validation
+    if [[ "$ARCHITECT_MODE" = "triage" ]]; then
+        if [[ ! -d "$REVIEWS_DIR" ]]; then
+            echo "ERROR: $REVIEWS_DIR not found. Run 'ralphus review' first." >&2
+            return 1
+        fi
+        mkdir -p "$REVIEWS_DIR/processed"
+        
+        # Check for unprocessed reviews
+        local finding_count
+        finding_count=$(find "$REVIEWS_DIR" -maxdepth 1 -name "*_review.md" 2>/dev/null | wc -l | tr -d ' ')
+        if [[ "$finding_count" -eq 0 ]]; then
+            echo "No unprocessed review files found in $REVIEWS_DIR."
+            echo "Check $REVIEWS_DIR/processed/ for completed items."
+            exit 0
+        fi
     fi
+    
+    # Prepare specs output directory
+    mkdir -p "$SPECS_DIR"
+    
+    # Export for prompt access
+    export ARCHITECT_MODE
+    export SPECS_DIR
+    export IDEAS_DIR
+    export REVIEWS_DIR
+    
+    return 0
+}
 
-    echo -e "\n--- Processing Iteration $ITERATION ---\n"
+# =============================================================================
+# Hook: get_templates() - Return template files for opencode
+# =============================================================================
+get_templates() {
+    echo "$TEMPLATES_DIR/SPEC_TEMPLATE_REFERENCE.md"
+    echo "$TEMPLATES_DIR/ARCHITECT_PLAN_REFERENCE.md"
+    
+    # Include PROJECT_CONTEXT.md if it exists
+    if [[ -f "$WORKING_DIR/PROJECT_CONTEXT.md" ]]; then
+        echo "$WORKING_DIR/PROJECT_CONTEXT.md"
+    fi
+}
 
-    # Context Message Selection
+# =============================================================================
+# Hook: build_message() - Construct message with architect context
+# =============================================================================
+# Determines CURRENT_INPUT and builds mode-specific message.
+# =============================================================================
+build_message() {
     CURRENT_INPUT=""
     
-    if [ "$MODE" = "feature" ]; then
-        if [ -n "$INPUT_FILE" ]; then
+    if [[ "$ARCHITECT_MODE" = "feature" ]]; then
+        if [[ -n "$INPUT_FILE" ]]; then
             # Single file mode
             CURRENT_INPUT="$INPUT_FILE"
-            if [ "$ITERATION" -gt 1 ]; then break; fi # Only one pass for specific file
         else
-            # Directory scan mode
-            # Find first markdown file in ideas/ that does NOT have a corresponding spec in specs/
-            # Logic: For each idea file, check if specs/$(basename) exists
-            FOUND_WORK=0
+            # Directory scan mode - find first unprocessed idea
             for idea in "$IDEAS_DIR"/*.md; do
-                if [ ! -f "$idea" ]; then continue; fi
+                if [[ ! -f "$idea" ]]; then continue; fi
                 
+                local filename spec_path
                 filename=$(basename "$idea")
                 spec_path="$SPECS_DIR/$filename"
                 
-                if [ ! -f "$spec_path" ]; then
+                if [[ ! -f "$spec_path" ]]; then
                     CURRENT_INPUT="$idea"
-                    FOUND_WORK=1
                     break
                 fi
             done
             
-            if [ "$FOUND_WORK" -eq 0 ]; then
+            if [[ -z "$CURRENT_INPUT" ]]; then
                 echo "No unprocessed ideas found in $IDEAS_DIR/"
                 echo "All ideas have corresponding specs in $SPECS_DIR/"
                 exit 0
@@ -170,60 +191,60 @@ while true; do
         MESSAGE="Act as Senior Architect. Analyze '$CURRENT_INPUT' and existing codebase. Create a technical specification in '$SPECS_DIR/$(basename "$CURRENT_INPUT")'."
         
     else
-        # Triage mode (Processed Folder Pattern)
-        # 1. Find first unprocessed review
-        CURRENT_INPUT=$(find "$REVIEWS_DIR" -maxdepth 1 -name "*_review.md" | head -n 1)
+        # Triage mode - find first unprocessed review
+        CURRENT_INPUT=$(find "$REVIEWS_DIR" -maxdepth 1 -name "*_review.md" 2>/dev/null | head -n 1)
         
-        if [ -z "$CURRENT_INPUT" ]; then
+        if [[ -z "$CURRENT_INPUT" ]]; then
             echo "All reviews processed!"
             exit 0
         fi
         
         echo "Triaging: $(basename "$CURRENT_INPUT")"
-        
         MESSAGE="Act as Senior Architect. Analyze '$CURRENT_INPUT'. Extract actionable fixes and APPEND them to 'specs/review-fixes.md'. Use the format in @SPEC_TEMPLATE_REFERENCE.md."
     fi
     
+    # Export for prompt access
+    export CURRENT_INPUT
+    
     echo "Task: $MESSAGE"
     
-    if [ "$ULTRAWORK" -eq 1 ]; then
+    # Append ultrawork suffix if enabled
+    if [[ "$ULTRAWORK" -eq 1 ]]; then
         MESSAGE="$MESSAGE ulw"
     fi
-
-    # Export for prompt
-    export CURRENT_INPUT="$CURRENT_INPUT"
-
-    # Prepare arguments
-    OPTS=(
-        -f "$INSTRUCTIONS_DIR/PROMPT_architect.md"
-        -f "$TEMPLATES_DIR/SPEC_TEMPLATE_REFERENCE.md"
-        -f "$TEMPLATES_DIR/ARCHITECT_PLAN_REFERENCE.md"
-    )
     
-    # Attach Context if it exists
-    if [ -f "$WORKING_DIR/PROJECT_CONTEXT.md" ]; then
-        OPTS+=(-f "$WORKING_DIR/PROJECT_CONTEXT.md")
+    # Append custom prompt if provided
+    if [[ -n "${CUSTOM_PROMPT:-}" ]]; then
+        MESSAGE="$MESSAGE Additional Instructions: $CUSTOM_PROMPT"
     fi
+}
 
-    OUTPUT=$("$OPENCODE" run --agent "$AGENT" \
-        "${OPTS[@]}" \
-        -- "$MESSAGE" 2>&1 | tee /dev/stderr) || true
-
-    # Post-processing for Triage: Move to processed
-    if [ "$MODE" = "triage" ] && [ -f "$CURRENT_INPUT" ]; then
+# =============================================================================
+# Hook: post_iteration() - Post-processing for triage mode
+# =============================================================================
+# Moves processed review files to processed/ directory.
+# For feature mode with specific file, exits after first iteration.
+# =============================================================================
+post_iteration() {
+    # Triage mode: move processed file to processed/
+    if [[ "$ARCHITECT_MODE" = "triage" ]] && [[ -f "$CURRENT_INPUT" ]]; then
         mv "$CURRENT_INPUT" "$REVIEWS_DIR/processed/"
         echo "Moved $(basename "$CURRENT_INPUT") to processed/"
-        
-        # Don't exit loop, continue to next file until max iterations
-        if echo "$OUTPUT" | grep -q "<promise>COMPLETE</promise>"; then
-            echo "Item complete."
-        fi
-        continue
     fi
-
-    # Check signals (for Feature mode)
-    if echo "$OUTPUT" | grep -q "<promise>COMPLETE</promise>"; then
-        echo "=== ARCHITECT COMPLETE ==="
+    
+    # Feature mode with specific file: exit after first iteration
+    if [[ "$ARCHITECT_MODE" = "feature" ]] && [[ -n "$INPUT_FILE" ]]; then
+        echo "Single file processing complete."
         exit 0
     fi
-done
+}
+
+# =============================================================================
+# Override check_signals for architect-specific behavior
+# =============================================================================
+# In triage mode, COMPLETE signals completion of current item, not all items.
+# The loop continues to next file unless no more files remain.
+# =============================================================================
+
+# Run the shared loop with all arguments
+run_loop "$_SCRIPT_DIR" "$_VARIANT_DIR" "$@"
