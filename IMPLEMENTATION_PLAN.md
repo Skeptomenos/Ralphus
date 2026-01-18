@@ -22,8 +22,8 @@
 - [x] 1.12 Implement `run_opencode()`: Accept template files as arguments; execute $OPENCODE run with --agent, -f flags, capture output
 - [x] 1.13 Implement `check_signals()`: Check for PLAN_COMPLETE, PHASE_COMPLETE, COMPLETE, BLOCKED, APPROVED; return appropriate exit codes
 - [x] 1.14 Implement `git_push()`: Push to origin with retry and -u fallback
-- [ ] 1.15 Implement `run_loop()`: Main entry point calling init, parse, validate, loop; call variant hooks: validate_variant, get_templates, build_message, post_iteration
-- [ ] 1.16 Add default no-op implementations for optional hooks (validate_variant, get_archive_files, build_message, post_iteration)
+- [x] 1.15 Implement `run_loop()`: Main entry point calling init, parse, validate, loop; call variant hooks: validate_variant, get_templates, build_message, post_iteration
+- [x] 1.16 Add default no-op implementations for optional hooks (validate_variant, get_archive_files, build_message, post_iteration)
 
 ---
 

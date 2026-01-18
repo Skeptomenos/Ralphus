@@ -656,5 +656,183 @@ git_push() {
 }
 
 # =============================================================================
-# Remaining core functions (1.15 - 1.16) to be implemented in subsequent tasks
+# 1.16 Default no-op implementations for optional hooks
 # =============================================================================
+# These provide default behavior for hooks that variants may choose not to define.
+# Variants override these by defining their own functions before sourcing this file
+# or after sourcing but before calling run_loop().
+#
+# Required hook (must be defined by variant):
+#   get_templates() - Returns list of template files (one per line)
+#
+# Optional hooks (default implementations provided here):
+#   validate_variant() - Return 0 (success) by default
+#   get_archive_files() - Return empty (use ARCHIVE_FILES from config)
+#   build_message() - Use build_base_message() by default
+#   post_iteration() - No-op by default
+# =============================================================================
+
+# Default validate_variant: always succeeds
+# Variants override this to check for tracking files, required directories, etc.
+validate_variant() {
+    return 0
+}
+
+# Default get_archive_files: returns nothing (relies on ARCHIVE_FILES config)
+# Variants override to dynamically determine which files to archive
+get_archive_files() {
+    :  # No-op
+}
+
+# Default build_message: delegates to build_base_message
+# Variants override to add custom message content (e.g., REVIEW_TARGET)
+build_message() {
+    build_base_message
+}
+
+# Default post_iteration: no-op
+# Variants override for post-processing (e.g., review artifact commits)
+post_iteration() {
+    :  # No-op
+}
+
+# =============================================================================
+# 1.15 run_loop() - Main entry point for variant loop scripts
+# =============================================================================
+# Orchestrates the complete loop lifecycle: initialization, parsing, validation,
+# and the main iteration loop. Calls variant hooks at appropriate points.
+#
+# Arguments:
+#   $1 - SCRIPT_DIR from the calling variant loop.sh
+#   $2 - VARIANT_DIR from the calling variant loop.sh
+#   $@ - Remaining arguments are passed to parse_common_args
+#
+# Expected variant setup (before calling run_loop):
+#   1. Source lib/loop_core.sh
+#   2. Source config.sh (sets VARIANT_NAME, TRACKING_FILE, etc.)
+#   3. Define required hook: get_templates()
+#   4. Optionally define: validate_variant(), build_message(), post_iteration()
+#
+# Lifecycle:
+#   1. init_ralphus() - Set up directories and defaults
+#   2. parse_common_args() - Parse command-line arguments
+#   3. validate_common() - Check prompt and template files exist
+#   4. validate_variant() - [Hook] Check variant-specific requirements
+#   5. setup_shutdown_handler() - Trap INT/TERM signals
+#   6. archive_on_branch_change() - Archive if branch changed
+#   7. show_header() - Display startup banner
+#   8. Loop:
+#      a. check_shutdown() - Exit if shutdown requested
+#      b. check_max_iterations() - Exit if limit reached
+#      c. Increment ITERATION counter
+#      d. build_message() - [Hook] Construct message (or build_base_message)
+#      e. get_templates() - [Hook] Get template file list
+#      f. run_opencode() - Execute the agent
+#      g. check_signals() - Parse output for completion signals
+#      h. Handle exit codes (PLAN_COMPLETE, COMPLETE, BLOCKED, APPROVED)
+#      i. post_iteration() - [Hook] Run post-processing
+#      j. git_push() - Push changes to remote
+#
+# Example variant usage (variants/ralphus-code/scripts/loop.sh):
+#   #!/bin/bash
+#   SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+#   VARIANT_DIR="$(dirname "$SCRIPT_DIR")"
+#   source "$VARIANT_DIR/../../lib/loop_core.sh"
+#   source "$VARIANT_DIR/config.sh"
+#   get_templates() { echo "$TEMPLATES_DIR/IMPLEMENTATION_PLAN_REFERENCE.md"; }
+#   run_loop "$SCRIPT_DIR" "$VARIANT_DIR" "$@"
+# =============================================================================
+run_loop() {
+    local caller_script_dir="$1"
+    local caller_variant_dir="$2"
+    shift 2  # Remove first two args, leave the rest for parse_common_args
+
+    # 1. Initialize the environment
+    init_ralphus "$caller_script_dir" "$caller_variant_dir"
+
+    # 2. Parse command-line arguments
+    parse_common_args "$@"
+
+    # 3. Validate common requirements
+    if ! validate_common; then
+        exit 1
+    fi
+
+    # 4. Validate variant-specific requirements (hook)
+    if ! validate_variant; then
+        exit 1
+    fi
+
+    # 5. Set up graceful shutdown handler
+    setup_shutdown_handler
+
+    # 6. Archive previous run if branch changed
+    archive_on_branch_change
+
+    # 7. Display startup header
+    show_header
+
+    # 8. Main loop
+    while true; do
+        # 8a. Check for shutdown request
+        check_shutdown
+
+        # 8b. Check iteration limit
+        if ! check_max_iterations; then
+            echo "Reached max iterations: $MAX_ITERATIONS"
+            break
+        fi
+
+        # 8c. Increment iteration counter
+        ITERATION=$((ITERATION + 1))
+        echo -e "\n======================== ITERATION $ITERATION ========================\n"
+
+        # 8d. Build the message (hook or default)
+        build_message
+
+        # 8e. Get template files from variant hook (required)
+        local templates=()
+        while IFS= read -r template; do
+            [[ -n "$template" ]] && templates+=("$template")
+        done < <(get_templates)
+
+        # 8f. Run opencode with prompt and templates
+        run_opencode "${templates[@]}"
+
+        # 8g. Check for completion signals
+        check_signals
+        local signal_code=$?
+
+        # 8h. Handle exit codes based on signals
+        case $signal_code in
+            10)
+                echo "=== PLANNING COMPLETE ==="
+                exit 0
+                ;;
+            20)
+                echo "=== ALL TASKS COMPLETE ==="
+                exit 0
+                ;;
+            30)
+                echo "=== BLOCKED ==="
+                echo "$BLOCKED_REASON"
+                exit 1
+                ;;
+            40)
+                echo "=== APPROVED ==="
+                exit 0
+                ;;
+            0)
+                # PHASE_COMPLETE or no signal - continue loop
+                ;;
+        esac
+
+        # 8i. Run post-iteration hook
+        post_iteration
+
+        # 8j. Push changes to remote
+        git_push
+    done
+
+    echo "=== Loop finished after $ITERATION iterations ==="
+}
