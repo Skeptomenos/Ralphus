@@ -1,24 +1,23 @@
-<!-- Standard Review Checklist - Reference Only -->
-
 # Code Review Checklist
 
-## Security (Always Check)
+## Security (Check All Explicitly)
 
 ### Input Validation
 - [ ] All user inputs validated/sanitized
-- [ ] Type checking on API boundaries
+- [ ] Type checking at API boundaries
 - [ ] Length/format constraints enforced
 - [ ] Reject invalid input early
 
 ### Injection Prevention
-- [ ] SQL: Parameterized queries only (no string concatenation)
+- [ ] SQL injection: Parameterized queries only
 - [ ] XSS: Output encoding, CSP headers
-- [ ] Command injection: No shell commands with user input
+- [ ] Command injection: No shell with user input
 - [ ] Path traversal: Validate file paths
+- [ ] NoSQL injection: Sanitize query operators
 
 ### Authentication & Authorization
 - [ ] Auth required on protected endpoints
-- [ ] Authorization checks (not just auth)
+- [ ] Authorization checks (not just authentication)
 - [ ] Session handling secure (httpOnly, secure flags)
 - [ ] No privilege escalation paths
 
@@ -28,86 +27,34 @@
 - [ ] Sensitive data not logged
 - [ ] PII handled per policy
 
-## Correctness
-
-### Logic
-- [ ] Code does what it's supposed to do
-- [ ] Edge cases handled (null, empty, zero, negative, max)
-- [ ] Boundary conditions correct
-- [ ] Off-by-one errors checked
-
-### Error Handling
+## Correctness (Adapt to codebase)
+- [ ] Edge cases handled (null, empty, bounds)
 - [ ] Errors caught and handled appropriately
-- [ ] No swallowed exceptions
-- [ ] User-facing errors are helpful but not leaky
-- [ ] Cleanup on error paths (transactions, resources)
-
-### Types & Contracts
-- [ ] Types used correctly
-- [ ] No unsafe type assertions without validation
-- [ ] Nullability handled
+- [ ] Types used correctly, no unsafe casts
 - [ ] API contracts match implementation
 
 ## Performance
-
-### Queries & Data
 - [ ] No N+1 queries
-- [ ] Appropriate indexes assumed/documented
-- [ ] Pagination on list endpoints
-- [ ] Batch operations where appropriate
-
-### Algorithms & Loops
 - [ ] No unbounded loops
-- [ ] Appropriate data structures
-- [ ] Time complexity reasonable
-- [ ] Space complexity considered
-
-### Resources
-- [ ] Event listeners cleaned up
-- [ ] Subscriptions unsubscribed
-- [ ] Connections/handles closed
-- [ ] Caching considered
+- [ ] Resources cleaned up (listeners, connections)
+- [ ] Pagination on list endpoints
 
 ## Maintainability
-
-### Code Style
 - [ ] Follows project conventions
-- [ ] Consistent naming
-- [ ] No magic numbers/strings
+- [ ] No dead/duplicate code
 - [ ] Comments explain "why" not "what"
 
-### Structure
-- [ ] Functions are focused (SRP)
-- [ ] Reasonable function length (<50 lines)
-- [ ] No deep nesting (>3 levels)
-- [ ] Dependencies injected/mockable
-
-### Cleanliness
-- [ ] No dead code
-- [ ] No commented-out code
-- [ ] No TODO/FIXME without tracking
-- [ ] No duplicate code
-
 ## Testing
-
-### Coverage
-- [ ] Tests exist for the feature
-- [ ] Happy path tested
-- [ ] Error cases tested
-- [ ] Edge cases tested
-
-### Quality
-- [ ] Tests are readable
+- [ ] Tests exist for feature
+- [ ] Error and edge cases covered
 - [ ] Tests are deterministic
-- [ ] Tests don't depend on external state
-- [ ] Mocks are appropriate
 
 ## Severity Levels
 
-| Level | Description | Action Required |
-|-------|-------------|-----------------|
-| **Critical** | Security vulnerability, data loss risk | Block merge, fix immediately |
-| **High** | Bug, logic error, significant issue | Fix before merge |
-| **Medium** | Code smell, suboptimal approach | Should fix, can defer |
-| **Low** | Style, minor improvement | Nice to have |
-| **Info** | Suggestion, question, FYI | No action required |
+| Level    | Description                 | Action               |
+|----------|-----------------------------|----------------------|
+| Critical | Security vuln, data loss    | Block merge, fix now |
+| High     | Bug, logic error            | Fix before merge     |
+| Medium   | Code smell, suboptimal      | Should fix           |
+| Low      | Style, minor improvement    | Nice to have         |
+| Info     | Suggestion, question        | No action required   |
