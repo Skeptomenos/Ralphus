@@ -19,7 +19,7 @@
 - [x] 1.9 Implement `check_shutdown()`: If SHUTDOWN=1, echo and exit 0
 - [x] 1.10 Implement `check_max_iterations()`: If MAX_ITERATIONS > 0 and ITERATION >= MAX_ITERATIONS, return 1
 - [x] 1.11 Implement `build_base_message()`: Construct message with optional ulw suffix; append CUSTOM_PROMPT if set
-- [ ] 1.12 Implement `run_opencode()`: Accept template files as arguments; execute $OPENCODE run with --agent, -f flags, capture output
+- [x] 1.12 Implement `run_opencode()`: Accept template files as arguments; execute $OPENCODE run with --agent, -f flags, capture output
 - [ ] 1.13 Implement `check_signals()`: Check for PLAN_COMPLETE, PHASE_COMPLETE, COMPLETE, BLOCKED, APPROVED; return appropriate exit codes
 - [ ] 1.14 Implement `git_push()`: Push to origin with retry and -u fallback
 - [ ] 1.15 Implement `run_loop()`: Main entry point calling init, parse, validate, loop; call variant hooks: validate_variant, get_templates, build_message, post_iteration

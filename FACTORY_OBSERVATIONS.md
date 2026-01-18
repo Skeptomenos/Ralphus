@@ -91,7 +91,7 @@ Implement modular loop architecture using the Ralphus factory pipeline:
 | 3 | Medium | Build | Every iteration re-reads IMPLEMENTATION_PLAN.md and runs `ls` | Consider caching or context persistence between iterations |
 | 4 | Low | Build | Tag format inconsistent (0.0.1 vs v0.0.7) | Standardize in loop_core.sh |
 | 5 | High | Architect | Task granularity too fine - 50 tasks at ~3min each = 2.5 hours | Group related tasks (e.g., all shutdown functions = 1 task) |
-| 6 | Medium | Build | No context persistence between iterations | Each iteration starts fresh, wastes tokens re-reading same files |
+| 6 | ~~Medium~~ | ~~Build~~ | ~~No context persistence between iterations~~ | **INVALID** - Fresh context IS the feature. IMPLEMENTATION_PLAN.md is the persistence layer. This prevents hallucination accumulation. |
 
 ---
 
@@ -113,7 +113,7 @@ Things to monitor during the factory run:
 
 1. **Task Granularity**: Architect should group related functions into single tasks. 50 atomic tasks is overkill.
 
-2. **Context Persistence**: Builder wastes tokens re-reading same files every iteration. Should cache.
+2. **Fresh Context by Design**: Each iteration re-reads IMPLEMENTATION_PLAN.md - this is CORRECT. The plan file IS the memory. Fresh context prevents hallucination accumulation across iterations.
 
 3. **Inline Testing**: The pattern of writing bash tests before commit is excellent - should be standardized.
 

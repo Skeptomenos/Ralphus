@@ -465,5 +465,61 @@ build_base_message() {
 }
 
 # =============================================================================
-# Remaining core functions (1.12 - 1.16) to be implemented in subsequent tasks
+# 1.12 run_opencode() - Execute opencode with prompt and template files
+# =============================================================================
+# Runs the opencode CLI with the configured agent, prompt file, and any
+# additional template files. Captures output while also displaying it.
+#
+# Arguments:
+#   $@ - Additional template files to include via -f flags
+#
+# Uses globals:
+#   OPENCODE - Path to opencode binary (from init_ralphus)
+#   AGENT - Agent name to use (from init_ralphus)
+#   PROMPT_FILE - Main prompt file path (from validate_common)
+#   MESSAGE - The message to send (from build_base_message or build_message)
+#   WORKING_DIR - Directory to run opencode in
+#
+# Returns:
+#   Sets OUTPUT global with captured stdout/stderr
+#   Returns the exit code from opencode (or 0 if using || true pattern)
+#
+# Behavior:
+#   1. Builds command with --agent and -f flags for prompt and templates
+#   2. Executes in WORKING_DIR context
+#   3. Uses tee to both capture output and display in real-time
+#   4. Suppresses exit code failures (|| true) since signals indicate completion
+#
+# Example:
+#   build_base_message
+#   run_opencode "$TEMPLATES_DIR/IMPLEMENTATION_PLAN_REFERENCE.md"
+#   check_signals
+# =============================================================================
+run_opencode() {
+    local template_files=("$@")
+    
+    # Build the command arguments
+    local cmd_args=()
+    cmd_args+=(run --agent "$AGENT")
+    
+    # Add the main prompt file
+    cmd_args+=(-f "$PROMPT_FILE")
+    
+    # Add all template files
+    for template in "${template_files[@]}"; do
+        if [[ -n "$template" && -f "$template" ]]; then
+            cmd_args+=(-f "$template")
+        fi
+    done
+    
+    # Add separator and message
+    cmd_args+=(-- "$MESSAGE")
+    
+    # Execute opencode in WORKING_DIR, capture output while displaying
+    # Uses || true to prevent exit on non-zero return (signals indicate completion)
+    OUTPUT=$(cd "$WORKING_DIR" && "$OPENCODE" "${cmd_args[@]}" 2>&1 | tee /dev/stderr) || true
+}
+
+# =============================================================================
+# Remaining core functions (1.13 - 1.16) to be implemented in subsequent tasks
 # =============================================================================
