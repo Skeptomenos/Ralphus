@@ -13,7 +13,7 @@
 - [x] 1.3 Implement `init_ralphus()`: Parse SCRIPT_DIR, VARIANT_DIR from caller; set WORKING_DIR from RALPHUS_WORKING_DIR or pwd; set AGENT from RALPH_AGENT (default: Sisyphus); set OPENCODE from OPENCODE_BIN (default: opencode); initialize ULTRAWORK=0, MODE="build", MAX_ITERATIONS=0, CUSTOM_PROMPT=""
 - [x] 1.4 Implement `parse_common_args()`: Handle plan, ulw/ultrawork, numeric (max iterations), help, custom strings/files; store results in global variables
 - [x] 1.5 Implement `show_header()`: Print variant name, mode, agent, current branch; print ultrawork and max_iterations if set
-- [ ] 1.6 Implement `validate_common()`: Check PROMPT_FILE exists; check TEMPLATES_DIR exists
+- [x] 1.6 Implement `validate_common()`: Check PROMPT_FILE exists; check TEMPLATES_DIR exists
 - [ ] 1.7 Implement `archive_on_branch_change()`: Read LAST_BRANCH_FILE, compare to CURRENT_BRANCH; if different, create archive dir and copy ARCHIVE_FILES; write CURRENT_BRANCH to LAST_BRANCH_FILE
 - [ ] 1.8 Implement `setup_shutdown_handler()`: Set SHUTDOWN=0; trap INT TERM to set SHUTDOWN=1 with message
 - [ ] 1.9 Implement `check_shutdown()`: If SHUTDOWN=1, echo and exit 0

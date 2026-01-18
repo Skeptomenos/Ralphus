@@ -237,5 +237,54 @@ show_header() {
 }
 
 # =============================================================================
-# Remaining core functions (1.6 - 1.16) to be implemented in subsequent tasks
+# 1.6 validate_common() - Validate common requirements before loop starts
+# =============================================================================
+# Checks that essential files and directories exist for the loop to run.
+# Uses config variables (DEFAULT_PROMPT, PLAN_PROMPT) to determine PROMPT_FILE.
+#
+# Uses globals:
+#   MODE - "build" or "plan" (determines which prompt file to use)
+#   INSTRUCTIONS_DIR - Path to variant's instructions directory
+#   TEMPLATES_DIR - Path to variant's templates directory
+#   DEFAULT_PROMPT - Filename for build mode prompt (from config.sh)
+#   PLAN_PROMPT - Filename for plan mode prompt (from config.sh)
+#
+# Sets:
+#   PROMPT_FILE - Full path to the appropriate prompt file
+#
+# Returns:
+#   0 - Validation passed
+#   1 - Validation failed (prints error and returns)
+# =============================================================================
+validate_common() {
+    # Determine which prompt file to use based on mode
+    if [[ "$MODE" = "plan" ]] && [[ -n "${PLAN_PROMPT:-}" ]]; then
+        PROMPT_FILE="$INSTRUCTIONS_DIR/$PLAN_PROMPT"
+    else
+        PROMPT_FILE="$INSTRUCTIONS_DIR/${DEFAULT_PROMPT:-PROMPT_build.md}"
+    fi
+
+    # Check that INSTRUCTIONS_DIR exists
+    if [[ ! -d "$INSTRUCTIONS_DIR" ]]; then
+        echo "ERROR: Instructions directory not found: $INSTRUCTIONS_DIR" >&2
+        return 1
+    fi
+
+    # Check that PROMPT_FILE exists
+    if [[ ! -f "$PROMPT_FILE" ]]; then
+        echo "ERROR: Prompt file not found: $PROMPT_FILE" >&2
+        return 1
+    fi
+
+    # Check that TEMPLATES_DIR exists
+    if [[ ! -d "$TEMPLATES_DIR" ]]; then
+        echo "ERROR: Templates directory not found: $TEMPLATES_DIR" >&2
+        return 1
+    fi
+
+    return 0
+}
+
+# =============================================================================
+# Remaining core functions (1.7 - 1.16) to be implemented in subsequent tasks
 # =============================================================================
