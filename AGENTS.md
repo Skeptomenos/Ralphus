@@ -69,7 +69,7 @@ Run these after implementing to get immediate feedback:
 
 ## Modular Loop Architecture
 
-The loop scripts use a shared library pattern to eliminate duplication (~61% code reduction).
+The loop scripts use a shared library pattern to eliminate duplication (~61% code reduction). For detailed technical documentation, see [MODULAR_ARCHITECTURE.md](docs/MODULAR_ARCHITECTURE.md).
 
 ```
 ralphus/
@@ -83,7 +83,7 @@ ralphus/
 
 ### Hook System
 
-Variants customize behavior via hooks defined before calling `run_loop`:
+Variants customize behavior via hooks defined before calling `run_loop`. See [VARIANT_BLUEPRINT.md](docs/VARIANT_BLUEPRINT.md) for implementation details.
 
 | Hook | Purpose | Required |
 |------|---------|----------|

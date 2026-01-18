@@ -90,6 +90,8 @@ Each iteration:
 
 **Backpressure**: Self-quiz validation (see Ralphus Research).
 
+> **Technical Note**: These variants are implemented using the modular [shared library pattern](MODULAR_ARCHITECTURE.md).
+
 **Use Cases**:
 - Onboarding to a new codebase
 - Due diligence on acquisitions
