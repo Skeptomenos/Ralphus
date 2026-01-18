@@ -521,5 +521,96 @@ run_opencode() {
 }
 
 # =============================================================================
-# Remaining core functions (1.13 - 1.16) to be implemented in subsequent tasks
+# 1.13 check_signals() - Check opencode output for completion signals
+# =============================================================================
+# Parses the OUTPUT from run_opencode() for completion promise tags.
+# Returns an exit code indicating the signal found (or 0 for no signal).
+#
+# Uses globals:
+#   OUTPUT - Captured output from run_opencode()
+#   EXTRA_SIGNALS - Optional array of additional signals to check (from config.sh)
+#
+# Sets globals:
+#   SIGNAL_FOUND - The signal that was detected (empty if none)
+#   BLOCKED_REASON - Extracted reason from BLOCKED signal (if applicable)
+#
+# Returns:
+#   0 - Continue looping (no signal or PHASE_COMPLETE)
+#   10 - PLAN_COMPLETE (exit with success)
+#   20 - COMPLETE (exit with success)
+#   30 - BLOCKED (exit with failure)
+#   40 - APPROVED (exit with success, review variant only)
+#
+# Signal precedence (checked in order):
+#   1. BLOCKED - Most critical, indicates failure
+#   2. PLAN_COMPLETE - Planning phase done
+#   3. COMPLETE - All tasks done
+#   4. APPROVED - Review approved (if in EXTRA_SIGNALS)
+#   5. PHASE_COMPLETE - Single task done, continue loop
+#
+# Example usage in run_loop():
+#   run_opencode "${templates[@]}"
+#   check_signals
+#   case $? in
+#       10) echo "=== PLANNING COMPLETE ===" && exit 0 ;;
+#       20) echo "=== ALL TASKS COMPLETE ===" && exit 0 ;;
+#       30) echo "=== BLOCKED ===" && echo "$BLOCKED_REASON" && exit 1 ;;
+#       40) echo "=== APPROVED ===" && exit 0 ;;
+#       0)  continue ;;  # PHASE_COMPLETE or no signal
+#   esac
+# =============================================================================
+check_signals() {
+    # Initialize signal tracking variables
+    SIGNAL_FOUND=""
+    BLOCKED_REASON=""
+
+    # Early return if OUTPUT is empty
+    if [[ -z "${OUTPUT:-}" ]]; then
+        return 0
+    fi
+
+    # Check for BLOCKED signal first (highest priority - indicates failure)
+    if echo "$OUTPUT" | grep -q "<promise>BLOCKED:"; then
+        SIGNAL_FOUND="BLOCKED"
+        # Extract the blocked reason between the tags
+        BLOCKED_REASON=$(echo "$OUTPUT" | grep -o "<promise>BLOCKED:[^<]*</promise>" | head -1)
+        return 30
+    fi
+
+    # Check for PLAN_COMPLETE signal
+    if echo "$OUTPUT" | grep -q "<promise>PLAN_COMPLETE</promise>"; then
+        SIGNAL_FOUND="PLAN_COMPLETE"
+        return 10
+    fi
+
+    # Check for COMPLETE signal
+    if echo "$OUTPUT" | grep -q "<promise>COMPLETE</promise>"; then
+        SIGNAL_FOUND="COMPLETE"
+        return 20
+    fi
+
+    # Check for APPROVED signal (typically only in review variant via EXTRA_SIGNALS)
+    # Also check directly for variants that define it in config
+    if [[ -n "${EXTRA_SIGNALS:-}" ]]; then
+        for signal in "${EXTRA_SIGNALS[@]}"; do
+            if [[ "$signal" = "APPROVED" ]] && echo "$OUTPUT" | grep -q "<promise>APPROVED</promise>"; then
+                SIGNAL_FOUND="APPROVED"
+                return 40
+            fi
+        done
+    fi
+
+    # Check for PHASE_COMPLETE signal (continues loop)
+    if echo "$OUTPUT" | grep -q "<promise>PHASE_COMPLETE</promise>"; then
+        SIGNAL_FOUND="PHASE_COMPLETE"
+        echo "=== PHASE COMPLETE - next iteration ==="
+        return 0
+    fi
+
+    # No signal found - continue loop
+    return 0
+}
+
+# =============================================================================
+# Remaining core functions (1.14 - 1.16) to be implemented in subsequent tasks
 # =============================================================================
