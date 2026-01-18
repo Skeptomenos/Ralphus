@@ -35,6 +35,37 @@
 #   <promise>BLOCKED:task:reason</promise> - Stuck, exit failure
 #   <promise>APPROVED</promise>        - Review approved (review variant only)
 #
+# How to Implement Hooks:
+#   Hooks are shell functions defined by variant scripts BEFORE calling run_loop().
+#   The variant's function definition overrides the default no-op in this library.
+#
+#   Example (in variants/ralphus-code/scripts/loop.sh):
+#     #!/bin/bash
+#     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+#     VARIANT_DIR="$(dirname "$SCRIPT_DIR")"
+#     source "$VARIANT_DIR/../../lib/loop_core.sh"  # Load defaults first
+#     source "$VARIANT_DIR/config.sh"              # Load variant config
+#
+#     # Override required hook - MUST define this
+#     get_templates() {
+#         echo "$TEMPLATES_DIR/IMPLEMENTATION_PLAN_REFERENCE.md"
+#     }
+#
+#     # Override optional hook - validates build mode requirements
+#     validate_variant() {
+#         [[ "$MODE" != "build" ]] && return 0
+#         [[ -f "$WORKING_DIR/$TRACKING_FILE" ]] || { echo "Run plan first"; return 1; }
+#     }
+#
+#     run_loop "$SCRIPT_DIR" "$VARIANT_DIR" "$@"
+#
+#   Hook Execution Order in run_loop():
+#     1. parse_variant_args() - Called per-argument during parsing
+#     2. validate_variant()   - Called once before loop starts
+#     3. build_message()      - Called each iteration before opencode
+#     4. get_templates()      - Called each iteration to get template files
+#     5. post_iteration()     - Called each iteration after signal check
+#
 # =============================================================================
 
 set -euo pipefail
@@ -201,8 +232,29 @@ show_usage() {
     echo "  <string>   Append custom prompt string"
 }
 
-# Default no-op for parse_variant_args - variants override if needed
-# Returns 1 (not handled) by default, so parse_common_args handles everything
+# -----------------------------------------------------------------------------
+# parse_variant_args() - Handle variant-specific CLI arguments
+# -----------------------------------------------------------------------------
+# Default: Returns 1 (arg not handled) so parse_common_args processes it
+# Called once per argument during parse_common_args loop
+#
+# Arguments:
+#   $1 - The current argument being parsed
+#
+# Returns:
+#   0 - Argument was handled by this hook (skip common parsing)
+#   1 - Argument was NOT handled (let parse_common_args process it)
+#
+# Example override (ralphus-review):
+#   parse_variant_args() {
+#       case "$1" in
+#           pr)     REVIEW_TARGET="pr"; return 0 ;;
+#           diff)   REVIEW_TARGET="diff"; return 0 ;;
+#           files)  REVIEW_TARGET="files"; return 0 ;;
+#           *)      return 1 ;;  # Not handled, pass to common parser
+#       esac
+#   }
+# -----------------------------------------------------------------------------
 parse_variant_args() {
     return 1
 }
@@ -662,39 +714,84 @@ git_push() {
 # 1.16 Default no-op implementations for optional hooks
 # =============================================================================
 # These provide default behavior for hooks that variants may choose not to define.
-# Variants override these by defining their own functions before sourcing this file
-# or after sourcing but before calling run_loop().
+# Variants override these by defining their own functions AFTER sourcing this file
+# but BEFORE calling run_loop(). Shell function definitions replace earlier ones.
 #
-# Required hook (must be defined by variant):
-#   get_templates() - Returns list of template files (one per line)
+# Required hook (MUST be defined by variant):
+#   get_templates() - Returns list of template files (one per line via echo)
+#                     Called each iteration to determine which files to pass to opencode.
+#                     Example: echo "$TEMPLATES_DIR/MY_REFERENCE.md"
 #
 # Optional hooks (default implementations provided here):
-#   validate_variant() - Return 0 (success) by default
-#   get_archive_files() - Return empty (use ARCHIVE_FILES from config)
-#   build_message() - Use build_base_message() by default
-#   post_iteration() - No-op by default
+#   validate_variant()   - Check variant requirements before loop starts
+#                          Return 0 to continue, 1 to abort
+#   get_archive_files()  - Dynamically determine files to archive (rarely needed)
+#   build_message()      - Construct MESSAGE for opencode (defaults to build_base_message)
+#   post_iteration()     - Run after each iteration completes (e.g., git commits)
+#   parse_variant_args() - Handle variant-specific CLI arguments
+#                          Return 0 if arg was handled, 1 to pass to common parser
 # =============================================================================
 
-# Default validate_variant: always succeeds
-# Variants override this to check for tracking files, required directories, etc.
+# -----------------------------------------------------------------------------
+# validate_variant() - Check variant-specific requirements before loop starts
+# -----------------------------------------------------------------------------
+# Default: Always succeeds (returns 0)
+# Override to check for: tracking files, required directories, mode-specific state
+#
+# Example override (ralphus-code):
+#   validate_variant() {
+#       [[ "$MODE" != "build" ]] && return 0  # Skip check in plan mode
+#       if [[ ! -f "$WORKING_DIR/$TRACKING_FILE" ]]; then
+#           echo "Error: $TRACKING_FILE not found. Run: ralphus code plan"
+#           return 1
+#       fi
+#   }
+# -----------------------------------------------------------------------------
 validate_variant() {
     return 0
 }
 
-# Default get_archive_files: returns nothing (relies on ARCHIVE_FILES config)
-# Variants override to dynamically determine which files to archive
+# -----------------------------------------------------------------------------
+# get_archive_files() - Dynamically determine files to archive on branch change
+# -----------------------------------------------------------------------------
+# Default: Returns nothing (relies on ARCHIVE_FILES array from config.sh)
+# Override only if you need runtime logic to determine which files to archive
+# -----------------------------------------------------------------------------
 get_archive_files() {
     :  # No-op
 }
 
-# Default build_message: delegates to build_base_message
-# Variants override to add custom message content (e.g., REVIEW_TARGET)
+# -----------------------------------------------------------------------------
+# build_message() - Construct the MESSAGE variable for opencode execution
+# -----------------------------------------------------------------------------
+# Default: Calls build_base_message() which creates standard message with
+#          ultrawork suffix and custom prompt injection
+# Override to add variant-specific context (e.g., review target, main branch)
+#
+# Example override (ralphus-review):
+#   build_message() {
+#       build_base_message  # Start with standard message
+#       MESSAGE="$MESSAGE | REVIEW_TARGET=$REVIEW_TARGET | MAIN_BRANCH=$MAIN_BRANCH"
+#   }
+# -----------------------------------------------------------------------------
 build_message() {
     build_base_message
 }
 
-# Default post_iteration: no-op
-# Variants override for post-processing (e.g., review artifact commits)
+# -----------------------------------------------------------------------------
+# post_iteration() - Run after each iteration completes (before git_push)
+# -----------------------------------------------------------------------------
+# Default: No-op
+# Override for post-processing such as committing review artifacts,
+# updating tracking files, or triggering external notifications
+#
+# Example override (ralphus-review):
+#   post_iteration() {
+#       if [[ -d "$WORKING_DIR/reviews" ]]; then
+#           (cd "$WORKING_DIR" && git add reviews/ && git commit -m "Review artifacts" 2>/dev/null || true)
+#       fi
+#   }
+# -----------------------------------------------------------------------------
 post_iteration() {
     :  # No-op
 }
