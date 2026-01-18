@@ -53,9 +53,9 @@
 
 ## Phase 4: Propagate Custom Prompt Injection
 
-- [ ] 4.1 Ensure parse_common_args() handles custom strings/files: check if arg is file with -f, cat and append; else append as string
-- [ ] 4.2 Ensure build_base_message() appends CUSTOM_PROMPT when set
-- [ ] 4.3 Test custom prompt with each variant: `ralphus code "focus on tests"`, `ralphus review "check security only"`, `ralphus architect feature "prioritize API design"`
+- [x] 4.1 Ensure parse_common_args() handles custom strings/files: check if arg is file with -f, cat and append; else append as string
+- [x] 4.2 Ensure build_base_message() appends CUSTOM_PROMPT when set
+- [x] 4.3 Test custom prompt with each variant: `ralphus code "focus on tests"`, `ralphus review "check security only"`, `ralphus architect feature "prioritize API design"`
 
 ---
 
