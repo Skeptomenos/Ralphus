@@ -28,7 +28,7 @@
 
 ## Phase 3: Strengthen Plan Mode Prompt
 
-- [ ] 3.1 Enhance granularity guidance in `PROMPT_plan.md`
+- [x] 3.1 Enhance granularity guidance in `PROMPT_plan.md`
       File: `variants/ralphus-code/instructions/PROMPT_plan.md`
       Location: Expand existing "Task Granularity" section (lines 9-13)
       Content: Add explicit batching rules, anti-patterns, and warning for 40+ tasks

@@ -12,6 +12,21 @@ Break phases into atomic, deployable tasks. Each task must be a **complete logic
 - Constraint: Must be implementable in one continuous session (~30 mins).
 - Avoid: Massive refactors or dependent chains without intermediate working states.
 
+**Task Batching Rules:**
+1. One task = one thing you can test in isolation
+2. Multiple functions in the same file = usually one task
+3. Multiple files with shared purpose = one task if tested together
+4. Config files that follow the same pattern = one task
+
+**Anti-patterns:**
+- One task per function (too granular)
+- One task per file (too granular if files are related)
+- Tasks with no clear test criteria
+
+**Target:** 15-25 tasks per feature. If you have 40+ tasks, you're too granular—re-group before continuing.
+
+**Self-check:** Review task count before emitting PLAN_COMPLETE. Consolidate if needed.
+
 2. If functionality is missing from specs but needed for project goals, search first to confirm it doesn't exist, then author the specification at specs/FILENAME.md and document the plan in @IMPLEMENTATION_PLAN.md.
 
 IMPORTANT: Plan only. Do NOT implement. Confirm with code search before assuming anything is missing.
