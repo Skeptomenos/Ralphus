@@ -126,5 +126,86 @@ init_ralphus() {
 }
 
 # =============================================================================
-# Remaining core functions (1.4 - 1.16) to be implemented in subsequent tasks
+# 1.4 parse_common_args() - Parse command-line arguments common to all variants
+# =============================================================================
+# Handles standardized argument parsing using for-loop pattern (not while/case).
+# Variants can provide parse_variant_args() hook for variant-specific args.
+#
+# Arguments:
+#   "$@" - All command-line arguments
+#
+# Recognizes:
+#   plan         - Sets MODE="plan"
+#   ulw/ultrawork - Sets ULTRAWORK=1
+#   <numeric>    - Sets MAX_ITERATIONS
+#   help/-h/--help - Prints usage and exits
+#   <file>       - Reads file content and appends to CUSTOM_PROMPT
+#   <string>     - Appends string to CUSTOM_PROMPT
+#
+# Sets:
+#   MODE, ULTRAWORK, MAX_ITERATIONS, CUSTOM_PROMPT - Based on parsed args
+#
+# Note: Variants may override this behavior by defining parse_variant_args()
+# which is called first. If parse_variant_args returns 0, the arg was handled.
+# =============================================================================
+parse_common_args() {
+    for arg in "$@"; do
+        # First, let variant try to handle the argument
+        # parse_variant_args returns 0 if it handled the arg
+        if type parse_variant_args &>/dev/null && parse_variant_args "$arg"; then
+            continue
+        fi
+
+        # Common argument handling
+        if [[ "$arg" = "plan" ]]; then
+            MODE="plan"
+        elif [[ "$arg" = "ultrawork" ]] || [[ "$arg" = "ulw" ]]; then
+            ULTRAWORK=1
+        elif [[ "$arg" =~ ^[0-9]+$ ]]; then
+            MAX_ITERATIONS=$arg
+        elif [[ "$arg" = "help" ]] || [[ "$arg" = "--help" ]] || [[ "$arg" = "-h" ]]; then
+            show_usage
+            exit 0
+        else
+            # Custom prompt injection: file or string
+            if [[ -f "$arg" ]]; then
+                # Argument is a file - read its content
+                local content
+                content=$(cat "$arg")
+                CUSTOM_PROMPT="${CUSTOM_PROMPT} ${content}"
+            else
+                # Otherwise treat as text string
+                CUSTOM_PROMPT="${CUSTOM_PROMPT} ${arg}"
+            fi
+        fi
+    done
+
+    # Trim leading whitespace from CUSTOM_PROMPT
+    CUSTOM_PROMPT="${CUSTOM_PROMPT# }"
+}
+
+# =============================================================================
+# Default hook implementations (can be overridden by variants)
+# =============================================================================
+
+# Default usage - variants should override with their own help message
+show_usage() {
+    echo "Usage: ralphus ${VARIANT_NAME:-variant} [plan] [ulw] [N] [\"custom prompt\"]"
+    echo ""
+    echo "Options:"
+    echo "  plan       Run in planning mode"
+    echo "  ulw        Enable ultrawork mode"
+    echo "  N          Max iterations (e.g., 10)"
+    echo "  <file>     Read custom prompt from file"
+    echo "  <string>   Append custom prompt string"
+}
+
+# Default no-op for parse_variant_args - variants override if needed
+# Returns 1 (not handled) by default, so parse_common_args handles everything
+parse_variant_args() {
+    return 1
+}
+
+# =============================================================================
+# Remaining core functions (1.5 - 1.16) to be implemented in subsequent tasks
 # =============================================================================
