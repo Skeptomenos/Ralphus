@@ -9,7 +9,7 @@
 ## Phase 1: Create Shared Library
 
 - [x] 1.1 Create `lib/` directory in ralphus root
-- [ ] 1.2 Create `lib/loop_core.sh` with shebang, header comment, and `set -euo pipefail`
+- [x] 1.2 Create `lib/loop_core.sh` with shebang, header comment, and `set -euo pipefail`
 - [ ] 1.3 Implement `init_ralphus()`: Parse SCRIPT_DIR, VARIANT_DIR from caller; set WORKING_DIR from RALPHUS_WORKING_DIR or pwd; set AGENT from RALPH_AGENT (default: Sisyphus); set OPENCODE from OPENCODE_BIN (default: opencode); initialize ULTRAWORK=0, MODE="build", MAX_ITERATIONS=0, CUSTOM_PROMPT=""
 - [ ] 1.4 Implement `parse_common_args()`: Handle plan, ulw/ultrawork, numeric (max iterations), help, custom strings/files; store results in global variables
 - [ ] 1.5 Implement `show_header()`: Print variant name, mode, agent, current branch; print ultrawork and max_iterations if set
