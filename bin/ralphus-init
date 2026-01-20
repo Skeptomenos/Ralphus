@@ -1,0 +1,194 @@
+#!/bin/bash
+# Ralphus Init - Scaffold ralph-wiggum/ structure in a project
+
+set -euo pipefail
+
+RALPHUS_HOME="${RALPHUS_HOME:-$HOME/ralphus}"
+PROJECT_DIR="${RALPHUS_WORKING_DIR:-$(pwd)}"
+RALPH_DIR="$PROJECT_DIR/ralph-wiggum"
+
+# Colors
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+show_help() {
+    cat << 'EOF'
+Usage: ralphus init [options]
+
+Initialize ralph-wiggum/ directory structure in the current project.
+
+Options:
+  --force    Overwrite existing files (directories are always merged)
+  --help     Show this help message
+
+The ralph-wiggum/ structure includes:
+  memory/           Shared project context
+  prds/             Product -> Architect conveyor
+  specs/            Architect -> Code conveyor
+  product/inbox/    Brain dumps input
+  architect/        Architect workspace
+  code/             Code workspace
+  review/           Review workspace
+  research/inbox/   Research questions
+  research/artifacts/
+  discover/inbox/   Discovery seeds
+  discover/artifacts/
+  synthesis/partials/
+EOF
+}
+
+create_dir() {
+    local dir="$1"
+    if [ ! -d "$dir" ]; then
+        mkdir -p "$dir"
+        echo -e "${GREEN}Created${NC} $dir"
+    else
+        echo -e "${BLUE}Exists${NC}  $dir"
+    fi
+}
+
+create_file() {
+    local file="$1"
+    local content="$2"
+    local force="${3:-false}"
+    
+    if [ ! -f "$file" ] || [ "$force" = "true" ]; then
+        echo "$content" > "$file"
+        echo -e "${GREEN}Created${NC} $file"
+    else
+        echo -e "${BLUE}Exists${NC}  $file"
+    fi
+}
+
+create_gitkeep() {
+    local dir="$1"
+    local gitkeep="$dir/.gitkeep"
+    if [ ! -f "$gitkeep" ]; then
+        touch "$gitkeep"
+    fi
+}
+
+# Parse arguments
+FORCE=false
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --force)
+            FORCE=true
+            shift
+            ;;
+        --help|-h)
+            show_help
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $1"
+            show_help
+            exit 1
+            ;;
+    esac
+done
+
+echo "Initializing ralph-wiggum/ in $PROJECT_DIR"
+echo ""
+
+# Create directory structure
+create_dir "$RALPH_DIR"
+create_dir "$RALPH_DIR/memory"
+create_dir "$RALPH_DIR/prds"
+create_dir "$RALPH_DIR/specs"
+
+# Product variant
+create_dir "$RALPH_DIR/product"
+create_dir "$RALPH_DIR/product/inbox"
+create_dir "$RALPH_DIR/product/inbox/archive"
+create_gitkeep "$RALPH_DIR/product/inbox"
+
+# Architect variant
+create_dir "$RALPH_DIR/architect"
+
+# Code variant
+create_dir "$RALPH_DIR/code"
+
+# Review variant
+create_dir "$RALPH_DIR/review"
+
+# Research variant
+create_dir "$RALPH_DIR/research"
+create_dir "$RALPH_DIR/research/inbox"
+create_dir "$RALPH_DIR/research/artifacts"
+create_gitkeep "$RALPH_DIR/research/inbox"
+
+# Discover variant
+create_dir "$RALPH_DIR/discover"
+create_dir "$RALPH_DIR/discover/inbox"
+create_dir "$RALPH_DIR/discover/artifacts"
+create_gitkeep "$RALPH_DIR/discover/inbox"
+
+# Synthesis variant
+create_dir "$RALPH_DIR/synthesis"
+create_dir "$RALPH_DIR/synthesis/partials"
+
+echo ""
+
+# Create context.md template
+CONTEXT_CONTENT='# Project Context
+
+> This file provides shared context for all Ralphus agents.
+> Fill in the sections below to help agents understand your project.
+
+## Ralphus Structure
+
+**CRITICAL**: All Ralphus files live under `ralph-wiggum/`:
+- `ralph-wiggum/specs/` - Technical specifications
+- `ralph-wiggum/prds/` - Product requirement docs
+- `ralph-wiggum/memory/` - Shared context (this file)
+- `ralph-wiggum/[variant]/` - Variant workspaces
+
+**NEVER** create `specs/`, `prds/`, or `inbox/` at the project root.
+
+## Project Overview
+
+<!-- What does this project do? Who is it for? -->
+
+## Tech Stack
+
+<!-- Languages, frameworks, key dependencies -->
+
+## Architecture
+
+<!-- High-level structure, key patterns used -->
+
+## Development Workflow
+
+<!-- How to run, test, deploy -->
+
+## Conventions
+
+<!-- Naming conventions, code style, patterns to follow -->
+
+## Key Files
+
+<!-- Important files agents should know about -->
+'
+
+create_file "$RALPH_DIR/memory/context.md" "$CONTEXT_CONTENT" "$FORCE"
+
+# Create .gitignore
+GITIGNORE_CONTENT='# Transient state
+.last-*
+
+# Keep directory structure
+!.gitkeep
+'
+
+create_file "$RALPH_DIR/.gitignore" "$GITIGNORE_CONTENT" "$FORCE"
+
+echo ""
+echo -e "${GREEN}Done!${NC} ralph-wiggum/ structure initialized."
+echo ""
+echo "Next steps:"
+echo "  1. Edit ralph-wiggum/memory/context.md with your project details"
+echo "  2. Drop ideas in ralph-wiggum/product/inbox/"
+echo "  3. Run: ralphus product"

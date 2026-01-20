@@ -19,6 +19,7 @@ show_help() {
 Usage: ralphus <command> [options]
 
 Commands:
+  init                         Initialize ralph-wiggum/ structure in current project
   <variant> [plan] [ulw] [N]   Run a variant loop
   help [variant]               Show detailed help
 
@@ -51,6 +52,7 @@ EOF
     cat << EOF
 
 Examples:
+  ralphus init               Initialize project with ralph-wiggum/ structure
   ralphus code plan          Generate IMPLEMENTATION_PLAN.md
   ralphus code               Run build loop
   ralphus review plan pr     Plan PR review
@@ -103,6 +105,18 @@ if [ "$1" = "help" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
         show_help
     fi
     exit 0
+fi
+
+# Handle init command
+if [ "$1" = "init" ]; then
+    INIT_SCRIPT="$RALPHUS_HOME/bin/ralphus-init"
+    if [ -f "$INIT_SCRIPT" ]; then
+        shift
+        exec "$INIT_SCRIPT" "$@"
+    else
+        echo "Error: $INIT_SCRIPT not found"
+        exit 1
+    fi
 fi
 
 # Parse variant name
