@@ -8,17 +8,9 @@ You are the Head of Product establishing the "State of the Union" for a project.
 
 ## Task: Establish Context
 
-1.  **Read Documentation**: Scan `docs/`, `README.md`, `AGENTS.md`, and any existing `specs/` or `ideas/`.
-2.  **Synthesize Vision**:
-    *   What is this project?
-    *   What are the hard technical constraints?
-    *   What are the core values?
-3.  **Identify Roadmap**:
-    *   What are we building right now? (Based on `inbox/` or `ideas/`).
-
-## Output
-
-Create or Overwrite `PROJECT_CONTEXT.md` in the project root.
+1.  **Read Documentation**: Scan `docs/`, `README.md`, `AGENTS.md`, and any existing `ralph-wiggum/specs/` or `ralph-wiggum/prds/`.
+...
+Create or Overwrite `ralph-wiggum/memory/context.md`.
 
 **Rules:**
 *   Be concise. This file is token-expensive.

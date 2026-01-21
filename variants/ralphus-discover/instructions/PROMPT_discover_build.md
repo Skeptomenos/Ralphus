@@ -1,5 +1,5 @@
-0a. Study @DISCOVERY_PLAN.md to find the next unanswered question.
-0b. Study the reference templates: @DISCOVERY_REFERENCE.md, @CODEBASE_UNDERSTANDING_REFERENCE.md.
+0a. Study `ralph-wiggum/discover/plan.md` to find the next unanswered question.
+0b. Study the reference templates in `ralph-wiggum/discover/templates/`: @DISCOVERY_REFERENCE.md, @CODEBASE_UNDERSTANDING_REFERENCE.md.
 
 ---
 
@@ -19,10 +19,10 @@ Answer Question → Generate 0 Follow-ups → Exhaustion Counter +1
 
 ### 1. Pick the Next Question
 
-From DISCOVERY_PLAN.md, pick the **first unchecked question**:
-- Check "Follow-ups" section FIRST (depth-first exploration)
-- Then check seed questions by phase (Architecture → Patterns → Conventions → Data Flow → Tricks)
-- Skip questions marked `[x]`
+From `ralph-wiggum/discover/plan.md`, pick the **first unchecked question**:
+- **Priority:** Answer all **Seed Questions** [ ] before processing Follow-ups. Ensure breadth before depth.
+- If all seeds are done, then check "Follow-ups".
+- Skip questions marked `[x]`.
 
 ### 2. Investigate Deeply
 
@@ -37,7 +37,7 @@ Use all available tools to answer thoroughly:
 
 ### 3. Create Discovery File
 
-Create `discoveries/{NNN}-{slug}.md` using the format in @DISCOVERY_REFERENCE.md:
+Create `ralph-wiggum/discover/artifacts/{NNN}-{slug}.md` using the format in @DISCOVERY_REFERENCE.md:
 
 ```markdown
 # Discovery: {Question}
@@ -79,9 +79,9 @@ Examples:
 
 **Generate 1-2 follow-ups per discovery.** Only generate 0 if you genuinely found nothing new to explore.
 
-### 5. Update DISCOVERY_PLAN.md
+### 5. Update PLAN
 
-1. Mark the question `[x]` complete
+1. Mark the question `[x]` complete in `ralph-wiggum/discover/plan.md`
 2. Add follow-up questions to the "Follow-ups" section with `- [ ]`
 3. Update the Discoveries Log table
 4. Update the Summary counts
@@ -90,13 +90,12 @@ Examples:
 ### 6. Commit
 
 ```bash
-git add discoveries/ DISCOVERY_PLAN.md
-git commit -m "Discover: {brief description}"
+git add ralph-wiggum/discover/ && git commit -m "Discover: {brief description}"
 ```
 
 ## Exhaustion Detection
 
-After updating DISCOVERY_PLAN.md, check:
+After updating `ralph-wiggum/discover/plan.md`, check:
 
 | Condition | Action |
 |-----------|--------|
@@ -115,8 +114,10 @@ When exhausted, create summary documents using @CODEBASE_UNDERSTANDING_REFERENCE
 3. **CONVENTIONS.md** — Documented conventions and style rules
 4. **GOTCHAS.md** — Tricks, quirks, workarounds, and tribal knowledge
 
+Save these in `ralph-wiggum/discover/artifacts/`.
+
 ```bash
-git add CODEBASE_UNDERSTANDING.md PATTERNS.md CONVENTIONS.md GOTCHAS.md
+git add ralph-wiggum/discover/artifacts/
 git commit -m "Synthesize: Complete codebase understanding"
 ```
 
@@ -141,5 +142,5 @@ Then output:
 
 ---
 
-99999. File Ownership: Do not move, rename, or reorganize tracking files (*_PLAN.md) into subdirectories. They MUST remain in the project root.
-999999. Do not update REFERENCE files. Only update @DISCOVERY_PLAN.md and individual discovery files.
+99999. File Ownership: Do not move, rename, or reorganize tracking files (*plan.md) into subdirectories. They MUST remain in the variant root.
+999999. Do not update REFERENCE files. Only update `plan.md` and individual discovery files in `artifacts/`.

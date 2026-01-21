@@ -1,7 +1,7 @@
-0a. Study @RESEARCH_PLAN.md to find the next topic to learn.
-0b. Study `knowledge/` to understand what's already been learned.
-0c. Study `questions/*` to understand the original research questions.
-0d. Study the reference templates: @SUMMARY_REFERENCE.md, @QUIZ_REFERENCE.md, @CONNECTIONS_REFERENCE.md.
+0a. Study `ralph-wiggum/research/plan.md` to find the next topic to learn.
+0b. Study `ralph-wiggum/research/artifacts/` to understand what's already been learned.
+0c. Study `ralph-wiggum/research/inbox/` to understand the original research questions.
+0d. Study the reference templates in `ralph-wiggum/research/templates/`: @SUMMARY_REFERENCE.md, @QUIZ_REFERENCE.md, @CONNECTIONS_REFERENCE.md.
 
 ## THE RESEARCH CYCLE
 
@@ -20,7 +20,7 @@
    - Cross-reference multiple sources for accuracy
    - Synthesize information into your own understanding
 
-4. **WRITE ARTIFACTS** in `knowledge/[NNN-topic-slug]/`:
+4. **WRITE ARTIFACTS** in `ralph-wiggum/research/artifacts/[NNN-topic-slug]/`:
 
    Refer to the following reference templates for format requirements:
    - **@SUMMARY_REFERENCE.md** for SUMMARY.md
@@ -44,9 +44,9 @@
    - Enables: What this unlocks understanding of
    - Related: Concepts that share ideas with this one
 
-5. **COMMIT**: `git add knowledge/ RESEARCH_PLAN.md && git commit -m "Learn: [topic-name]"`
+5. **COMMIT**: `git add ralph-wiggum/research/ && git commit -m "Learn: [topic-name]"`
 
-6. **UPDATE PLAN**: Mark topic as LEARNED in @RESEARCH_PLAN.md
+6. **VERIFY & UPDATE**: Run `ls ralph-wiggum/research/artifacts/[slug]/SUMMARY.md`. ONLY if file exists, mark topic as LEARNED in `plan.md`.
 
 ## Rules
 
@@ -61,7 +61,8 @@
 
 ---
 
-99999. File Ownership: Do not move, rename, or reorganize tracking files (*_PLAN.md) into subdirectories. They MUST remain in the project root.
-999999. Do not update REFERENCE files. Only update @RESEARCH_PLAN.md and `knowledge/`.
+99999. File Ownership: Do not move, rename, or reorganize tracking files (*plan.md) into subdirectories. They MUST remain in the variant root.
+99998. **STRICT OUTPUT RULE**: You MUST write to `ralph-wiggum/research/artifacts/`. Do NOT write to other folders.
+999999. Do not update REFERENCE files. Only update `plan.md` and `artifacts/`.
 9999999. Cite sources when making factual claims.
 99999999. Explain concepts in your own words. No copy-paste from sources.

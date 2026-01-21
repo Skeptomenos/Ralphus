@@ -49,7 +49,7 @@ source "$_VARIANT_DIR/../../lib/loop_core.sh"
 # - IMPLEMENTATION_PLAN.md must exist in build mode (created by plan mode)
 # =============================================================================
 validate_variant() {
-    local specs_dir="$WORKING_DIR/specs"
+    local specs_dir="$WORKING_DIR/ralph-wiggum/specs"
     
     # Require specs/ directory
     if [[ ! -d "$specs_dir" ]]; then

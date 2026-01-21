@@ -49,16 +49,16 @@ source "$_VARIANT_DIR/../../lib/loop_core.sh"
 # - RESEARCH_PLAN.md must exist in build mode (created by plan mode)
 # =============================================================================
 validate_variant() {
-    local questions_dir="$WORKING_DIR/questions"
+    local questions_dir="$WORKING_DIR/ralph-wiggum/research/inbox"
     
-    # Require questions/ directory
+    # Require inbox directory
     if [[ ! -d "$questions_dir" ]]; then
         echo "ERROR: $questions_dir/ directory not found." >&2
-        echo "Create $questions_dir/*.md files with your research questions first." >&2
+        echo "Run 'mkdir -p ralph-wiggum/research/inbox' and add questions/*.md files." >&2
         return 1
     fi
     
-    # In build mode, require RESEARCH_PLAN.md
+    # In build mode, require plan.md
     if [[ "$MODE" != "plan" ]] && [[ ! -f "$WORKING_DIR/$TRACKING_FILE" ]]; then
         echo "ERROR: $TRACKING_FILE not found in $WORKING_DIR" >&2
         echo "Run planning mode first: ralphus research plan" >&2

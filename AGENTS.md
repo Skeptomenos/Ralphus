@@ -8,6 +8,11 @@ Ralphus is a **meta-framework** for autonomous coding loops. It orchestrates LLM
 
 **Core Philosophy**: "Let Ralphus Ralphus" — the loop is self-correcting through backpressure (failing tests).
 
+For deep background on the Ralph Loop methodology, see [docs/references/](docs/references/):
+- `RALPH_LOOP_PHILOSOPHY.md` — Core concepts: backpressure, reanchoring, the loop mindset
+- `HOW_TO_BUILD_A_CODING_AGENT.md` — The 5 primitives, 300 lines of code in a loop
+- `GAS_TOWN_ORCHESTRATION.md` — Next-level multi-agent orchestration (Steve Yegge)
+
 ---
 
 ## Build & Run
@@ -110,23 +115,33 @@ Variants customize behavior via hooks defined before calling `run_loop`. See [VA
 ```
 ralphus/                          # This playbook repo
 ├── lib/
-│   └── loop_core.sh              # Shared loop library (hooks, signals, git ops)
+│   └── loop_core.sh              # Shared loop library
 ├── variants/                     # The Autonomous Factory
-│   ├── ralphus-code/             # Builder
-│   │   ├── config.sh             # Variant config
-│   │   ├── scripts/loop.sh       # Thin wrapper
-│   │   ├── instructions/         # Prompt files
-│   │   └── templates/            # Reference templates
-│   ├── ralphus-review/           # Auditor
-│   ├── ralphus-architect/        # Tech Lead (Spec)
-│   ├── ralphus-product/          # PM (Slicer)
-│   ├── ralphus-research/         # Learner
-│   └── ralphus-discover/         # Explorer
-├── skills/                       # OpenCode skills
-│   └── ralphus-remote/           # Homelab remote execution
-├── bin/                          # CLI wrapper
-│   └── ralphus                   # Routes to correct variant
-└── README.md                     # Philosophy & usage
+│   ├── ralphus-code/             # Builder (Spec -> Code)
+│   ├── ralphus-architect/        # Tech Lead (PRD -> Spec)
+│   ├── ralphus-product/          # PM (Dump -> PRD)
+│   ├── ralphus-research/         # Learner (Knowledge)
+│   ├── ralphus-discover/         # Explorer (Findings)
+│   ├── ralphus-synthesis/        # Librarian (Docs)
+│   └── ralphus-review/           # Auditor (QA)
+```
+
+### The Ralph-Wiggum Standard (Project Layout)
+
+When Ralphus runs in a project, it uses this structure:
+
+```
+project_root/
+├── AGENTS.md                   # The Constitution
+├── src/                        # The Code
+└── ralph-wiggum/               # The Factory Floor
+    ├── memory/                 # Global Context
+    ├── prds/                   # Handoff: Product -> Architect
+    ├── specs/                  # Handoff: Architect -> Code
+    ├── [variant]/              # Agent Workspaces
+    │   ├── plan.md             # The Brain
+    │   ├── inbox/              # Inputs
+    │   └── artifacts/          # Outputs
 ```
 
 ---
@@ -199,11 +214,14 @@ Study @IMPLEMENTATION_PLAN.md
 
 | Role | Variant | Input | Output | Purpose |
 |------|---------|-------|--------|---------|
-| **Product** | `ralphus-product` | `inbox/` | `ideas/` | Slice messy ideas into atomic features. |
-| **Architect** | `ralphus-architect` | `ideas/` | `specs/` | Research feasibility and write rigorous specs. |
+| **Product** | `ralphus-product` | `inbox/` | `prds/` | Slice messy ideas into atomic PRDs. |
+| **Architect** | `ralphus-architect` | `prds/` | `specs/` | Research feasibility and write rigorous specs. |
 | **Builder** | `ralphus-code` | `specs/` | Code | Implement features and pass tests. |
-| **Auditor** | `ralphus-review` | Code | `reviews/` | Check security, style, and correctness. |
-| **Fixer** | `ralphus-architect` | `reviews/` | `specs/review-fixes.md` | Triage findings. STRICTLY ignores Low/Info. Moves processed reviews to `reviews/processed/`. |
+| **Auditor** | `ralphus-review` | Code | `findings/` | Check security, style, and correctness. |
+| **Fixer** | `ralphus-architect` | `findings/` | `specs/review-fixes.md` | Triage findings. STRICTLY ignores Low/Info. |
+| **Learner** | `ralphus-research` | `inbox/` | `knowledge/` | Deep dive into technologies. |
+| **Explorer** | `ralphus-discover` | `inbox/` | `findings/` | Map the codebase. |
+| **Librarian** | `ralphus-synthesis` | `artifacts/` | `docs/` | Consolidate knowledge into architecture docs. |
 
 ---
 
@@ -239,7 +257,7 @@ See `variants/ralphus-architect/instructions/PROMPT_architect.md` for full Task 
 ## Guardrails (Numbered by Importance)
 
 ```
-99999.       File Ownership: Do not move, rename, or reorganize tracking files (*_PLAN.md) into subdirectories. They MUST remain in the project root.
+99999.       File Ownership: Do not move, rename, or reorganize tracking files (*plan.md) into subdirectories. They MUST remain in the variant root (ralph-wiggum/[variant]/plan.md).
 999999.      Document the why in code and specs
 9999999.     Single sources of truth, no adapters
 99999999.    Tag releases when tests pass (semver)

@@ -868,6 +868,45 @@ post_iteration() {
 }
 
 # =============================================================================
+# 1.14a check_propulsion() - GUPP-Lite: Check for unfinished work
+# =============================================================================
+# Implements the "Gastown Universal Propulsion Principle" (Lite version).
+# Checks if the tracking file exists and contains incomplete tasks.
+# If work is found, it prints a "Hook Loaded" banner to encourage execution.
+#
+# Uses globals:
+#   WORKING_DIR - Project root
+#   TRACKING_FILE - The plan file (e.g., IMPLEMENTATION_PLAN.md)
+#
+# =============================================================================
+check_propulsion() {
+    # Skip if no tracking file configured
+    if [[ -z "${TRACKING_FILE:-}" ]]; then
+        return 0
+    fi
+
+    local track_path="$WORKING_DIR/$TRACKING_FILE"
+
+    # Only check if file exists
+    if [[ -f "$track_path" ]]; then
+        # Count incomplete tasks (- [ ])
+        local incomplete
+        incomplete=$(grep -c "^- \[ \]" "$track_path" 2>/dev/null || echo 0)
+
+        if [[ "$incomplete" -gt 0 ]]; then
+            echo ""
+            echo "⚓️  GUPP PROPULSION CHECK"
+            echo "   ---------------------------------------"
+            echo "   Found $incomplete incomplete tasks in $TRACKING_FILE"
+            echo "   🚀 HOOK IS LOADED. Resuming convoy..."
+            echo ""
+            # We don't exit/block, we just loud-notify the operator
+            # Ideally this would auto-start, but safety first for now.
+        fi
+    fi
+}
+
+# =============================================================================
 # 1.15 run_loop() - Main entry point for variant loop scripts
 # =============================================================================
 # Orchestrates the complete loop lifecycle: initialization, parsing, validation,
@@ -934,10 +973,14 @@ run_loop() {
         exit 1
     fi
 
-    # 5. Set up graceful shutdown handler
+    # 5. Check Propulsion (GUPP-Lite)
+    # Detects if there is unfinished work on the hook (tracking file)
+    check_propulsion
+
+    # 6. Set up graceful shutdown handler
     setup_shutdown_handler
 
-    # 6. Archive previous run if branch changed
+    # 7. Archive previous run if branch changed
     archive_on_branch_change
 
     # 7. Display startup header

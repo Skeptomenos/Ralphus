@@ -49,7 +49,7 @@ parse_variant_args() {
 
 # Ensure required directories exist
 validate_variant() {
-    mkdir -p "$WORKING_DIR/inbox" "$WORKING_DIR/inbox/archive" "$WORKING_DIR/ideas"
+    mkdir -p "$WORKING_DIR/ralph-wiggum/product/inbox" "$WORKING_DIR/ralph-wiggum/product/inbox/archive" "$WORKING_DIR/ralph-wiggum/prds"
     return 0
 }
 
@@ -68,7 +68,7 @@ build_message() {
     if [[ "$MODE" = "init" ]]; then
         MESSAGE="Act as Head of Product. Read documentation and existing specs to establish PROJECT_CONTEXT.md. Do NOT process inbox yet."
     else
-        MESSAGE="Act as Product Manager. Read 'PROJECT_CONTEXT.md'. Analyze this file, slice into atomic ideas in 'ideas/', update the Context roadmap, and archive the input. Input file: $CURRENT_FILE"
+        MESSAGE="Act as Product Manager. Read 'ralph-wiggum/memory/context.md'. Analyze this file, slice into atomic ideas in 'ralph-wiggum/prds/', update the Context roadmap, and archive the input. Input file: $CURRENT_FILE"
     fi
     
     # Append ultrawork suffix if enabled
@@ -135,8 +135,8 @@ run_sequential() {
     fi
 
     # 7. Process mode: iterate over inbox files
-    local inbox_dir="$WORKING_DIR/inbox"
-    local archive_dir="$WORKING_DIR/inbox/archive"
+    local inbox_dir="$WORKING_DIR/ralph-wiggum/product/inbox"
+    local archive_dir="$WORKING_DIR/ralph-wiggum/product/inbox/archive"
     
     # Find all markdown files in inbox (not in subdirectories)
     local files

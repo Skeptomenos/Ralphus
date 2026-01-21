@@ -28,6 +28,24 @@ Then came **Sisyphus** — the OpenCode agent cursed to roll context windows uph
 
 ## Architecture
 
+**The Ralph-Wiggum Standard:** All projects follow a unified directory structure for agent state.
+
+```
+project_root/
+├── AGENTS.md                   # The Constitution (Global Rules)
+├── src/                        # The Product (Codebase)
+└── ralph-wiggum/               # The Factory Floor
+    ├── memory/                 # Global Context (Shared)
+    ├── ideas/                  # Conveyor: Product -> Architect
+    ├── specs/                  # Conveyor: Architect -> Code
+    ├── [variant]/              # Agent Workspaces
+    │   ├── plan.md             # The Brain
+    │   ├── inbox/              # User Input
+    │   └── artifacts/          # Agent Output
+```
+
+See [docs/RALPH_WIGGUM_ARCHITECTURE.md](docs/RALPH_WIGGUM_ARCHITECTURE.md) for the full spec.
+
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                              VARIANTS                                   │
@@ -105,11 +123,11 @@ The complete autonomous software factory pipeline:
 
 | Role | Variant | Input | Output | Purpose |
 |------|---------|-------|--------|---------|
-| **Product** | `ralphus-product` | `inbox/` | `ideas/` | Slice messy ideas into atomic features. |
-| **Architect** | `ralphus-architect` | `ideas/` | `specs/` | Research feasibility and write rigorous specs. |
+| **Product** | `ralphus-product` | `inbox/` | `prds/` | Slice messy ideas into atomic PRDs. |
+| **Architect** | `ralphus-architect` | `prds/` | `specs/` | Research feasibility and write rigorous specs. |
 | **Builder** | `ralphus-code` | `specs/` | Code | Implement features and pass tests. |
-| **Auditor** | `ralphus-review` | Code | `reviews/` | Check security, style, and correctness. |
-| **Fixer** | `ralphus-architect` | `reviews/` | `specs/review-fixes.md` | Triage findings. |
+| **Auditor** | `ralphus-review` | Code | `findings/` | Check security, style, and correctness. |
+| **Fixer** | `ralphus-architect` | `findings/` | `specs/review-fixes.md` | Triage findings. |
 
 ---
 
@@ -204,13 +222,14 @@ ralphus code ulw 20    # Ultrawork mode, max 20 iterations
 
 | Command | Purpose | Required Directory |
 |---------|---------|-------------------|
-| `ralphus product` | Brain dump slicing | `inbox/` |
-| `ralphus architect` | Spec generation | `ideas/` |
-| `ralphus code` | Feature implementation | `specs/` |
+| `ralphus product` | Brain dump slicing | `ralph-wiggum/product/inbox/` |
+| `ralphus architect` | Spec generation | `ralph-wiggum/prds/` |
+| `ralphus code` | Feature implementation | `ralph-wiggum/specs/` |
 | `ralphus test` | Test creation | `test-specs/` |
 | `ralphus review` | Code review | (none) |
-| `ralphus research` | Deep learning | `questions/` |
-| `ralphus discover` | Codebase understanding | (none) |
+| `ralphus research` | Deep learning | `ralph-wiggum/research/inbox/` |
+| `ralphus discover` | Codebase understanding | `ralph-wiggum/discover/inbox/` |
+| `ralphus synthesis` | Documentation assembly | `ralph-wiggum/[variant]/artifacts/` |
 
 ### How It Works
 
@@ -219,8 +238,9 @@ ralphus code ulw 20    # Ultrawork mode, max 20 iterations
 │                           YOUR PROJECT                                  │
 │                         (current directory)                             │
 ├─────────────────────────────────────────────────────────────────────────┤
-│  specs/                    <- Your specifications                       │
-│  IMPLEMENTATION_PLAN.md    <- Generated here                            │
+│  ralph-wiggum/                                                          │
+│    specs/                  <- Your specifications                       │
+│    code/plan.md            <- Generated here                            │
 │  src/                      <- Your source code                          │
 └─────────────────────────────────────────────────────────────────────────┘
                                     │

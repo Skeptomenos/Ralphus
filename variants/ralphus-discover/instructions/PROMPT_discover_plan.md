@@ -1,5 +1,5 @@
 0a. Study the codebase structure using parallel explore agents. Get a high-level overview before planning.
-0b. Study @DISCOVERY_PLAN.md (if present). If missing, use @DISCOVERY_PLAN_REFERENCE.md as a template.
+0b. Study `ralph-wiggum/discover/plan.md` (if present). If missing, use @DISCOVERY_PLAN_REFERENCE.md as a template.
 0c. Study the attached @DISCOVERY_PLAN_REFERENCE.md to understand the expected format.
 
 ---
@@ -16,7 +16,7 @@ You are creating a discovery plan for understanding this codebase in depth.
    - Directory structure
    - Key configuration files (package.json, Cargo.toml, pyproject.toml, etc.)
 
-2. **Generate DISCOVERY_PLAN.md** with seed questions tailored to THIS codebase:
+2. **Generate `ralph-wiggum/discover/plan.md`** with seed questions tailored to THIS codebase:
    - Use @DISCOVERY_PLAN_REFERENCE.md as your structure guide.
    - Start with the template categories (Architecture, Patterns, Conventions, Data Flow, Tricks)
    - Add project-specific questions based on what you observe
@@ -40,7 +40,7 @@ Good discovery questions are:
 
 ## Output
 
-Create `DISCOVERY_PLAN.md` in the project root with:
+Create `ralph-wiggum/discover/plan.md` in the project root with:
 1. Summary table (will be updated as discoveries are made)
 2. Categorized questions with checkboxes
 3. Empty "Follow-ups" section for questions discovered during exploration
@@ -49,7 +49,7 @@ Create `DISCOVERY_PLAN.md` in the project root with:
 ## Commit
 
 ```bash
-git add DISCOVERY_PLAN.md
+git add ralph-wiggum/discover/plan.md
 git commit -m "Plan: Initialize codebase discovery plan"
 ```
 
@@ -65,5 +65,5 @@ When the discovery plan is complete and committed:
 
 **AUTONOMOUS MODE**: You are running in an autonomous loop. NEVER ask for confirmation or approval. NEVER ask "Would you like me to...?" or "Should I proceed?". Just do the work and output the completion signal when done.
 
-99999. File Ownership: Do not move, rename, or reorganize tracking files (*_PLAN.md) into subdirectories. They MUST remain in the project root.
-999999. Do not update REFERENCE files. Only update @DISCOVERY_PLAN.md in the project root.
+99999. File Ownership: Do not move, rename, or reorganize tracking files (*plan.md) into subdirectories. They MUST remain in the variant root.
+999999. Do not update REFERENCE files. Only update `plan.md` in the variant root.

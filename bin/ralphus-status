@@ -1,0 +1,109 @@
+#!/bin/bash
+# ralphus-status - Dashboard for the Autonomous Factory
+# Displays the state of all Ralphus variants (Code, Review, Architect, etc.)
+
+set -u
+
+BASE_DIR="$(cd "$(dirname "$(dirname "$0")")" && pwd)"
+VARIANTS_DIR="$BASE_DIR/variants"
+
+# Colors
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+YELLOW='\033[1;33m'
+GRAY='\033[0;90m'
+NC='\033[0m'
+BOLD='\033[1m'
+
+echo -e "\n${BOLD}🏭 RALPHUS FACTORY STATUS${NC}"
+echo -e "${GRAY}   $(date)${NC}\n"
+
+# Header
+printf "%-15s | %-20s | %-10s | %s\n" "VARIANT" "TRACKING FILE" "PROGRESS" "STATUS"
+echo -e "${GRAY}--------------------------------------------------------------------------------${NC}"
+
+# Iterate through known variants
+# Defined order matches the factory pipeline
+VARIANTS=("ralphus-product" "ralphus-architect" "ralphus-code" "ralphus-review" "ralphus-research" "ralphus-discover")
+
+for variant in "${VARIANTS[@]}"; do
+    if [[ ! -d "$VARIANTS_DIR/$variant" ]]; then
+        continue
+    fi
+
+    # Source config to get variables in a subshell to avoid polluting current shell
+    # We suppress output from config sourcing
+    (
+        variant_short=${variant#ralphus-}
+        TRACKING_FILE=""
+        
+        # Try to extract TRACKING_FILE from config.sh
+        if [[ -f "$VARIANTS_DIR/$variant/config.sh" ]]; then
+            # Grep it out to avoid sourcing bash logic
+            TRACKING_FILE=$(grep "^TRACKING_FILE=" "$VARIANTS_DIR/$variant/config.sh" | cut -d'"' -f2)
+        fi
+
+        # Default fallback if not found
+        if [[ -z "$TRACKING_FILE" ]]; then
+            case "$variant_short" in
+                "code") TRACKING_FILE="IMPLEMENTATION_PLAN.md" ;;
+                "review") TRACKING_FILE="REVIEW_PLAN.md" ;;
+                "research") TRACKING_FILE="RESEARCH_PLAN.md" ;;
+                "discover") TRACKING_FILE="DISCOVERY_PLAN.md" ;;
+                "architect") TRACKING_FILE="(stateless)" ;; # Currently stateless
+                "product") TRACKING_FILE="inbox/" ;;
+            esac
+        fi
+
+        # Status Logic
+        PROGRESS="-"
+        STATUS="${GRAY}Idle${NC}"
+        FILE_LABEL="$TRACKING_FILE"
+
+        # Check tracking file status
+        if [[ "$TRACKING_FILE" == *"/" ]]; then
+            # It's a directory (Product/Inbox)
+            if [[ -d "$TRACKING_FILE" ]]; then
+                count=$(ls -1 "$TRACKING_FILE"/*.md 2>/dev/null | wc -l | tr -d ' ')
+                PROGRESS="${count} files"
+                if [[ "$count" -gt 0 ]]; then
+                    STATUS="${BLUE}Ready${NC}"
+                fi
+            else
+                FILE_LABEL="${GRAY}(missing)${NC}"
+            fi
+        elif [[ "$TRACKING_FILE" == "(stateless)" ]]; then
+             # Architect check
+             # Check if input files exist for architect
+             input_count=$(ls -1 ideas/*.md 2>/dev/null | wc -l | tr -d ' ')
+             if [[ "$input_count" -gt 0 ]]; then
+                 STATUS="${BLUE}Ready${NC}"
+                 PROGRESS="${input_count} ideas"
+             fi
+        elif [[ -f "$TRACKING_FILE" ]]; then
+            # It's a markdown plan
+            total=$(grep -c "^- \[" "$TRACKING_FILE" || echo 0)
+            done=$(grep -c "^- \[x\]" "$TRACKING_FILE" || echo 0)
+            
+            if [[ "$total" -gt 0 ]]; then
+                pct=$(( done * 100 / total ))
+                PROGRESS="${done}/${total} (${pct}%)"
+                
+                if [[ "$done" -eq "$total" ]]; then
+                    STATUS="${GREEN}Done${NC}"
+                else
+                    STATUS="${YELLOW}Active${NC}"
+                fi
+            else
+                PROGRESS="0/0"
+                STATUS="${GRAY}Empty${NC}"
+            fi
+        else
+            FILE_LABEL="${GRAY}${TRACKING_FILE} (missing)${NC}"
+        fi
+
+        printf "%-15s | %-20s | %-10s | %b\n" "$variant_short" "$FILE_LABEL" "$PROGRESS" "$STATUS"
+    )
+done
+
+echo ""
