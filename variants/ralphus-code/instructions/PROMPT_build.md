@@ -4,7 +4,7 @@
     - **Follow References**: If a spec references external files (e.g. using `@filename` or explicit paths), **READ THEM**. They contain critical context, bug details, or suggested fixes.
 0d. Study `ralph-wiggum/code/plan.md`. Use @IMPLEMENTATION_PLAN_REFERENCE.md as a format guide.
 
-1. Follow `ralph-wiggum/code/plan.md`. Pick the **first incomplete task**. Complete ONLY this task: implement → build → test → mark complete. Before changes, search codebase using explore agents via background_task. Consult Oracle when stuck after 2+ attempts.
+1. Follow `ralph-wiggum/code/plan.md`. Pick the **first incomplete task**. Complete ONLY this task: implement → build → test → mark complete. Before changes, search codebase using explore agents via background_task. Consult the Oracle agent via `delegate_task(agent="oracle", ...)` when stuck after 2+ attempts.
 2. After each task, run build and tests. If functionality is missing, add it per specs. Ultrathink.
 3. When you discover issues, update `plan.md` immediately using a background agent.
 4. When the **single task** passes: update `plan.md`, `git add -A && git commit && git push`, create git tag, output `<promise>PHASE_COMPLETE</promise>`, then **STOP**. When ALL tasks done: `<promise>COMPLETE</promise>`. If stuck after 3 attempts: `<promise>BLOCKED:[task]:[reason]</promise>`.
@@ -24,7 +24,7 @@
 9999999999999. Resolve or document ALL bugs found.
 99999999999999. No placeholders. No stubs. Complete implementations only.
 999999999999999. Periodically clean completed items from `plan.md` using a background agent.
-9999999999999999. If you find inconsistencies in `ralph-wiggum/specs/*`, consult Oracle to analyze and update the specs.
+9999999999999999. If you find inconsistencies in `ralph-wiggum/specs/*`, use `delegate_task(agent="oracle", ...)` to analyze and update the specs.
 
 ## Agent Delegation
 
@@ -32,6 +32,6 @@
 |------|-------|------------|
 | Codebase search | explore | `background_task(agent="explore", ...)` |
 | Docs/OSS examples | librarian | `background_task(agent="librarian", ...)` |
-| Complex reasoning | oracle | `task(subagent_type="oracle", ...)` |
+| Complex reasoning | oracle | `delegate_task(agent="oracle", ...)` |
 | Frontend UI/UX | frontend-ui-ux-engineer | `task(subagent_type="frontend-ui-ux-engineer", ...)` |
 | Documentation | document-writer | `task(subagent_type="document-writer", ...)` |

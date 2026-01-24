@@ -219,8 +219,8 @@ If stuck after 3 attempts on same task:
 |-----------|-------|-----------|
 | Codebase search | `explore` | Fast, parallel, low cost |
 | Doc/API lookup | `librarian` | Specialized for external knowledge |
-| Complex reasoning | `oracle` | Higher-capability model |
-| Security analysis | `oracle` | Needs careful analysis |
+| Complex reasoning | `delegate_task(agent="oracle")` | Higher-capability model (oh-my-opencode) |
+| Security analysis | `delegate_task(agent="oracle")` | Needs careful analysis |
 | Frontend UI | `frontend-ui-ux-engineer` | Specialized knowledge |
 
 ### Parallel vs Sequential

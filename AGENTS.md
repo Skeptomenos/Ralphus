@@ -1,278 +1,49 @@
 # AGENTS.md - Ralphus Autonomous Development Playbook
 
-> For AI agents operating in this repository. Keep operational, not verbose.
+> For AI agents. Keep operational, not verbose.
 
-## Project Overview
+## What Is This?
 
-Ralphus is a **meta-framework** for autonomous coding loops. It orchestrates LLM agents to iteratively implement features from specs. This is NOT a traditional codebase—it's a playbook meant to be copied into target projects.
+Ralphus is a **meta-framework** for autonomous coding loops. It orchestrates LLM agents to implement features from specs.
 
-**Core Philosophy**: "Let Ralphus Ralphus" — the loop is self-correcting through backpressure (failing tests).
+**Core Philosophy**: "Let Ralphus Ralphus" — self-correcting through backpressure (failing tests).
 
-For deep background on the Ralph Loop methodology, see [docs/references/](docs/references/):
-- `RALPH_LOOP_PHILOSOPHY.md` — Core concepts: backpressure, reanchoring, the loop mindset
-- `HOW_TO_BUILD_A_CODING_AGENT.md` — The 5 primitives, 300 lines of code in a loop
-- `GAS_TOWN_ORCHESTRATION.md` — Next-level multi-agent orchestration (Steve Yegge)
+See [docs/references/](docs/references/) for deep background.
 
 ---
 
 ## Build & Run
 
-### Central Execution (Recommended)
-
 ```bash
-# From any project directory
-cd ~/my-project
-
-# 1. Product (Brain Dump -> Ideas)
-echo "Need a leaderboard" > inbox/dump.md
-ralphus product
-
-# 2. Architect (Ideas -> Specs)
-ralphus architect feature
-
-# 3. Build (Specs -> Code)
-ralphus code plan
-ralphus code
-
-# 4. Review (Code -> Findings)
-ralphus review plan pr
-ralphus review
-
-# 5. Fix (Findings -> Fixes)
-ralphus architect triage
-ralphus code
+ralphus code plan    # Specs -> Task list
+ralphus code         # Task list -> Code
+ralphus review       # Code -> Findings
 ```
 
-The `ralphus` wrapper lives in `~/.local/bin/` and routes to the correct variant in `~/ralphus/variants/`.
+Stop: `Ctrl+C` (graceful) or `pkill -f opencode` (nuclear)
 
-### Direct Invocation (Alternative)
-
-```bash
-# If you copied the variant into your project
-./ralphus/ralphus-code/scripts/loop.sh plan
-./ralphus/ralphus-code/scripts/loop.sh
-
-# Or from central location with explicit working dir
-RALPHUS_WORKING_DIR=$(pwd) ~/ralphus/variants/ralphus-code/scripts/loop.sh plan
-```
-
-### Stop Gracefully
-
-```bash
-Ctrl+C                 # Finish current task, then stop
-pkill -f opencode      # Nuclear option
-```
+Validate: `bash -n variants/*/scripts/loop.sh`
 
 ---
 
-## Validation
-
-Run these after implementing to get immediate feedback:
-
-- Syntax: `bash -n variants/*/scripts/loop.sh`
-- Lint: `shellcheck variants/*/scripts/loop.sh` (if installed)
-
-## Modular Loop Architecture
-
-The loop scripts use a shared library pattern to eliminate duplication (~61% code reduction). For detailed technical documentation, see [MODULAR_ARCHITECTURE.md](docs/MODULAR_ARCHITECTURE.md).
+## Guardrails (by importance)
 
 ```
-ralphus/
-├── lib/
-│   └── loop_core.sh              # Shared library (~370 lines)
-└── variants/
-    └── ralphus-*/
-        ├── config.sh             # Variant configuration
-        └── scripts/loop.sh       # Thin wrapper (~50-100 lines each)
-```
-
-### Hook System
-
-Variants customize behavior via hooks defined before calling `run_loop`. See [VARIANT_BLUEPRINT.md](docs/VARIANT_BLUEPRINT.md) for implementation details.
-
-| Hook | Purpose | Required |
-|------|---------|----------|
-| `get_templates()` | Return template file paths (one per line) | Yes |
-| `validate_variant()` | Check variant-specific inputs | No |
-| `build_message()` | Construct custom iteration message | No |
-| `post_iteration()` | Run after each iteration | No |
-| `parse_variant_args()` | Handle variant-specific arguments | No |
-
-### Completion Signals
-
-| Signal | Exit Code | Meaning |
-|--------|-----------|---------|
-| `PHASE_COMPLETE` | 0 (continue) | Single task done, continue loop |
-| `PLAN_COMPLETE` | 10 | Planning phase done |
-| `COMPLETE` | 20 | All tasks done |
-| `BLOCKED` | 30 | Stuck, needs intervention |
-| `APPROVED` | 40 | Review approved (review only) |
-
----
-
-## File Structure
-
-```
-ralphus/                          # This playbook repo
-├── lib/
-│   └── loop_core.sh              # Shared loop library
-├── variants/                     # The Autonomous Factory
-│   ├── ralphus-code/             # Builder (Spec -> Code)
-│   ├── ralphus-architect/        # Tech Lead (PRD -> Spec)
-│   ├── ralphus-product/          # PM (Dump -> PRD)
-│   ├── ralphus-research/         # Learner (Knowledge)
-│   ├── ralphus-discover/         # Explorer (Findings)
-│   ├── ralphus-synthesis/        # Librarian (Docs)
-│   └── ralphus-review/           # Auditor (QA)
-```
-
-### The Ralph-Wiggum Standard (Project Layout)
-
-When Ralphus runs in a project, it uses this structure:
-
-```
-project_root/
-├── AGENTS.md                   # The Constitution
-├── src/                        # The Code
-└── ralph-wiggum/               # The Factory Floor
-    ├── memory/                 # Global Context
-    ├── prds/                   # Handoff: Product -> Architect
-    ├── specs/                  # Handoff: Architect -> Code
-    ├── [variant]/              # Agent Workspaces
-    │   ├── plan.md             # The Brain
-    │   ├── inbox/              # Inputs
-    │   └── artifacts/          # Outputs
-```
-
----
-
-## Code Style Guidelines
-
-### Shell Scripts (loop.sh)
-
-```bash
-#!/bin/bash
-set -euo pipefail                 # Fail-fast error handling
-
-# Variable naming: UPPER_SNAKE_CASE for constants
-MAX_ITERATIONS=20
-PROMPT_FILE="PROMPT_build.md"
-
-# Always quote variables
-echo "$CURRENT_BRANCH"
-cat "$PROMPT_FILE"
-
-# Use [[ ]] for conditionals
-[[ "$1" =~ ^[0-9]+$ ]]
-```
-
-### Markdown (Prompts & Specs)
-
-```markdown
-# Numbered guardrails (higher = more important)
-99999. Document the why
-999999. Single sources of truth
-9999999. Tag releases when tests pass
-
-# File references use @ prefix
-Study @IMPLEMENTATION_PLAN.md
-
-# Completion signals (machine-readable)
-<promise>COMPLETE</promise>
-<promise>BLOCKED:[task]:[reason]</promise>
-```
-
----
-
-## The Ralphus Factory Cycle
-
-```
-┌──────────────┐      ┌───────────────┐      ┌───────────────┐
-│              │      │               │      │               │
-│  Brain Dump  │─────▶│ ralphus       │─────▶│ ralphus       │
-│  (inbox/*.md)│      │ product       │      │ architect     │
-│              │      │ (Slice Ideas) │      │ (Write Specs) │
-└──────────────┘      └───────────────┘      └───────────────┘
-                              │                      │
-                              ▼                      ▼
-                      ┌───────────────┐      ┌───────────────┐
-                      │               │      │               │
-                      │ ideas/*.md    │      │ specs/*.md    │
-                      │               │      │               │
-                      └───────────────┘      └───────────────┘
-                                                     │
-                                                     ▼
-┌──────────────┐      ┌───────────────┐      ┌───────────────┐
-│              │      │               │      │               │
-│ ralphus      │◀─────│ ralphus       │◀─────│ ralphus       │
-│ review       │      │ code          │      │ code plan     │
-│ (Audit)      │      │ (Build)       │      │ (Task List)   │
-└──────────────┘      └───────────────┘      └───────────────┘
-```
-
-### Roles & Responsibilities
-
-| Role | Variant | Input | Output | Purpose |
-|------|---------|-------|--------|---------|
-| **Product** | `ralphus-product` | `inbox/` | `prds/` | Slice messy ideas into atomic PRDs. |
-| **Architect** | `ralphus-architect` | `prds/` | `specs/` | Research feasibility and write rigorous specs. |
-| **Builder** | `ralphus-code` | `specs/` | Code | Implement features and pass tests. |
-| **Auditor** | `ralphus-review` | Code | `findings/` | Check security, style, and correctness. |
-| **Fixer** | `ralphus-architect` | `findings/` | `specs/review-fixes.md` | Triage findings. STRICTLY ignores Low/Info. |
-| **Learner** | `ralphus-research` | `inbox/` | `knowledge/` | Deep dive into technologies. |
-| **Explorer** | `ralphus-discover` | `inbox/` | `findings/` | Map the codebase. |
-| **Librarian** | `ralphus-synthesis` | `artifacts/` | `docs/` | Consolidate knowledge into architecture docs. |
-
----
-
-## Task Batching
-
-Group implementation tasks by **testable deliverable**, not by code unit. Target: **15-25 tasks per feature**.
-
-| Scope | Tasks | Example |
-|-------|-------|---------|
-| New module with multiple functions | 1 | "Create lib/signals.sh with all signal handling" |
-| Similar config files (5-7 files) | 1-2 | "Create config.sh for all variants" |
-| Refactor similar scripts | 2-3 | "Refactor simple variants" + "Refactor complex variants" |
-| Documentation across files | 1 | "Update AGENTS.md and add inline comments" |
-
-**Anti-patterns**: One task per function, one task per file (when files are related), tasks without test criteria.
-
-**Warning**: If you have 40+ tasks, you're too granular. Re-group.
-
-See `variants/ralphus-architect/instructions/PROMPT_architect.md` for full Task Batching Guidelines.
-
----
-
-## Subagent Delegation
-
-| Operation | Subagents | Notes |
-|-----------|-----------|-------|
-| Search/Read | Up to 500 parallel Sonnet | Fire liberally for exploration |
-| Build/Test | 1 Sonnet at a time | Prevents race conditions |
-| Complex reasoning | Opus | Debugging, architecture, prioritization |
-
----
-
-## Guardrails (Numbered by Importance)
-
-```
-99999.       File Ownership: Do not move, rename, or reorganize tracking files (*plan.md) into subdirectories. They MUST remain in the variant root (ralph-wiggum/[variant]/plan.md).
+99999.       File Ownership: tracking files (*plan.md) stay in variant root
 999999.      Document the why in code and specs
 9999999.     Single sources of truth, no adapters
 99999999.    Tag releases when tests pass (semver)
-999999999.   Update AGENTS.md with operational learnings
 9999999999.  Resolve or document ALL bugs found
 99999999999. No placeholders. No stubs. Complete implementations only.
 ```
 
 ---
 
-## Error Recovery Protocol
+## Error Recovery
 
-1. **Test fails**: Fix the code, not the test
-2. **3 consecutive failures**: Document in the tracking plan, move to next task
-3. **15 min no progress**: Output `<promise>BLOCKED:[task]:[reason]</promise>`
+1. **Test fails** → Fix code, not test
+2. **3 failures** → Document in plan, move on
+3. **15 min stuck** → `<promise>BLOCKED:[task]:[reason]</promise>`
 
 **Never**: Delete failing tests, spin on same error, leave code broken
 
@@ -282,19 +53,36 @@ See `variants/ralphus-architect/instructions/PROMPT_architect.md` for full Task 
 
 | Don't | Do Instead |
 |-------|------------|
-| Assume code doesn't exist | Search first with subagents |
-| Implement placeholders/stubs | Complete implementations only |
-| Spin on failing tests | Document and move on after 3 attempts |
-| Bloat AGENTS.md with status | Status goes in the tracking plan |
-| Delete failing tests | Fix the code |
+| Assume code exists | Search first with subagents |
+| Overwrite variant files | Surgical edits + check git history |
+| Spin on failures | Document after 3 attempts |
+| Bloat AGENTS.md with status | Status goes in plan.md |
+
+**Critical**: Never overwrite entire variant files. Check `git log -5 -- <file>` first. Overwriting causes regression.
+
+---
+
+## Subagent Delegation
+
+| Task | Agent | Notes |
+|------|-------|-------|
+| Search/Read | explore | Fire liberally (parallel) |
+| Build/Test | sonnet | One at a time |
+| Complex reasoning | oracle | Architecture, debugging |
+
+---
+
+## Deep Dives
+
+- [Modular Architecture](docs/MODULAR_ARCHITECTURE.md) — Hooks, signals, loop_core.sh
+- [Ralph-Wiggum Standard](docs/RALPH_WIGGUM_ARCHITECTURE.md) — Project layout
+- [Factory Cycle](docs/FACTORY_CYCLE.md) — Variant roles, data flow
+- [Code Style](docs/CODE_STYLE.md) — Shell + Markdown conventions
 
 ---
 
 ## Operational Notes
 
-Succinct learnings about how to RUN the project:
-
-- OpenCode CLI required: `opencode run -f PROMPT.md "message"`
-- Prompts are inlined (not attached via `-f`) to prevent path leakage to agents
-- Remote homelab uses `~/.opencode/bin/opencode` path
-- Override agent with `RALPH_AGENT=<agent-name>` environment variable
+- OpenCode CLI: `opencode run -f PROMPT.md "message"`
+- Remote homelab: `~/.opencode/bin/opencode`
+- Override agent: `RALPH_AGENT=<agent-name>`

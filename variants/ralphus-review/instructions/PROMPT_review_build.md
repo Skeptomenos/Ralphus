@@ -128,8 +128,8 @@ Write findings to `reviews/FILENAME_review.md`.
 |------|-------|------------|
 | Read related code | explore | `background_task(agent="explore", ...)` |
 | Check docs/examples | librarian | `background_task(agent="librarian", ...)` |
-| Complex analysis | oracle | `task(subagent_type="oracle", ...)` |
-| Security deep-dive | oracle | `task(subagent_type="oracle", prompt="Security audit...")` |
+| Complex analysis | oracle | `delegate_task(agent="oracle", ...)` |
+| Security deep-dive | oracle | `delegate_task(agent="oracle", prompt="Security audit...")` |
 
 ---
 

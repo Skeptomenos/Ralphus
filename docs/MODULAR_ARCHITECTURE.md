@@ -57,6 +57,18 @@ Hooks are bash functions defined in the variant's `loop.sh` that the library cal
 | `post_iteration()` | Optional. Logic to run after a successful iteration. |
 | `parse_variant_args()`| Optional. Handle variant-specific command line arguments. |
 
+### Completion Signals
+
+Agents emit these signals to control loop behavior:
+
+| Signal | Exit Code | Meaning |
+|--------|-----------|---------|
+| `PHASE_COMPLETE` | 0 (continue) | Single task done, continue loop |
+| `PLAN_COMPLETE` | 10 | Planning phase done |
+| `COMPLETE` | 20 | All tasks done |
+| `BLOCKED` | 30 | Stuck, needs intervention |
+| `APPROVED` | 40 | Review approved (review only) |
+
 ## Benefits
 
 1.  **Consistency**: Bug fixes in `loop_core.sh` (like signal parsing or shutdown handling) automatically apply to all variants.
