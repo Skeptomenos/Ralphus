@@ -891,7 +891,7 @@ check_propulsion() {
     if [[ -f "$track_path" ]]; then
         # Count incomplete tasks (- [ ])
         local incomplete
-        incomplete=$(grep -c "^- \[ \]" "$track_path" 2>/dev/null || echo 0)
+        incomplete=$(grep -c "^- \[ \]" "$track_path" 2>/dev/null) || incomplete=0
 
         if [[ "$incomplete" -gt 0 ]]; then
             echo ""
